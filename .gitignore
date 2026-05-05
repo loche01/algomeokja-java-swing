@@ -1,0 +1,23 @@
+# Java build outputs
+/bin/
+/out/
+*.class
+
+# Eclipse workspace/project metadata
+.metadata/
+
+# Local DB configuration
+src/db.properties
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Backup folders
+backup/
+user.properties

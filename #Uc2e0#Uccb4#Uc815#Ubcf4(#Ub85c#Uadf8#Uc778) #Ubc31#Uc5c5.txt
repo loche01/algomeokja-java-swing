@@ -1,0 +1,192 @@
+
+package panel;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.text.*;
+
+public class BodyInfoSetPanel extends JFrame implements ActionListener{
+    // 입력 필드 및 버튼 선언
+    private ui_n_utils.RoundedComponent idField,  passButton, passConfirmField, nameField, verifyCodeField;
+    private ui_n_utils.RoundedComponent registerButton, emailButton, idButton, passConfirmButton, nameButton, ageButton;
+    private JTextField passaField, aField, bField, cField, dField, eField;
+
+    public BodyInfoSetPanel() {
+        setTitle("회원가입"); 
+        setSize(440, 956); 
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(null); 
+        setResizable(false);
+        getContentPane().setBackground(Color.white);
+
+        int formWidth = 308;
+        int centerX = (getWidth() - formWidth) / 3;
+        int startY = 100; // 시작 Y 위치
+
+        JLabel titleLabel = new JLabel("신체정보", JLabel.LEFT);
+        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 32)); // 폰트 설정
+        titleLabel.setBounds(centerX-20, startY - 95, 181, 58); // 위치 및 크기 설정
+        add(titleLabel); // 화면에 추가
+        
+        // 구분선
+        JSeparator divider1 = new JSeparator();
+        divider1.setBounds(centerX-60, startY -30, 440, 2);
+        divider1.setForeground(Color.black);
+        add(divider1);
+        // 키
+        JLabel idLabel = new JLabel("키");
+        idLabel.setBounds(centerX + 15, startY + 75, 100, 20);
+        add(idLabel);
+        
+        aField = new JTextField();
+		aField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		aField.setBackground(Color.white);
+		aField.setHorizontalAlignment(JTextField.RIGHT);
+		aField.setBorder(BorderFactory.createLineBorder(Color.white, 2));
+		aField.setBounds(centerX + 205, startY + 103, 80, 25);
+		add(aField);
+
+        JLabel cmLabel = new JLabel("cm");
+		cmLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		cmLabel.setBounds(centerX + 285, startY + 105, 30, 20);
+		add(cmLabel);
+		
+		 idButton = new ui_n_utils.RoundedComponent(308, 41, 10, "Button", "", 
+	        		Color.black, Color.white, Color.black,"Malgun Gothic", Font.PLAIN, 15);
+		    idButton.setBounds(centerX + 15, startY + 95, 308, 41);
+            add(idButton);
+
+        //몸무게
+        JLabel emailLabel = new JLabel("몸무게");
+        emailLabel.setBounds(centerX + 15, startY + 145, 100, 20);
+        add(emailLabel);
+		
+    	bField = new JTextField();
+		bField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		bField.setBackground(Color.white);
+		bField.setHorizontalAlignment(JTextField.RIGHT);
+		bField.setBorder(BorderFactory.createLineBorder(Color.white, 2));
+		bField.setBounds(centerX + 205, startY + 173, 80, 25);
+		add(bField);
+		
+        JLabel kgLabel = new JLabel("kg");
+  		kgLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+  		kgLabel.setBounds(centerX + 290, startY + 175, 20, 20);
+  		add(kgLabel);
+  		
+        emailButton = new ui_n_utils.RoundedComponent(308, 41, 10, "Button", "", 
+        		Color.black, Color.white, Color.black,"Malgun Gothic", Font.PLAIN, 15);
+        emailButton.setBounds(centerX + 15, startY + 165, formWidth, 41);
+        add(emailButton);
+
+        //체지방률
+        JLabel passLabel = new JLabel("체지방률");
+        passLabel.setBounds(centerX + 15, startY + 215, 100, 20);
+        add(passLabel);
+        
+		passaField = new JTextField();
+		passaField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		passaField.setBackground(Color.white);
+		passaField.setHorizontalAlignment(JTextField.RIGHT);
+		passaField.setBorder(BorderFactory.createLineBorder(Color.white, 2));
+		passaField.setBounds(centerX + 205, startY + 243, 80, 25);
+		add(passaField);
+
+        JLabel prLabel = new JLabel("%");
+  		prLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+  		prLabel.setBounds(centerX + 290, startY + 245, 20, 20);
+  		add(prLabel);
+  		
+        passButton = new ui_n_utils.RoundedComponent(308, 41, 10, "button", "",
+Color.black, Color.white, Color.black,"Malgun Gothic", Font.PLAIN, 15);
+        passButton.setBounds(centerX + 15, startY + 235, formWidth, 41);
+        add(passButton);
+
+        //체지방량
+        JLabel passConfirmLabel = new JLabel("체지방량");
+        passConfirmLabel.setBounds(centerX + 15, startY + 285, 120, 20);
+        add(passConfirmLabel);
+        
+        cField = new JTextField();
+		cField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		cField.setBackground(Color.white);
+		cField.setHorizontalAlignment(JTextField.RIGHT);
+		cField.setBorder(BorderFactory.createLineBorder(Color.white, 2));
+		cField.setBounds(centerX + 205, startY + 313, 80, 25);
+		add(cField);
+        
+        JLabel kgaLabel = new JLabel("kg");
+  		kgaLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+  		kgaLabel.setBounds(centerX + 290, startY + 315, 20, 20);
+  		add(kgaLabel);
+
+        passConfirmButton = new ui_n_utils.RoundedComponent(308, 41, 10, "button", "",
+        		Color.black, Color.white, Color.black,"Malgun Gothic", Font.PLAIN, 15);
+        passConfirmButton.setBounds(centerX + 15, startY + 305, formWidth, 41);
+        add(passConfirmButton);
+
+        //골격근량
+        JLabel nameLabel = new JLabel("골격근량");
+        nameLabel.setBounds(centerX + 15, startY + 355, 100, 20);
+        add(nameLabel);
+        
+        dField = new JTextField();
+		dField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		dField.setBackground(Color.white);
+		dField.setHorizontalAlignment(JTextField.RIGHT);
+		dField.setBorder(BorderFactory.createLineBorder(Color.white, 2));
+		dField.setBounds(centerX + 205, startY + 383, 80, 25);
+		add(dField);
+		
+        JLabel kgbLabel = new JLabel("kg");
+  		kgbLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+  		kgbLabel.setBounds(centerX + 290, startY + 385, 20, 20);
+  		add(kgbLabel);
+
+        nameButton = new ui_n_utils.RoundedComponent(308, 41, 10, "button", "", 
+        		Color.black, Color.white, Color.black,"Malgun Gothic", Font.PLAIN, 15);
+        nameButton.setBounds(centerX + 15, startY + 375, formWidth, 41);
+        add(nameButton);
+
+        //나이
+        JLabel phoneLabel = new JLabel("나이");
+        phoneLabel.setBounds(centerX + 15, startY + 425, 100, 20);
+        add(phoneLabel);
+        
+        eField = new JTextField();
+		eField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		eField.setBackground(Color.white);
+		eField.setHorizontalAlignment(JTextField.RIGHT);
+		eField.setBorder(BorderFactory.createLineBorder(Color.white, 2));
+		eField.setBounds(centerX + 205, startY + 453, 80, 25);
+		add(eField);
+		
+        JLabel seLabel = new JLabel("세");
+  		seLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+  		seLabel.setBounds(centerX + 290, startY + 455, 20, 20);
+  		add(seLabel);
+
+        ageButton = new ui_n_utils.RoundedComponent(308, 41, 10, "button", "", 
+        		Color.black, Color.white, Color.black,"Malgun Gothic", Font.PLAIN, 15);
+        ageButton.setBounds(centerX + 15, startY + 445, 308, 41);
+        add(ageButton);
+
+        //확인
+        registerButton = new ui_n_utils.RoundedComponent(135, 46, 10, "button", "확인", 
+        		Color.BLACK, Color.BLACK, Color.WHITE, "Jua", Font.BOLD, 24);
+        registerButton.setBounds(centerX + 105, startY + 590, 135, 46);
+        add(registerButton);
+        registerButton.getButton().addActionListener(this);
+        setLocationRelativeTo(null);
+        setVisible(true); 
+    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == registerButton.getButton()) {
+            System.out.println("확인 !");
+    }}
+    public static void main(String[] args) {
+        new BodyInfoSetPanel(); // 회원가입 페이지 생성
+    }}
