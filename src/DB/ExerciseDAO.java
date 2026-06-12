@@ -22,7 +22,7 @@ public class ExerciseDAO {
     }
 
     // 🔹 운동 정보 저장 메서드
-    public boolean saveExercise(String exerciseName, String exerciseCategory, 
+    public boolean saveExercise(String exerciseName, String exerciseCategory,
                                String exerciseType, float exerciseMET) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -41,7 +41,6 @@ public class ExerciseDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isSaved = true;
-                System.out.println("✅ 운동 정보 저장 완료! 운동명: " + exerciseName);
             }
 
         } catch (SQLException e) {
@@ -83,7 +82,6 @@ public class ExerciseDAO {
                 exercise.setExerciseMET(rs.getFloat("exercise_MET"));
                 exerciseList.add(exercise);
             }
-            System.out.println("✅ 전체 운동 정보 조회 성공! 총 " + exerciseList.size() + "개 운동");
 
         } catch (SQLException e) {
             System.err.println("❌ SQL 실행 중 오류 발생!");
@@ -127,7 +125,6 @@ public class ExerciseDAO {
                 exercise.setExerciseMET(rs.getFloat("exercise_MET"));
                 exerciseList.add(exercise);
             }
-            System.out.println("✅ " + category + " 카테고리 운동 정보 조회 성공! 총 " + exerciseList.size() + "개 운동");
 
         } catch (SQLException e) {
             System.err.println("❌ SQL 실행 중 오류 발생! 카테고리: " + category);
@@ -171,7 +168,6 @@ public class ExerciseDAO {
                 exercise.setExerciseMET(rs.getFloat("exercise_MET"));
                 exerciseList.add(exercise);
             }
-            System.out.println("✅ 키워드 '" + keyword + "' 검색 성공! 총 " + exerciseList.size() + "개 운동");
 
         } catch (SQLException e) {
             System.err.println("❌ SQL 실행 중 오류 발생! 키워드: " + keyword);
@@ -212,9 +208,6 @@ public class ExerciseDAO {
                 exercise.setExerciseCategory(rs.getString("exercise_category"));
                 exercise.setExerciseType(rs.getString("exercise_type"));
                 exercise.setExerciseMET(rs.getFloat("exercise_MET"));
-                System.out.println("✅ 운동 정보 조회 성공! 운동 코드: " + exerciseCode);
-            } else {
-                System.out.println("⚠ 운동 정보 없음. 운동 코드: " + exerciseCode);
             }
 
         } catch (SQLException e) {
@@ -236,7 +229,7 @@ public class ExerciseDAO {
     }
 
     // 🔹 운동 정보 수정 메서드
-    public boolean updateExercise(int exerciseCode, String exerciseName, 
+    public boolean updateExercise(int exerciseCode, String exerciseName,
                                  String exerciseCategory, String exerciseType, float exerciseMET) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -256,9 +249,6 @@ public class ExerciseDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isUpdated = true;
-                System.out.println("✅ 운동 정보 수정 완료! 운동 코드: " + exerciseCode);
-            } else {
-                System.out.println("⚠ 수정할 운동 정보가 없습니다. 운동 코드: " + exerciseCode);
             }
 
         } catch (SQLException e) {
@@ -293,9 +283,6 @@ public class ExerciseDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isDeleted = true;
-                System.out.println("✅ 운동 정보 삭제 완료! 운동 코드: " + exerciseCode);
-            } else {
-                System.out.println("⚠ 삭제할 운동 정보가 없습니다. 운동 코드: " + exerciseCode);
             }
 
         } catch (SQLException e) {
@@ -314,7 +301,7 @@ public class ExerciseDAO {
         }
         return isDeleted;
     }
-    
+
     public int getTotalBurnedCalories(String userId) {
         int totalBurnedCalories = 0;
         String sql = "SELECT SUM(exercise_calories) FROM exercise_log " +
@@ -322,7 +309,7 @@ public class ExerciseDAO {
 
         try (Connection conn = pool.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setString(1, userId);
             ResultSet rs = pstmt.executeQuery();
 
@@ -335,5 +322,5 @@ public class ExerciseDAO {
         return totalBurnedCalories;
     }
 
-    
+
 }
