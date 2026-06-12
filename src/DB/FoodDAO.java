@@ -22,9 +22,6 @@ public class FoodDAO {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        
-        System.out.println("🔹 FoodDAO: 데이터 가져오는 중...");
-        
         try {
             conn = pool.getConnection();
             String sql = "SELECT * FROM food";
@@ -41,10 +38,8 @@ public class FoodDAO {
                 food.setFat(rs.getDouble("fat"));
 
                 foodList.add(food);
-                //System.out.println("✅ 가져온 데이터: " + food.getFoodName() + " (" + food.getFoodKcal() + " kcal)");
             }
-            //System.out.println("🔹 총 " + foodList.size() + " 개의 데이터가 로드되었습니다.");
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -59,8 +54,6 @@ public class FoodDAO {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        
-        System.out.println("🔹 FoodDAO: 검색 수행 (" + searchKeyword + ")");
 
         try {
             conn = pool.getConnection();
@@ -77,13 +70,11 @@ public class FoodDAO {
                 food.setCarb(rs.getDouble("carb"));
                 food.setProtein(rs.getDouble("protein"));
                 food.setFat(rs.getDouble("fat"));
-                
+
                 foodList.add(food);
-                //System.out.println("✅ 검색 결과 추가: " + food.getFoodName() + " (" + food.getFoodKcal() + " kcal)");
             }
 
-            System.out.println("🔹 총 " + foodList.size() + "개의 검색 결과");
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -97,14 +88,14 @@ public class FoodDAO {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        
+
         try {
             conn = pool.getConnection();
             String sql = "SELECT * FROM food WHERE food_name = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, foodName);
             rs = pstmt.executeQuery();
-            
+
             if(rs.next()) {
                 FoodBean bean = new FoodBean();
                 bean.setFoodCode(rs.getInt("food_code"));
@@ -113,9 +104,6 @@ public class FoodDAO {
                 bean.setCarb(rs.getDouble("carb"));
                 bean.setProtein(rs.getDouble("protein"));
                 bean.setFat(rs.getDouble("fat"));
-                
-                System.out.println("✅ 음식 정보 조회: " + bean.getFoodName() 
-                               + " (코드: " + bean.getFoodCode() + ")");
                 return bean;
             }
         } catch(Exception e) {

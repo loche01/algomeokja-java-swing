@@ -46,12 +46,6 @@ public class GoalDAO {
             System.err.println("❌ 오류: user_id가 user 테이블에 존재하지 않음. 저장 불가!");
             return false;
         }
-
-        System.out.println("✅ 목표 저장 시작: userId=" + goal.getUserId() + 
-                          ", 시작 체중=" + goal.getStartWeight() + 
-                          ", 목표 체중=" + goal.getTargetWeight() + 
-                          ", 기간=" + goal.getTargetDuration() + "일");
-
         String checkQuery = "SELECT COUNT(*) FROM target WHERE user_id = ?";
         String insertQuery = "INSERT INTO target (user_id, start_weight, target_weight, target_duration) VALUES (?, ?, ?, ?)";
         String updateQuery = "UPDATE target SET start_weight=?, target_weight=?, target_duration=? WHERE user_id=?";
@@ -59,15 +53,12 @@ public class GoalDAO {
         try (Connection conn = pool.getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
 
-            System.out.println("✅ DB 연결 성공, 기존 데이터 확인 중...");
             checkStmt.setString(1, goal.getUserId());
             try (ResultSet rs = checkStmt.executeQuery()) {
                 boolean exists = rs.next() && rs.getInt(1) > 0;
-                System.out.println("✅ 기존 데이터 확인 결과: " + (exists ? "있음" : "없음"));
 
                 if (exists) { 
                     try (PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
-                        System.out.println("✅ 기존 데이터 업데이트 시작...");
                         updateStmt.setBigDecimal(1, goal.getStartWeight());
                         updateStmt.setBigDecimal(2, goal.getTargetWeight());
                         updateStmt.setInt(3, goal.getTargetDuration());
@@ -75,7 +66,6 @@ public class GoalDAO {
 
                         int rowsUpdated = updateStmt.executeUpdate();
                         if (rowsUpdated > 0) {
-                            System.out.println("✅ 목표 데이터 수정 완료! userId: " + goal.getUserId());
                             return true;
                         } else {
                             System.err.println("❌ 목표 데이터 수정 실패! userId: " + goal.getUserId());
@@ -83,7 +73,6 @@ public class GoalDAO {
                     }
                 } else { 
                     try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
-                        System.out.println("✅ 새 데이터 삽입 시작...");
                         insertStmt.setString(1, goal.getUserId());
                         insertStmt.setBigDecimal(2, goal.getStartWeight());
                         insertStmt.setBigDecimal(3, goal.getTargetWeight());
@@ -91,7 +80,6 @@ public class GoalDAO {
 
                         int rowsInserted = insertStmt.executeUpdate();
                         if (rowsInserted > 0) {
-                            System.out.println("✅ 목표 데이터 저장 완료! userId: " + goal.getUserId());
                             return true;
                         } else {
                             System.err.println("❌ 목표 데이터 저장 실패! userId: " + goal.getUserId());
@@ -115,26 +103,17 @@ public class GoalDAO {
 
     // 🔹 user_id로 최신 목표 체중 가져오기
     public UserGoal getUserGoal(String userId) {
-        System.out.println("✅ 목표 데이터 조회 시작: userId=" + userId);
         
         String sql = "SELECT * FROM target WHERE user_id = ?";
         try (Connection conn = pool.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            System.out.println("✅ DB 연결 성공, 목표 데이터 조회 중...");
             pstmt.setString(1, userId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    System.out.println("✅ 목표 데이터 조회 성공!");
-                    
                     // 결과 데이터 확인
                     BigDecimal startWeight = rs.getBigDecimal("start_weight");
                     BigDecimal targetWeight = rs.getBigDecimal("target_weight");
                     int targetDuration = rs.getInt("target_duration");
-                    
-                    System.out.println("✅ 조회된 데이터: 시작 체중=" + startWeight + 
-                                      ", 목표 체중=" + targetWeight + 
-                                      ", 기간=" + targetDuration + "일");
                     
                     return new UserGoal(
                         userId,
@@ -142,8 +121,6 @@ public class GoalDAO {
                         targetWeight,
                         targetDuration
                     );
-                } else {
-                    System.out.println("❌ 목표 데이터 없음! userId: " + userId);
                 }
             }
         } catch (SQLException e) {
