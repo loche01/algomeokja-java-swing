@@ -20,6 +20,19 @@ CREATE TABLE IF NOT EXISTS user (
     user_gender VARCHAR(10)
 );
 
+CREATE TABLE IF NOT EXISTS bodyinfo (
+    bodyinfo_code INT NOT NULL AUTO_INCREMENT,
+    user_id VARCHAR(50) NOT NULL,
+    height FLOAT DEFAULT NULL,
+    weight FLOAT DEFAULT NULL,
+    fat_rate FLOAT DEFAULT NULL,
+    fat_mass FLOAT DEFAULT NULL,
+    muscle_mass FLOAT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (bodyinfo_code),
+    INDEX idx_bodyinfo_user_id (user_id)
+);
+
 CREATE TABLE IF NOT EXISTS food (
     food_code INT PRIMARY KEY AUTO_INCREMENT,
     food_name VARCHAR(100) NOT NULL,
