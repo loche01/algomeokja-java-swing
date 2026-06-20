@@ -142,7 +142,7 @@ public class MainUserPanel extends JPanel {
 	// showExerciseCaloriePanel 메서드 구현
 	public void showExerciseCaloriePanel(ExerciseBean exercise) {
 	  // ExerciseCaloriePanel에 운동 정보 설정
-	  //exerciseCaloriePanel.updateExerciseInfo(exercise);
+	  exerciseCaloriePanel.updateExerciseInfo(exercise);
 	  // 패널 표시
 	  exerciseCaloriePanel.setBounds(0, 90, 440, 736);
 	  showPanel("ExerciseCalorie");
