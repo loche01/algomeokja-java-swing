@@ -48,6 +48,7 @@ public class ExerciseCaloriePanel extends JPanel {
         BackButton = new RoundedComponent(40, 40, 10, "button", "<",
                 Color.white, Color.white, Color.black, "Inter", Font.BOLD, 25);
         BackButton.setBounds(10, 10, 40, 40);
+        BackButton.getButton().addActionListener(e -> mainUserPanel.goToPreviousPanel());
         mainPanel.add(BackButton);
 
         // 운동 제목과 타입
