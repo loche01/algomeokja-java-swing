@@ -33,6 +33,16 @@ CREATE TABLE IF NOT EXISTS bodyinfo (
     INDEX idx_bodyinfo_user_id (user_id)
 );
 
+CREATE TABLE IF NOT EXISTS target (
+    user_id VARCHAR(50) NOT NULL,
+    start_weight DECIMAL(5,2) NOT NULL,
+    target_weight DECIMAL(5,2) NOT NULL,
+    target_duration INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id)
+);
+
 CREATE TABLE IF NOT EXISTS food (
     food_code INT PRIMARY KEY AUTO_INCREMENT,
     food_name VARCHAR(100) NOT NULL,
