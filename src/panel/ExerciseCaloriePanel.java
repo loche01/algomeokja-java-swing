@@ -164,7 +164,13 @@ public class ExerciseCaloriePanel extends JPanel {
 
         workoutTitle.setText(exercise.getExerciseName());
         workoutType.setText(exercise.getExerciseType());
-        calculateCalories();
+        resetInputFields();
+    }
+
+    private void resetInputFields() {
+        timeField.setText("");
+        weightField.setText("");
+        calorieValue.setText("0 Kcal");
     }
 
     private boolean validateInputs() {
