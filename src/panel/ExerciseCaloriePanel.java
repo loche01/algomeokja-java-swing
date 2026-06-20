@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import main.MainUserPanel;
+import model.ExerciseBean;
 import model.LoginManager;
 import ui_n_utils.RoundedComponent;
 
@@ -20,6 +21,7 @@ public class ExerciseCaloriePanel extends JPanel {
     private double exerciseMET = 6.0; // 기본 MET 값
     private MainUserPanel mainUserPanel; // MainUserPanel 참조
     private int currentExerciseCode = 1; // 기본 운동 코드
+    private String currentExerciseName; // 현재 선택된 운동명
     private String currentUserId; // 현재 로그인된 사용자 ID
     private ExerciseLogDAO exerciseLogDAO;
 
@@ -36,14 +38,14 @@ public class ExerciseCaloriePanel extends JPanel {
         exerciseLogDAO = new ExerciseLogDAO();
 
         // ── 메인 패널 구성 ──
-        mainPanel = new RoundedComponent(380, 600, 30, "panel", " ", 
+        mainPanel = new RoundedComponent(380, 600, 30, "panel", " ",
                 new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
         mainPanel.setBounds(20, 110, 380, 600);
         mainPanel.setLayout(null);
         mainPanel.setEnabled(false);
 
         // 뒤로가기 버튼
-        BackButton = new RoundedComponent(40, 40, 10, "button", "<", 
+        BackButton = new RoundedComponent(40, 40, 10, "button", "<",
                 Color.white, Color.white, Color.black, "Inter", Font.BOLD, 25);
         BackButton.setBounds(10, 10, 40, 40);
         mainPanel.add(BackButton);
@@ -61,7 +63,7 @@ public class ExerciseCaloriePanel extends JPanel {
         mainPanel.add(workoutType);
 
         // ── 운동 시간 입력 패널 ──
-        timePanel = new RoundedComponent(330, 50, 20, "panel", " ", 
+        timePanel = new RoundedComponent(330, 50, 20, "panel", " ",
                 Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.black, " ", 0, 0);
         timePanel.setBounds(25, 150, 330, 50);
         timePanel.setLayout(null);
@@ -92,7 +94,7 @@ public class ExerciseCaloriePanel extends JPanel {
         mainPanel.add(timePanel);
 
         // ── 현재 체중 입력 패널 ──
-        weightPanel = new RoundedComponent(330, 50, 20, "panel", " ", 
+        weightPanel = new RoundedComponent(330, 50, 20, "panel", " ",
                 Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.black, " ", 0, 0);
         weightPanel.setBounds(25, 220, 330, 50);
         weightPanel.setLayout(null);
@@ -134,7 +136,7 @@ public class ExerciseCaloriePanel extends JPanel {
         mainPanel.add(calorieValue);
 
         // ── 저장 버튼 ──
-        finishButton = new RoundedComponent(100, 40, 10, "button", "저장", 
+        finishButton = new RoundedComponent(100, 40, 10, "button", "저장",
                 Color.BLACK, Color.BLACK, Color.WHITE, "Inter", Font.BOLD, 14);
         finishButton.setBounds(140, 420, 100, 40);
         JButton finishBtn = finishButton.getButton();
@@ -150,6 +152,21 @@ public class ExerciseCaloriePanel extends JPanel {
         mainPanel.add(finishButton);
         add(mainPanel);
     }
+
+    public void updateExerciseInfo(ExerciseBean exercise) {
+        if (exercise == null) {
+            return;
+        }
+
+        this.currentExerciseCode = exercise.getExerciseCode();
+        this.currentExerciseName = exercise.getExerciseName();
+        this.exerciseMET = exercise.getExerciseMET();
+
+        workoutTitle.setText(exercise.getExerciseName());
+        workoutType.setText(exercise.getExerciseType());
+        calculateCalories();
+    }
+
     private boolean validateInputs() {
         if (timeField.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "운동 시간을 입력해주세요.", "입력 오류", JOptionPane.WARNING_MESSAGE);
@@ -206,8 +223,8 @@ public class ExerciseCaloriePanel extends JPanel {
             double kcal = Double.parseDouble(calorieText);
 
             System.out.println("저장할 운동 데이터: 운동코드=" + currentExerciseCode + ", 사용자ID=" + currentUserId + ", 시간=" + runtime + ", 체중=" + weight + ", 칼로리=" + kcal);
-            
-            return exerciseLogDAO.saveExerciseLog(currentExerciseCode, currentUserId, runtime, weight, kcal);
+
+            return exerciseLogDAO.saveExerciseLog(currentExerciseCode, currentExerciseName, currentUserId, runtime, weight, kcal);
         } catch (Exception e) {
             e.printStackTrace();
             return false;

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class ExerciseLogDAO {
     private DBConnectionMgr pool;
-    
+
     public ExerciseLogDAO() {
         try {
             pool = DBConnectionMgr.getInstance();
@@ -15,8 +15,13 @@ public class ExerciseLogDAO {
             e.printStackTrace();
         }
     }
-    
-    public boolean saveExerciseLog(int exerciseCode, String userId, 
+
+    public boolean saveExerciseLog(int exerciseCode, String userId,
+            int exerciseLogRuntime, double weightInput, double exerciseKcal) {
+        return saveExerciseLog(exerciseCode, null, userId, exerciseLogRuntime, weightInput, exerciseKcal);
+    }
+
+    public boolean saveExerciseLog(int exerciseCode, String exerciseName, String userId,
             int exerciseLogRuntime, double weightInput, double exerciseKcal) {
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -25,13 +30,14 @@ public class ExerciseLogDAO {
         try {
             conn = pool.getConnection();
 
-            String sql = "INSERT INTO exercise_log (user_id, exercise_code, exercise_calories) " +
-                    "VALUES (?, ?, ?)";
+            String sql = "INSERT INTO exercise_log (user_id, exercise_code, exercise_name, exercise_calories) " +
+                    "VALUES (?, ?, ?, ?)";
 
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, userId);
             pstmt.setInt(2, exerciseCode);
-            pstmt.setInt(3, (int) Math.round(exerciseKcal));
+            pstmt.setString(3, exerciseName);
+            pstmt.setInt(4, (int) Math.round(exerciseKcal));
 
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
