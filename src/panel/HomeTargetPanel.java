@@ -87,7 +87,7 @@ public class HomeTargetPanel extends JPanel {
         targetChangeLabel.setBounds(50, 520, 340, 50);
         targetChangeLabel.setForeground(new Color(0x404040));
         add(targetChangeLabel);
-        
+
         durationLabel = new JLabel("", SwingConstants.CENTER);
         durationLabel.setFont(new Font("Inter", Font.BOLD, 20));
         durationLabel.setBounds(50, 570, 340, 50);
@@ -107,7 +107,7 @@ public class HomeTargetPanel extends JPanel {
 
         String userId = UserSessionManager.getInstance().getCurrentUser().getUser_id();
         System.out.println("✅ 목표 데이터 로드 시도: userId=" + userId);
-        
+
         UserGoal goal = goalDAO.getUserGoal(userId);
 
         if (goal != null) {
@@ -142,29 +142,52 @@ public class HomeTargetPanel extends JPanel {
         }
 
         String userId = UserSessionManager.getInstance().getCurrentUser().getUser_id();
-        
+
         // 현재 체중 표시
         BigDecimal latestWeight = goalDAO.getLatestWeight(userId);
         int currentWeight = latestWeight != null ? latestWeight.intValue() : startWeight;
         
         nowWeightLabel.setText("<html>현재 체중은 <b style='font-size:20px;color:#002D62;'>" + currentWeight + "kg</b> 입니다.</html>");
         
-        // 식단 기록을 통한 체중 변화 계산
+        // 목표 기간 진행률은 기존 계산 흐름을 유지
         Map<String, Object> weightChangeData = goalDAO.calculateWeightChangeFromMealLogs(userId);
-        double weightChange = (double) weightChangeData.get("weightChange");
-        double progressPercent = (double) weightChangeData.get("progressPercent");
         double timeProgressRatio = (double) weightChangeData.get("timeProgressRatio");
         
+        boolean isWeightLossGoal = targetWeight < startWeight;
+        boolean isWeightGainGoal = targetWeight > startWeight;
+        double weightChange = 0.0;
+        double remainingWeight = 0.0;
+        double progressPercent = 0.0;
+        String changeDirection = isWeightGainGoal ? "증량" : "감량";
+
+        if (isWeightLossGoal) {
+            weightChange = startWeight - currentWeight;
+            remainingWeight = currentWeight - targetWeight;
+            int targetChange = startWeight - targetWeight;
+            if (targetChange != 0) {
+                progressPercent = (weightChange / targetChange) * 100.0;
+            }
+        } else if (isWeightGainGoal) {
+            weightChange = currentWeight - startWeight;
+            remainingWeight = targetWeight - currentWeight;
+            int targetChange = targetWeight - startWeight;
+            if (targetChange != 0) {
+                progressPercent = (weightChange / targetChange) * 100.0;
+            }
+        }
+
+        weightChange = Math.max(0.0, weightChange);
+        remainingWeight = Math.max(0.0, remainingWeight);
+        progressPercent = Math.max(0.0, Math.min(100.0, progressPercent));
+
         // 체중 변화 표시
-        String changeDirection = weightChange > 0 ? "감량" : "증가";
-        weightChangeLabel.setText("<html>현재까지 <b style='font-size:20px;color:#002D62;'>" + 
-                                 String.format("%.1f", Math.abs(weightChange)) + 
+        weightChangeLabel.setText("<html>현재까지 <b style='font-size:20px;color:#002D62;'>" +
+                                 String.format("%.1f", weightChange) +
                                  "kg</b>의 " + changeDirection + "이 있습니다.</html>");
         
         // 목표까지 남은 체중 표시
-        int remainingWeight = Math.abs(currentWeight - targetWeight);
         targetChangeLabel.setText("<html>목표 체중까지 <b style='font-size:20px; color:red;'>" + 
-                                 remainingWeight + "kg</b> 남았습니다.</html>");
+                                 String.format("%.1f", remainingWeight) + "kg</b> 남았습니다.</html>");
         
         // 목표 기간 표시
         durationLabel.setText("<html>목표 기간: <b style='font-size:20px;color:#002D62;'>" + 
