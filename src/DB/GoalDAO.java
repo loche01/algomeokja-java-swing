@@ -114,12 +114,15 @@ public class GoalDAO {
                     BigDecimal startWeight = rs.getBigDecimal("start_weight");
                     BigDecimal targetWeight = rs.getBigDecimal("target_weight");
                     int targetDuration = rs.getInt("target_duration");
+                    Timestamp createdAt = rs.getTimestamp("created_at");
+                    LocalDate goalStartDate = createdAt != null ? createdAt.toLocalDateTime().toLocalDate() : null;
                     
                     return new UserGoal(
                         userId,
                         startWeight,
                         targetWeight,
-                        targetDuration
+                        targetDuration,
+                        goalStartDate
                     );
                 }
             }
@@ -142,21 +145,27 @@ public class GoalDAO {
         Map<String, Object> result = new HashMap<>();
         result.put("weightChange", 0.0);
         result.put("progressPercent", 0.0);
+        result.put("timeProgressRatio", 0.0);
         
         // 목표 정보 가져오기
         UserGoal goal = getUserGoal(userId);
         if (goal == null) {
             return result;
         }
+        if (goal.getTargetDuration() <= 0 || goal.getCreatedAt() == null) {
+            return result;
+        }
         
         // 목표 시작일부터 현재까지의 기간 계산 (일수)
         LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusDays(goal.getTargetDuration());
+        LocalDate startDate = goal.getCreatedAt();
         long daysPassed = ChronoUnit.DAYS.between(startDate, today);
+        if (daysPassed < 0) daysPassed = 0;
         
         // 목표 기간 대비 경과 기간 비율
         double timeProgressRatio = (double) daysPassed / goal.getTargetDuration();
         if (timeProgressRatio > 1.0) timeProgressRatio = 1.0; // 100%를 넘지 않도록
+        if (timeProgressRatio < 0.0) timeProgressRatio = 0.0; // 0% 미만이 되지 않도록
         
         // 식단 기록을 통한 칼로리 섭취량 계산
         double totalCaloriesConsumed = calculateTotalCaloriesConsumed(userId, startDate);
