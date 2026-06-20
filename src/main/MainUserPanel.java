@@ -228,7 +228,7 @@ public class MainUserPanel extends JPanel {
         switch (panelName) {
             case "HomeDaily": homeDailyPanel.setVisible(true); break;
             case "HomeMeal":  /* 이미 위에서 처리됨 */ break;
-            case "HomeTarget": homeTargetPanel.setVisible(true); break;
+            case "HomeTarget": homeTargetPanel.refreshData(); homeTargetPanel.setVisible(true); break;
            }
         printPanelComponents();
     }
