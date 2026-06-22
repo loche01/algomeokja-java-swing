@@ -136,16 +136,60 @@ SELECT '벤치프레스', '가슴', '근력운동', 6.0
 WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '벤치프레스');
 
 INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '인클라인벤치프레스', '가슴', '근력운동', 5.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '인클라인벤치프레스');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '덤벨플라이', '가슴', '근력운동', 4.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '덤벨플라이');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '딥스', '가슴', '근력운동', 5.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '딥스');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
 SELECT '스쿼트', '하체', '근력운동', 5.0
 WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '스쿼트');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '런지', '하체', '근력운동', 4.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '런지');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '레그프레스', '하체', '근력운동', 5.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '레그프레스');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '레그컬', '하체', '근력운동', 3.5
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '레그컬');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '카프레이즈', '하체', '근력운동', 3.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '카프레이즈');
 
 INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
 SELECT '런닝', '유산소', '유산소운동', 8.0
 WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '런닝');
 
 INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '빠르게걷기', '유산소', '유산소운동', 4.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '빠르게걷기');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '자전거', '유산소', '유산소운동', 6.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '자전거');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
 SELECT '플랭크', '코어', '근력운동', 3.0
 WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '플랭크');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '크런치', '코어', '근력운동', 3.5
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '크런치');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '레그레이즈', '코어', '근력운동', 3.5
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '레그레이즈');
 
 INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
 SELECT '랫풀다운', '등', '근력운동', 4.0
