@@ -171,7 +171,11 @@ public class ExerciseListPanel extends JPanel {
 
     // Helper method to load exercises for a category
     private void loadExercisesForCategory(String category) {
-        exerciseList = exerciseDAO.getExercisesByCategory(category);
+        if ("전체".equals(category)) {
+            exerciseList = exerciseDAO.getAllExercises();
+        } else {
+            exerciseList = exerciseDAO.getExercisesByCategory(category);
+        }
         
         // Clear and recreate exercise buttons
         clearExerciseButtons();
@@ -305,6 +309,7 @@ public class ExerciseListPanel extends JPanel {
             exerciseContentPanel.add(emptyPanel);
             exerciseContentPanel.add(Box.createVerticalStrut(10));
         }
+        exerciseContentPanel.add(Box.createVerticalStrut(90));
         
         exerciseContentPanel.revalidate();
         exerciseContentPanel.repaint();
