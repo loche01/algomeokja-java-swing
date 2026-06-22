@@ -110,10 +110,21 @@ public class ExerciseDAO {
 
         try {
             conn = pool.getConnection();
-            String sql = "SELECT exercise_code, exercise_name, exercise_category, exercise_type, exercise_MET "
-                       + "FROM exercise WHERE exercise_category = ?";
+            String sql;
+            if ("유산소&코어".equals(category)) {
+                sql = "SELECT exercise_code, exercise_name, exercise_category, exercise_type, exercise_MET "
+                    + "FROM exercise WHERE exercise_category IN (?, ?)";
+            } else {
+                sql = "SELECT exercise_code, exercise_name, exercise_category, exercise_type, exercise_MET "
+                    + "FROM exercise WHERE exercise_category = ?";
+            }
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, category);
+            if ("유산소&코어".equals(category)) {
+                pstmt.setString(1, "유산소");
+                pstmt.setString(2, "코어");
+            } else {
+                pstmt.setString(1, category);
+            }
             rs = pstmt.executeQuery();
 
             while (rs.next()) {
