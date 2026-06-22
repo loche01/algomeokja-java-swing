@@ -145,7 +145,7 @@ public class ExerciseListPanel extends JPanel {
         this.currentCategory = category;
         
         // 카테고리 버튼 텍스트 변경
-        categoryButton.getButton().setText(category);
+        categoryButton.getButton().setText("< " + category);
         
         // 검색 필드 초기화
         searchField.setText(" 검색어를 입력하세요...");
@@ -161,6 +161,11 @@ public class ExerciseListPanel extends JPanel {
         categoryButton = new RoundedComponent(110, 35, 35, "button", currentCategory, 
                 Color.white, Color.white, Color.black, "Malgun Gothic", Font.BOLD, 14);
         categoryButton.setBounds(160, 110, 110, 35);
+        categoryButton.getButton().addActionListener(e -> {
+            if (mainUserPanel != null) {
+                mainUserPanel.showPanel("ExerciseSearch");
+            }
+        });
         add(categoryButton);
     }
 
