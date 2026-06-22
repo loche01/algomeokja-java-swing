@@ -147,6 +147,38 @@ INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_
 SELECT '플랭크', '코어', '근력운동', 3.0
 WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '플랭크');
 
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '랫풀다운', '등', '근력운동', 4.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '랫풀다운');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '바벨로우', '등', '근력운동', 5.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '바벨로우');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '데드리프트', '등', '근력운동', 6.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '데드리프트');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '풀업', '등', '근력운동', 8.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '풀업');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '숄더프레스', '팔&어깨', '근력운동', 5.0
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '숄더프레스');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '사이드레터럴레이즈', '팔&어깨', '근력운동', 3.5
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '사이드레터럴레이즈');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '덤벨컬', '팔&어깨', '근력운동', 3.5
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '덤벨컬');
+
+INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_MET)
+SELECT '트라이셉스익스텐션', '팔&어깨', '근력운동', 3.5
+WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '트라이셉스익스텐션');
+
 INSERT INTO notice (admin_id, notice_title, notice_coment, notice_time)
 SELECT 'admin', '테스트 공지사항', '프로젝트 실행 확인용 테스트 공지입니다.', NOW()
 WHERE NOT EXISTS (SELECT 1 FROM notice WHERE notice_title = '테스트 공지사항');
