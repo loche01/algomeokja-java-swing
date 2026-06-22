@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class ExerciseSearchPanel extends JPanel {
-    private RoundedComponent button, abutton, bbutton, cbutton, dbutton;
+    private RoundedComponent button, abutton, bbutton, cbutton, dbutton, allButton;
     private JTextField searchField;
     private JButton searchButton;
     private MainUserPanel mainUserPanel;
@@ -150,6 +150,19 @@ public class ExerciseSearchPanel extends JPanel {
             if (mainUserPanel != null) {
             	 // Pass "유산소 & 코어" category to ExerciseListPanel
                 mainUserPanel.showExerciseListPanel("유산소&코어");
+            }
+        });
+
+        // 전체 운동 버튼
+        allButton = new RoundedComponent(110, 35, 30, "button", "전체", Color.white, Color.white, Color.black, "맑은고딕",
+                Font.BOLD, 14);
+        allButton.setBounds(156, 235, 110, 35);
+        add(allButton);
+
+        // 전체 운동 버튼에 이벤트 리스너 추가
+        allButton.getButton().addActionListener(e -> {
+            if (mainUserPanel != null) {
+                mainUserPanel.showExerciseListPanel("전체");
             }
         });
 
