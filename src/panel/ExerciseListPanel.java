@@ -75,9 +75,7 @@ public class ExerciseListPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String keyword = searchField.getText();
-                if (!keyword.equals(" 검색어를 입력하세요...") && !keyword.isEmpty()) {
-                    performSearch(keyword);
-                }
+                performSearch(keyword);
             }
         });
 
@@ -86,9 +84,7 @@ public class ExerciseListPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String keyword = searchField.getText();
-                if (!keyword.equals(" 검색어를 입력하세요...") && !keyword.isEmpty()) {
-                    performSearch(keyword);
-                }
+                performSearch(keyword);
             }
         });
 
@@ -234,14 +230,21 @@ public class ExerciseListPanel extends JPanel {
     // 검색 기능 구현
     private void performSearch(String keyword) {
         System.out.println("Searching for: " + keyword + " in category: " + currentCategory);
+        String searchKeyword = keyword != null ? keyword.trim() : "";
+        if (searchKeyword.isEmpty() || searchKeyword.equals("검색어를 입력하세요...")) {
+            loadExercisesForCategory(currentCategory);
+            return;
+        }
+        String lowerKeyword = searchKeyword.toLowerCase();
         
         // 검색 결과를 저장할 리스트
         List<ExerciseBean> searchResults = new ArrayList<>();
         
         // 현재 카테고리의 운동들 중에서 검색어를 포함하는 운동만 찾기
         for (ExerciseBean exercise : exerciseList) {
-            if (exercise.getExerciseName().toLowerCase().contains(keyword.toLowerCase()) ||
-                exercise.getExerciseType().toLowerCase().contains(keyword.toLowerCase())) {
+            String exerciseName = exercise.getExerciseName() != null ? exercise.getExerciseName().toLowerCase() : "";
+            String exerciseType = exercise.getExerciseType() != null ? exercise.getExerciseType().toLowerCase() : "";
+            if (exerciseName.contains(lowerKeyword) || exerciseType.contains(lowerKeyword)) {
                 searchResults.add(exercise);
             }
         }
