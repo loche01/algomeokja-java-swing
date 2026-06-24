@@ -258,3 +258,9 @@ FoodDAO: 검색 수행
 공지사항 UI 업데이트 시작
 현재 로그인된 사용자 ID: null
 ```
+
+## 라이선스
+
+이 프로젝트는 MIT License를 따릅니다.
+자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
+
