@@ -7,14 +7,12 @@
 
 이 프로젝트는 기존 Eclipse 기반 Java 프로젝트를 macOS 환경에서 복구하고, MySQL 연동 및 실행 오류를 수정하여 포트폴리오용으로 정리한 프로젝트입니다.
 
-이 프로젝트는 기존 Eclipse 기반 Java 프로젝트를 macOS 환경에서 복구하고, MySQL 연동 및 실행 오류를 수정하여 포트폴리오용으로 정리한 프로젝트입니다.
 
 ## 관련 문서
 
 - [프로젝트 트러블슈팅 기록](docs/troubleshooting.md)
 - [데이터베이스 설정 방법](README_DB_CONFIG.md)
 
-## 주요 기능
 
 ## 주요 기능
 
@@ -259,3 +257,4 @@ src/main/MainFrame.java
 FoodDAO: 검색 수행
 공지사항 UI 업데이트 시작
 현재 로그인된 사용자 ID: null
+```
