@@ -2,7 +2,12 @@ package DB;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ExerciseLogDAO {
     private DBConnectionMgr pool;
@@ -60,4 +65,52 @@ public class ExerciseLogDAO {
             }
         }
         return isSaved;
-    }}
+    }
+
+    public List<Map<String, Object>> getTodayExerciseLogs(String userId) {
+        List<Map<String, Object>> logs = new ArrayList<>();
+        if (userId == null || userId.trim().isEmpty()) {
+            return logs;
+        }
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = pool.getConnection();
+
+            String sql = "SELECT exercise_name, exercise_calories, exercise_date " +
+                    "FROM exercise_log " +
+                    "WHERE user_id = ? AND DATE(exercise_date) = CURDATE() " +
+                    "ORDER BY exercise_date DESC, exercise_log_id DESC";
+
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userId);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Map<String, Object> log = new HashMap<>();
+                log.put("exercise_name", rs.getString("exercise_name"));
+                log.put("exercise_calories", rs.getInt("exercise_calories"));
+                log.put("exercise_date", rs.getTimestamp("exercise_date"));
+                logs.add(log);
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ SQL 실행 중 오류 발생! 오늘 운동 로그 조회: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("❌ 알 수 없는 오류 발생!");
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) pool.freeConnection(conn);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return logs;
+    }
+}
