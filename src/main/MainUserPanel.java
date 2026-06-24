@@ -204,7 +204,7 @@ public class MainUserPanel extends JPanel {
                 || panelName.equals("ExerciseList")|| panelName.equals("ExerciseCalorie")) {
                 showTabBar(false);
                 switch (panelName) {
-                    case "Calendar": calendarPanel.setBounds(0, 90, 440, 736); calendarPanel.setVisible(true); break;
+                    case "Calendar": calendarPanel.refresh(); calendarPanel.setBounds(0, 90, 440, 736); calendarPanel.setVisible(true); break;
                     case "ExerciseSearch": exerciseSearchPanel.setBounds(0, 90, 440, 736); exerciseSearchPanel.setVisible(true); break;
                     case "MyPage": myPagePanel.setBounds(0, 90, 440, 736); myPagePanel.setVisible(true); break;
                     case "Notice": noticePanel.setBounds(0, 90, 440, 736); noticePanel.setVisible(true); break;
