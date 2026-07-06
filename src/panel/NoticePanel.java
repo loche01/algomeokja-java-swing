@@ -26,7 +26,6 @@ public class NoticePanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
-                System.out.println("🔄 공지사항 패널이 보임 → DB에서 공지사항 새로 불러옴");
                 loadNotices(mainUserPanel); // 자동 갱신
             }
         });
@@ -77,8 +76,6 @@ public class NoticePanel extends JPanel {
         backButton.addActionListener(e -> {
             if (mainUserPanel != null) {
                 // 이전 패널로 돌아가기
-                String previousPanel = mainUserPanel.getPreviousPanel();
-                System.out.println("🔙 공지사항 닫기: 이전 패널(" + previousPanel + ")로 돌아갑니다.");
                 mainUserPanel.goToPreviousPanel();
             } else {
                 System.out.println("❌ mainUserPanel이 null입니다!");
@@ -107,10 +104,7 @@ public class NoticePanel extends JPanel {
 
     // 🔹 공지사항 목록 불러오기 (DB 연동)
     private void loadNotices(MainUserPanel mainUserPanel) {
-        System.out.println("🔄 공지사항 UI 업데이트 시작...");
-
         List<NoticeBean> notices = noticeDAO.getAllNotices();
-        System.out.println("✅ 불러온 공지사항 개수: " + notices.size());
 
         // ✅ 기존 공지사항 목록만 삭제 (헤더 유지)
         Component[] components = noticePanel.getComponents();
@@ -143,13 +137,10 @@ public class NoticePanel extends JPanel {
                 title.addMouseListener(new java.awt.event.MouseAdapter() {
                     @Override
                     public void mouseClicked(java.awt.event.MouseEvent e) {
-                        System.out.println("🔍 공지사항 제목 클릭됨: " + notice.getNotice_title());
-
                         int noticeNum = notice.getNotice_num();
                         NoticeBean selectedNotice = new NoticeDAO().getNoticeById(noticeNum);
 
                         if (selectedNotice != null) {
-                            System.out.println("✅ 공지사항 상세 데이터 정상 조회됨! -> updateNoticeDetail 호출");
                             mainUserPanel.getNoticeDetailPanel().updateNoticeDetail(selectedNotice);
                         } else {
                             System.err.println("❌ 공지사항 상세 데이터 없음!");
@@ -164,7 +155,6 @@ public class NoticePanel extends JPanel {
                 noticePanel.add(title);
                 noticePanel.add(author);
                 noticePanel.add(date);
-                System.out.println("📌 공지사항 UI 추가: " + notice.getNotice_title() + " | 날짜: " + notice.getNotice_time());
             }
             
         }
@@ -172,6 +162,5 @@ public class NoticePanel extends JPanel {
         // ✅ UI 강제 갱신
         noticePanel.revalidate();
         noticePanel.repaint();
-        System.out.println("✅ 공지사항 UI 업데이트 완료");
     }
 }

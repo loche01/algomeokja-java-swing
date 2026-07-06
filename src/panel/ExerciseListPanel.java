@@ -137,7 +137,6 @@ public class ExerciseListPanel extends JPanel {
 
     // Method to set category and refresh panel
     public void setCategory(String category) {
-        System.out.println("Setting category to: " + category);
         this.currentCategory = category;
         
         // 카테고리 버튼 텍스트 변경
@@ -229,7 +228,6 @@ public class ExerciseListPanel extends JPanel {
 
     // 검색 기능 구현
     private void performSearch(String keyword) {
-        System.out.println("Searching for: " + keyword + " in category: " + currentCategory);
         String searchKeyword = keyword != null ? keyword.trim() : "";
         if (searchKeyword.isEmpty() || searchKeyword.equals("검색어를 입력하세요...")) {
             loadExercisesForCategory(currentCategory);
@@ -283,7 +281,6 @@ public class ExerciseListPanel extends JPanel {
     // Add exercise buttons based on current category
     private void addExerciseButtons() {
         if (exerciseList == null || exerciseList.isEmpty()) {
-            System.out.println(currentCategory + " 운동 데이터가 없습니다.");
             JLabel noDataLabel = new JLabel(currentCategory + " 운동 데이터가 없습니다.", SwingConstants.CENTER);
             noDataLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
             noDataLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -291,14 +288,10 @@ public class ExerciseListPanel extends JPanel {
             return;
         }
         
-        System.out.println("Adding " + exerciseList.size() + " exercises for category: " + currentCategory);
-        
         int minItems = 6; // 최소 6개 아이템이 보이도록 설정
         
         // 운동 목록 추가
         for (ExerciseBean ex : exerciseList) {
-            System.out.println("Adding exercise: " + ex.getExerciseName() + " (" + ex.getExerciseType() + ")");
-            
             // 운동 아이템 생성하여 추가
             exerciseContentPanel.add(createExerciseItem(ex));
             exerciseContentPanel.add(Box.createVerticalStrut(2)); // 아이템 간 간격
@@ -336,8 +329,6 @@ public class ExerciseListPanel extends JPanel {
         itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                System.out.println("운동 아이템 클릭됨: " + ex.getExerciseName());
-                
                 // MainUserPanel의 참조가 필요합니다
                 if (mainUserPanel != null) {
                     // 운동 정보를 칼로리 패널로 전달하고 해당 패널 표시
