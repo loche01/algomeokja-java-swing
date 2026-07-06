@@ -96,7 +96,6 @@ public class MainUserPanel extends JPanel {
         for (JPanel panel : panels) {
             panel.setBounds(0, 140, 440, 686);
             add(panel);
-            System.out.println("✅ MainUserPanel:"+ panel+"추가 완료");
         }
 
         // userInfoLabel 초기화
@@ -158,12 +157,10 @@ public class MainUserPanel extends JPanel {
         // 이전 패널 이름 저장 (Notice 또는 noticeDetailPanel이 아닌 경우에만)
         if (!currentPanel.equals("Notice") && !currentPanel.equals("noticeDetailPanel")) {
             previousPanel = currentPanel;
-            System.out.println("✅ 이전 패널 저장: " + previousPanel);
         }
         
         // 현재 패널 업데이트
         currentPanel = panelName;
-        System.out.println("✅ 현재 패널 설정: " + currentPanel);
         
         // HomeDaily 패널로 이동할 경우 네비게이션 바의 홈 버튼도 선택
         if (panelName.equals("HomeDaily")) {
@@ -182,9 +179,7 @@ public class MainUserPanel extends JPanel {
 			                noticePanel, noticeDetailPanel};
 
         for (JPanel panel : panels) {
-        	System.out.println("🔄 showPanel 호출됨: " + panelName);
             panel.setVisible(false);
-            System.out.println("🔍 숨김 처리: " + panel.getClass().getName());
         }
         
         // HomeMeal 패널이 표시될 때 사용자 정보 즉시 업데이트
@@ -230,13 +225,6 @@ public class MainUserPanel extends JPanel {
             case "HomeMeal":  /* 이미 위에서 처리됨 */ break;
             case "HomeTarget": homeTargetPanel.refreshData(); homeTargetPanel.setVisible(true); break;
            }
-        printPanelComponents();
-    }
-    public void printPanelComponents() {
-        System.out.println("📌 현재 MainUserPanel에 포함된 패널 목록:");
-        for (Component comp : getComponents()) {
-            System.out.println("  - " + comp.getClass().getName() + " | Visible: " + comp.isVisible());
-        }
     }
     // 📌 탭 클릭 시 패널 전환
     private void handleTabClick(java.awt.event.ActionEvent e) {
@@ -286,7 +274,6 @@ public class MainUserPanel extends JPanel {
         
         if (userInfoLabel != null) {
             userInfoLabel.setText("환영합니다, " + user.getUser_name() + "님(" + user.getUser_id() + ")");
-            System.out.println("✅ 로그인 성공! 아이디: " + user.getUser_id() + ", 이름: " + user.getUser_name());
         }
     }
 
@@ -302,7 +289,6 @@ public class MainUserPanel extends JPanel {
 
     // 이전 패널로 돌아가는 메서드 추가
     public void goToPreviousPanel() {
-        System.out.println("🔙 이전 패널로 돌아가기: " + previousPanel);
         showPanel(previousPanel);
     }
 

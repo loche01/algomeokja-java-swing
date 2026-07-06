@@ -20,8 +20,6 @@ public class NavUtil {
     	 mainUserPanel = panelManager;
     	 if (panelManager == null) {
     	        System.out.println("🚨 [오류] MainUserPanel이 NavUtil에 전달되지 않음!");
-    	    } else {
-    	        System.out.println("✅ MainUserPanel이 NavUtil에 정상 전달됨: " + panelManager);
     	    }
     	JPanel navPanel = new JPanel();
         navPanel.setLayout(null);
@@ -45,7 +43,6 @@ public class NavUtil {
         navButtons = buttons; // 버튼 배열 저장
 
         // 기본 선택 버튼 (홈)
-        System.out.println("기본 선택 버튼: 홈");
         setSelectedButton(btnHome, buttons);
 
         // 버튼 이벤트 리스너 추가
@@ -64,8 +61,6 @@ public class NavUtil {
     // 📌 화면 전환 메서드 수정
     private static void switchPage(String pageName) {
         if (mainUserPanel != null) {
-            System.out.println("패널 전환 시도: " + pageName); // ✅ 디버깅 로그 추가
-
             // 🔹 MainUserPanel에서 정의한 패널 이름과 일치하도록 수정
             switch (pageName) {
                 case "홈": 
@@ -136,7 +131,6 @@ public class NavUtil {
             // 첫 번째 버튼이 홈 버튼
             BottonNav homeButton = navButtons[0];
             setSelectedButton(homeButton, navButtons);
-            System.out.println("✅ 네비게이션 바의 홈 버튼이 선택되었습니다.");
         } else {
             System.out.println("❌ 네비게이션 버튼이 초기화되지 않았습니다.");
         }
