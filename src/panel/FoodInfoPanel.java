@@ -18,8 +18,6 @@ public class FoodInfoPanel extends JPanel {
     public FoodInfoPanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
         
-        System.out.println("✅ FoodInfoPanel 생성자 실행됨");
-        
         setLayout(null);
         setBackground(new Color(192, 233, 147));
         setBounds(0, 0, 440, 956);

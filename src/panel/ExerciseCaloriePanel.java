@@ -32,7 +32,6 @@ public class ExerciseCaloriePanel extends JPanel {
         this.mainUserPanel = mainUserPanel;
         // 현재 로그인된 사용자 ID 가져오기
         this.currentUserId = LoginManager.getInstance().getUserId();
-        System.out.println("현재 로그인된 사용자 ID: " + currentUserId);
 
         // ExerciseLogDAO 초기화
         exerciseLogDAO = new ExerciseLogDAO();

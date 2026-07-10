@@ -175,8 +175,6 @@ public class MealLogDAO {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, userId);
             
-            System.out.println("🔍 영양소 정보 조회: userId=" + userId);
-            
             rs = pstmt.executeQuery();
             
             if (rs.next()) {
@@ -184,14 +182,6 @@ public class MealLogDAO {
                 nutritionMap.put("carbs", rs.getDouble("total_carbs"));
                 nutritionMap.put("protein", rs.getDouble("total_protein"));
                 nutritionMap.put("fat", rs.getDouble("total_fat"));
-                
-                System.out.println("✅ 조회된 영양소 정보:");
-                System.out.println("  - 칼로리: " + nutritionMap.get("calories") + " kcal");
-                System.out.println("  - 탄수화물: " + nutritionMap.get("carbs") + " g");
-                System.out.println("  - 단백질: " + nutritionMap.get("protein") + " g");
-                System.out.println("  - 지방: " + nutritionMap.get("fat") + " g");
-            } else {
-                System.out.println("⚠ 조회된 영양소 정보 없음");
             }
             
         } catch (Exception e) {
