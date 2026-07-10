@@ -72,8 +72,6 @@ public class NoticeDAO {
             pstmt = conn.prepareStatement(sql);
             rs = pstmt.executeQuery();
 
-            System.out.println("🔍 [NoticeDAO] 공지사항 목록 조회 실행됨");
-
             while (rs.next()) {
                 NoticeBean notice = new NoticeBean();
                 notice.setNotice_num(rs.getInt("notice_num"));
@@ -82,11 +80,8 @@ public class NoticeDAO {
                 notice.setNotice_content(rs.getString("notice_coment"));
                 notice.setNotice_time(rs.getTimestamp("notice_time")); // ✅ 중요! notice_time 설정
 
-                System.out.println("📢 " + notice.getNotice_num() + " | " + notice.getNotice_title() + " | " + notice.getAdmin_id() + " | " + notice.getNotice_time());
                 notices.add(notice);
             }
-
-            System.out.println("✅ 불러온 공지사항 개수: " + notices.size());
 
         } catch (SQLException e) {
             System.err.println("❌ SQL 실행 중 오류 발생!");

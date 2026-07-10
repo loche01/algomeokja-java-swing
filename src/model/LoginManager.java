@@ -32,7 +32,6 @@ public class LoginManager {
             } else {
                 // 일반 사용자인 경우
                 ui_n_utils.UserSessionManager.getInstance().setCurrentUser(user);
-                System.out.println("✅ [LoginManager] 사용자 정보 설정 완료: " + user.getUser_name());
             }
         }
     }
