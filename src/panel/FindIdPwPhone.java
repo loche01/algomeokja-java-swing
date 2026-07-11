@@ -1,21 +1,30 @@
 package panel;
 
+import DB.UserDAO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import main.MainFrame;
+import ui_n_utils.CustomDialog;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.SmartTextField;
+import ui_n_utils.ValidationUtils;
 
 
 
 public class FindIdPwPhone extends JPanel implements ActionListener {
     private RoundedComponent findIdButton, phoneTabButton,emailTabButton,sendCodeButton1,sendCodeButton2,  findPwButton;
-    private SmartTextField nameField1,nameField2,idField2,phoneField1,verifyField1,phoneField2, verifyField2;
+    private SmartTextField nameField1,nameField2,idField2,phoneField1,phoneField2, verifyField2;
     private MainFrame mainFrame;
+    private UserDAO userDAO;
+    private String verifiedId;
+    private String verifiedIdName;
+    private String verifiedIdPhone;
+
     public FindIdPwPhone(MainFrame mainFrame) {
-    	this.mainFrame = mainFrame;
+        this.mainFrame = mainFrame;
+        this.userDAO = new UserDAO();
         setLayout(null);
         setBackground(Color.WHITE);
         setBounds(0, 0, 440, 956);
@@ -72,15 +81,10 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         phoneField1.setBounds(centerX+50, startY + 225, 170, 30);
         add(phoneField1);
 
-        sendCodeButton1 = new RoundedComponent(90, 30,0,"button", "인증 전송",Color.black, Color.black, Color.white, "Inter", Font.BOLD, 15 );
+        sendCodeButton1 = new RoundedComponent(90, 30,0,"button", "사용자 확인",Color.black, Color.black, Color.white, "Inter", Font.BOLD, 13 );
         sendCodeButton1.setBounds(centerX + 230, startY + 225, 90, 30);
         sendCodeButton1.getButton().addActionListener(this);
         add(sendCodeButton1);
-        
-        // 인증번호 입력 필드
-        verifyField1 = new SmartTextField("인증번호를 입력해주세", 30);
-        verifyField1.setBounds(centerX+50, startY + 265, formWidth, 30);
-        add(verifyField1);
         
         // 아이디 찾기 버튼
         findIdButton = new RoundedComponent(198, 44, 35, "button", "아이디 찾기", new Color(0xC0E993),  new Color(0xC0E993), Color.white, "Inter", Font.BOLD, 15);
@@ -145,14 +149,65 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == sendCodeButton1.getButton()) {
-            System.out.println("ID 찾기 - 인증번호 전송 클릭!");
+            verifyIdOwner();
         } else if (e.getSource() == findIdButton.getButton()) {
-            System.out.println("아이디 찾기 버튼 클릭!");
+            showFoundId();
         } else if (e.getSource() == sendCodeButton2.getButton()) {
             System.out.println("비밀번호 찾기 - 인증번호 전송 클릭!");
         } else if (e.getSource() == findPwButton.getButton()) {
             System.out.println("비밀번호 찾기 버튼 클릭!");
         }
+    }
+
+    private void verifyIdOwner() {
+        String userName = nameField1.getRealText().trim();
+        String userPhone = phoneField1.getRealText().trim();
+
+        if (!ValidationUtils.isValidName(userName)) {
+            CustomDialog.showDialog(mainFrame, "이름을 올바르게 입력해주세요.", "사용자 확인");
+            clearIdVerification();
+            return;
+        }
+        if (!ValidationUtils.isValidPhone(userPhone)) {
+            CustomDialog.showDialog(mainFrame, "휴대폰 번호를 010-1234-5678 형식으로 입력해주세요.", "사용자 확인");
+            clearIdVerification();
+            return;
+        }
+
+        String userId = userDAO.findUserIdByNameAndPhone(userName, userPhone);
+        if (userId == null) {
+            CustomDialog.showDialog(mainFrame, "입력한 정보와 일치하는 사용자를 찾을 수 없습니다.", "사용자 확인");
+            clearIdVerification();
+            return;
+        }
+
+        verifiedId = userId;
+        verifiedIdName = userName;
+        verifiedIdPhone = userPhone;
+        CustomDialog.showDialog(mainFrame, "사용자 확인이 완료되었습니다.", "사용자 확인");
+    }
+
+    private void showFoundId() {
+        String userName = nameField1.getRealText().trim();
+        String userPhone = phoneField1.getRealText().trim();
+        if (verifiedId == null || !userName.equals(verifiedIdName) || !userPhone.equals(verifiedIdPhone)) {
+            CustomDialog.showDialog(mainFrame, "이름과 휴대폰 번호로 사용자 확인을 먼저 완료해주세요.", "아이디 찾기");
+            clearIdVerification();
+            return;
+        }
+
+        JOptionPane.showMessageDialog(mainFrame,
+                "회원님의 아이디는 " + verifiedId + " 입니다.",
+                "아이디 찾기",
+                JOptionPane.INFORMATION_MESSAGE);
+        clearIdVerification();
+        mainFrame.showPanel("login");
+    }
+
+    private void clearIdVerification() {
+        verifiedId = null;
+        verifiedIdName = null;
+        verifiedIdPhone = null;
     }
 
 }
