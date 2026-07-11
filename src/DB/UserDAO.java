@@ -140,4 +140,45 @@ public class UserDAO {
 
         return matchCount == 1 ? foundUserId : null;
     }
+
+    public boolean verifyUserIdentity(String userId, String userName, String userPhone) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            con = pool.getConnection();
+            String sql = "SELECT COUNT(*) FROM user WHERE user_id=? AND user_name=? AND user_phone=?";
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, userId);
+            pstmt.setString(2, userName);
+            pstmt.setString(3, userPhone);
+            rs = pstmt.executeQuery();
+            return rs.next() && rs.getInt(1) == 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            pool.freeConnection(con, pstmt, rs);
+        }
+    }
+
+    public boolean updateUserPassword(String userId, String newPassword) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            con = pool.getConnection();
+            String sql = "UPDATE user SET user_pwd=? WHERE user_id=?";
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, newPassword);
+            pstmt.setString(2, userId);
+            return pstmt.executeUpdate() == 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            pool.freeConnection(con, pstmt);
+        }
+    }
 }
