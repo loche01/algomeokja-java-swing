@@ -325,6 +325,14 @@ public class FoodListPanel extends JPanel {
     
     // 담은 목록을 DB에 저장하는 메서드
     private void saveMealToDatabase() {
+        if (currentMealType == null || currentMealType.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "식사 유형을 선택해주세요.",
+                "저장 불가",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         String userId = LoginManager.getInstance().getUserId();
         if (userId == null || userId.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
