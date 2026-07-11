@@ -62,6 +62,29 @@ public class LoginPanel extends JPanel implements ActionListener {
 		passwordField.setBounds(62, 495, 315, 40);
 		add(passwordField);
 
+		JPasswordField passwordInput = (JPasswordField) passwordField.getComponent();
+		char defaultEchoChar = passwordInput.getEchoChar();
+		passwordInput.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 58));
+
+		JButton passwordVisibilityButton = new JButton("보기");
+		passwordVisibilityButton.setFont(new Font("Malgun Gothic", Font.BOLD, 11));
+		passwordVisibilityButton.setForeground(new Color(0x4F6F46));
+		passwordVisibilityButton.setBounds(325, 495, 52, 40);
+		passwordVisibilityButton.setFocusPainted(false);
+		passwordVisibilityButton.setBorderPainted(false);
+		passwordVisibilityButton.setContentAreaFilled(false);
+		passwordVisibilityButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		passwordVisibilityButton.addActionListener(e -> {
+			int caretPosition = passwordInput.getCaretPosition();
+			boolean showPassword = passwordInput.getEchoChar() != 0;
+			passwordInput.setEchoChar(showPassword ? (char) 0 : defaultEchoChar);
+			passwordVisibilityButton.setText(showPassword ? "숨김" : "보기");
+			passwordInput.requestFocusInWindow();
+			SwingUtilities.invokeLater(() -> passwordInput.setCaretPosition(
+					Math.min(caretPosition, passwordInput.getDocument().getLength())));
+		});
+		add(passwordVisibilityButton);
+
 		// 엔터키 입력 시 로그인 시도 기능 추가
 		// 아이디 필드에 KeyListener 추가
 		if (loginField.getTextField() != null) {
