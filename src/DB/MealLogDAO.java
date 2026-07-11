@@ -20,8 +20,7 @@ public class MealLogDAO {
     // 식사 로그 추가 (담은 목록의 음식들을 meal_log 테이블에 INSERT)
     public boolean insertMealLogs(int mealCode, Vector<FoodBean> favoriteItems) {
         if (mealCode <= 0 || favoriteItems == null || favoriteItems.isEmpty()) {
-            System.err.println("❌ 유효하지 않은 입력값: mealCode=" + mealCode + 
-                             ", favoriteItems=" + (favoriteItems == null ? "null" : favoriteItems.size()));
+            System.err.println("식단 상세 정보를 저장할 수 없는 입력입니다.");
             return false;
         }
 
@@ -38,25 +37,17 @@ public class MealLogDAO {
                         "VALUES (?, ?, ?, ?, ?, ?, ?)";
             pstmt = conn.prepareStatement(sql);
             
-            System.out.println("🔹 식단 상세 정보 저장 시작... (meal_code: " + mealCode + ")");
-            
             for (FoodBean food : favoriteItems) {
                 try {
                     if (food.getFoodCode() <= 0) {
-                        throw new SQLException("유효하지 않은 food_code: " + food.getFoodCode());
+                        throw new SQLException("유효하지 않은 음식 코드입니다.");
                     }
-
-                    System.out.println("\n✅ 저장 중인 음식: " + food.getFoodName());
-                    System.out.println("  - 음식 코드: " + food.getFoodCode());
-                    System.out.println("  - 설정 그램: " + food.getWeight() + "g");
                     
                     // 이미 FoodInfoPanel에서 계산된 값을 그대로 사용
                     double finalKcal = food.getFoodKcal();
                     double finalCarb = food.getCarb();
                     double finalProtein = food.getProtein();
                     double finalFat = food.getFat();
-                    
-                    System.out.println("  - 저장할 칼로리: " + finalKcal + "kcal");
                     
                     // meal_log 테이블에 삽입
                     pstmt.setInt(1, mealCode);
@@ -69,13 +60,12 @@ public class MealLogDAO {
                     
                     int result = pstmt.executeUpdate();
                     if (result <= 0) {
-                        System.out.println("❌ 음식 저장 실패: " + food.getFoodName());
+                        System.err.println("식단 상세 정보 저장에 실패했습니다.");
                         success = false;
                         break;
                     }
                 } catch (Exception e) {
-                    System.out.println("❌ 음식 저장 중 오류: " + food.getFoodName() 
-                                   + " (코드: " + food.getFoodCode() + ")");
+                    System.err.println("식단 상세 정보 저장 중 오류가 발생했습니다.");
                     e.printStackTrace();
                     success = false;
                     break;
@@ -90,6 +80,7 @@ public class MealLogDAO {
             
         } catch (Exception e) {
             success = false;
+            e.printStackTrace();
             try {
                 if (conn != null) conn.rollback();
             } catch (SQLException ex) {

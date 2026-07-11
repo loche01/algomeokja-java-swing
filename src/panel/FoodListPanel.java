@@ -234,9 +234,6 @@ public class FoodListPanel extends JPanel {
         
         if (!alreadyExists) {
             favoriteItems.add(food);
-            System.out.println("✅ 담은 목록에 추가됨: " + food.getFoodName() + " (코드: " + food.getFoodCode() + ")");
-        } else {
-            System.out.println("⚠ 이미 담은 목록에 있음: " + food.getFoodName());
         }
         
         // 담은 목록 UI 업데이트
@@ -343,23 +340,26 @@ public class FoodListPanel extends JPanel {
         }
         
         try {
-            // 저장 전 로그 출력
-            System.out.println("🔹 DB 저장 시작: userId=" + userId + ", mealType=" + currentMealType);
-            
             // meal 테이블에 새 레코드 추가 (meal_type 포함)
             int mealCode = mealDAO.insertMeal(userId, currentMealType);
             
             if (mealCode == -1) {
-                throw new Exception("식사 기록 생성에 실패했습니다.");
+                JOptionPane.showMessageDialog(this,
+                    "식사 기록을 생성하지 못했습니다. 잠시 후 다시 시도해주세요.",
+                    "저장 오류",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
             }
-            
-            System.out.println("✅ 생성된 meal_code: " + mealCode);
-            
+
             // meal_log 테이블에 담은 음식 목록 추가
             boolean success = mealLogDAO.insertMealLogs(mealCode, favoriteItems);
             
             if (!success) {
-                throw new Exception("식단 저장에 실패했습니다.");
+                JOptionPane.showMessageDialog(this,
+                    "선택한 음식 정보를 저장하지 못했습니다. 담은 목록을 확인한 뒤 다시 시도해주세요.",
+                    "저장 오류",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
             }
 
             // 성공 메시지 표시
@@ -382,7 +382,7 @@ public class FoodListPanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "식단 저장 중 오류가 발생했습니다: " + e.getMessage(),
+                "식단 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
                 "저장 오류",
                 JOptionPane.ERROR_MESSAGE);
         }
@@ -400,8 +400,6 @@ public class FoodListPanel extends JPanel {
         itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                System.out.println("🍽️ 음식 아이템 클릭됨: " + food.getFoodName());
-                
                 if (isFavoriteList) {
                     // DB에서 원본 데이터를 가져옴
                     FoodBean originalFood = foodDAO.getFoodByName(food.getFoodName());
@@ -507,16 +505,12 @@ public class FoodListPanel extends JPanel {
 	    // UI 업데이트
 	    showFavoriteItems();
 	    
-	    // 자동 저장은 하지 않음 - 사용자가 저장 버튼을 눌러야 저장됨
-	    
-	    System.out.println("✅ 담은 목록의 음식 정보 업데이트: " + updatedFood.getFoodName() 
-	                     + " (코드: " + updatedFood.getFoodCode() + ", " + updatedFood.getFoodKcal() + "kcal)");
+        // 자동 저장은 하지 않음 - 사용자가 저장 버튼을 눌러야 저장됨
 	}
 
     // meal_type 설정 메서드
     public void setMealType(String mealType) {
         this.currentMealType = mealType;
-        System.out.println("✅ 식사 시간대 설정: " + mealType);
         
         // 검색 탭으로 초기화
         switchToSearchTab();
