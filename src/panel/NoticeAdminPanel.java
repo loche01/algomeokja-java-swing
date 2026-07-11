@@ -46,7 +46,7 @@ public class NoticeAdminPanel extends JPanel implements ActionListener {
 
         // 공지사항 목록 헤더
         String[] headers = {"번호", "제목", "작성자", "작성날짜"};
-        int[] headerX = {20, 70, 220, 320};
+        int[] headerX = {30, 70, 210, 275};
 
         for (int i = 0; i < headers.length; i++) {
             JLabel label = new JLabel(headers[i]);
@@ -67,11 +67,12 @@ public class NoticeAdminPanel extends JPanel implements ActionListener {
         noticeListPanel.setBorder(null);
 
         scrollPane = new JScrollPane(noticeListPanel);
-        scrollPane.setBounds(10, 100, 380, 400);
-        scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setBounds(10, 100, 380, 430);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getViewport().setBackground(Color.WHITE);
         noticePanel.add(scrollPane);
 
         // 🔹 글쓰기 버튼
@@ -134,7 +135,7 @@ public class NoticeAdminPanel extends JPanel implements ActionListener {
         checkBoxes.clear();
 
         // ✅ 패널 크기 설정 (공지 개수에 따라 동적 조정)
-        noticeListPanel.setPreferredSize(new Dimension(380, Math.max(400, notices.size() * 40)));
+        noticeListPanel.setPreferredSize(new Dimension(360, Math.max(430, notices.size() * 52)));
 
         if (notices.isEmpty()) {
             JLabel noDataLabel = new JLabel("📢 등록된 공지사항이 없습니다.");
@@ -144,17 +145,33 @@ public class NoticeAdminPanel extends JPanel implements ActionListener {
         } else {
             for (int i = 0; i < notices.size(); i++) {
                 NoticeBean notice = notices.get(i);
+                int rowY = i * 52;
 
                 JCheckBox checkBox = new JCheckBox();
-                checkBox.setBounds(5, (i * 40), 20, 30);
-                checkBox.setBackground(Color.WHITE);
+                checkBox.setBounds(5, rowY + 7, 24, 30);
+                checkBox.setBackground(new Color(0xF8FAF6));
                 checkBoxes.add(checkBox);
 
                 JLabel number = new JLabel(String.valueOf(notice.getNotice_num()));
                 JLabel title = new JLabel(notice.getNotice_title());
                 JLabel author = new JLabel(notice.getAdmin_id());
-                JLabel date = new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                JLabel date = new JLabel(new SimpleDateFormat("yyyy-MM-dd")
                         .format(new Date(notice.getNotice_time().getTime())));
+
+                number.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
+                title.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+                author.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+                date.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+                author.setForeground(Color.DARK_GRAY);
+                date.setForeground(Color.GRAY);
+                title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                JLabel[] rowLabels = {number, title, author, date};
+                for (JLabel label : rowLabels) {
+                    label.setOpaque(true);
+                    label.setBackground(new Color(0xF8FAF6));
+                    label.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, new Color(0xE1E7DD)));
+                }
 
                 // 📌 제목 클릭 시 상세 페이지 이동
                 title.addMouseListener(new MouseAdapter() {
@@ -171,10 +188,10 @@ public class NoticeAdminPanel extends JPanel implements ActionListener {
                     }
                 });
 
-                number.setBounds(30, (i * 40), 50, 30);
-                title.setBounds(80, (i * 40), 120, 30);
-                author.setBounds(210, (i * 40), 80, 30);
-                date.setBounds(260, (i * 40), 140, 30);
+                number.setBounds(30, rowY, 40, 44);
+                title.setBounds(70, rowY, 140, 44);
+                author.setBounds(210, rowY, 65, 44);
+                date.setBounds(275, rowY, 85, 44);
 
                 noticeListPanel.add(checkBox);
                 noticeListPanel.add(number);

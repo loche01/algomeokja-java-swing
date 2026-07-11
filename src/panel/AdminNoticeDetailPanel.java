@@ -64,6 +64,7 @@ public class AdminNoticeDetailPanel extends JPanel {
         closeButton.setFocusPainted(false);
         closeButton.setBorderPainted(false);
         closeButton.setContentAreaFilled(false);
+        closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         noticePanel.add(closeButton);
         closeButton.addActionListener(e -> mainAdminPanel.showPanel("NoticeAdmin"));
 
@@ -105,21 +106,24 @@ public class AdminNoticeDetailPanel extends JPanel {
         contentArea = new JTextArea();
         contentArea.setFont(new Font("Inter", Font.PLAIN, 14));
         contentArea.setWrapStyleWord(true);
+        contentArea.setLineWrap(true);
         contentArea.setEditable(false);
         contentArea.setCursor(null);
         contentArea.setBackground(Color.WHITE);
         contentArea.setMargin(new Insets(5, 5, 5, 5));
 
         contentScrollPane = new JScrollPane(contentArea);
-        contentScrollPane.setBounds(10, 130, 360, 300);
+        contentScrollPane.setBounds(10, 130, 360, 350);
         contentScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        contentScrollPane.setBorder(null);
+        contentScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        contentScrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xE0E0E0)));
         noticePanel.add(contentScrollPane);
 
         // 🔹 파일 목록 패널 추가 (위치 조정)
         fileListPanel = new JPanel();
         fileListPanel.setLayout(new BoxLayout(fileListPanel, BoxLayout.Y_AXIS));
-        fileListPanel.setBounds(10, 450, 360, 150);
+        fileListPanel.setBounds(10, 500, 360, 90);
         fileListPanel.setBackground(Color.WHITE);
         noticePanel.add(fileListPanel);
 
@@ -132,7 +136,7 @@ public class AdminNoticeDetailPanel extends JPanel {
      // 🔹 수정 버튼 추가 (이 부분이 빠져 있어서 NullPointerException 발생)
         editButton = new RoundedComponent(100, 40, 10, "button", "수정", 
                         Color.GRAY, Color.GRAY, Color.WHITE, "맑은 고딕", Font.BOLD, 16);
-        editButton.setBounds(150, 600, 100, 40);
+        editButton.setBounds(140, 615, 100, 40);
         noticePanel.add(editButton);
 
         
@@ -144,7 +148,6 @@ public class AdminNoticeDetailPanel extends JPanel {
                 return;
             }
 
-            System.out.println("🔹 수정할 공지사항 ID: " + currentNoticeId);
             mainAdminPanel.showPanel("NoticeEditPanel");  
             mainAdminPanel.getNoticeEditPanel().loadNoticeForEdit(currentNoticeId);
         });
