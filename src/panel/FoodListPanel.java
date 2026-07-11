@@ -371,44 +371,12 @@ public class FoodListPanel extends JPanel {
             // 식단 저장 후 패널 초기화
             clearPanel();
             
-            // EDT에서 UI 업데이트 수행
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // HomeMealPanel 업데이트
-                        mainUserPanel.getHomeMealPanel().updateCalories();
-                        
-                        // 디버깅을 위한 로그 추가
-                        System.out.println("✅ 패널 전환 시도: HomeMeal");
-                        
-                        // HomeDailyPanel로 전환 (기존 homeMeal에서 변경)
-                        mainUserPanel.showPanel("HomeMeal");
-                        
-                        // 화면 갱신 강제
-                        mainUserPanel.revalidate();
-                        mainUserPanel.repaint();
-                        
-                        System.out.println("✅ HomeMealPanel로 전환 완료");
-                        
-                        // 만약 패널 전환이 실패하면 대체 방법으로 홈 화면으로 이동
-                        if (mainUserPanel.getComponent(0).getClass().getSimpleName().contains("JLayeredPane")) {
-                            System.out.println("⚠️ 패널을 찾을 수 없어 홈 화면으로 이동합니다.");
-                            mainUserPanel.showPanel("Home");
-                        }
-                    } catch (Exception e) {
-                        System.out.println("❌ 패널 전환 중 오류 발생: " + e.getMessage());
-                        e.printStackTrace();
-                        
-                        // 오류 발생 시 홈 화면으로 이동 시도
-                        try {
-                            mainUserPanel.showPanel("Home");
-                            System.out.println("⚠️ 오류 발생으로 홈 화면으로 이동합니다.");
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }
+            // 등록된 식단 홈 화면을 갱신한 뒤 복귀
+            SwingUtilities.invokeLater(() -> {
+                mainUserPanel.getHomeMealPanel().updateCalories();
+                mainUserPanel.showPanel("HomeMeal");
+                mainUserPanel.revalidate();
+                mainUserPanel.repaint();
             });
             
         } catch (Exception e) {
