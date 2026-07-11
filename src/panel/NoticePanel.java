@@ -14,11 +14,11 @@ import ui_n_utils.RoundedComponent;
 
 
 public class NoticePanel extends JPanel {
-    private RoundedComponent prevPageButton, nextPageButton, noticePanel;
+    private RoundedComponent noticePanel;
     private NoticeDAO noticeDAO;
 
     private JPanel headerPanel; // ✅ 헤더 패널을 따로 관리
-    private NoticeDetailPanel noticeDetailPanel;
+    private JPanel noticeListPanel;
 
     public NoticePanel(MainUserPanel mainUserPanel) {
         this.noticeDAO = new NoticeDAO(); // NoticeDAO 객체 생성
@@ -82,21 +82,22 @@ public class NoticePanel extends JPanel {
             }
         });
 
-        // 🔹 목록 헤더
-        String[] headers = {"번호", "제목", "작성자", "작성날짜"};
-        int[] headerX = {10, 60, 190, 280};  // 📌 위치 조정
-
-        for (int i = 0; i < headers.length; i++) {
-            JLabel label = new JLabel(headers[i]);
-            label.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-            label.setBounds(headerX[i], 60, 100, 20);
-            headerPanel.add(label);
-        }
-
         JSeparator separator = new JSeparator();
-        separator.setBounds(0, 85, 400, 3);
+        separator.setBounds(10, 70, 380, 1);
         separator.setForeground(Color.BLACK);
         headerPanel.add(separator);
+
+        noticeListPanel = new JPanel();
+        noticeListPanel.setLayout(new BoxLayout(noticeListPanel, BoxLayout.Y_AXIS));
+        noticeListPanel.setBackground(Color.WHITE);
+
+        JScrollPane noticeScrollPane = new JScrollPane(noticeListPanel);
+        noticeScrollPane.setBounds(10, 90, 380, 550);
+        noticeScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        noticeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        noticeScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        noticeScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        noticePanel.add(noticeScrollPane);
 
         // 🔹 공지사항 목록 불러오기 (DB 연동)
         loadNotices(mainUserPanel);
@@ -105,62 +106,79 @@ public class NoticePanel extends JPanel {
     // 🔹 공지사항 목록 불러오기 (DB 연동)
     private void loadNotices(MainUserPanel mainUserPanel) {
         List<NoticeBean> notices = noticeDAO.getAllNotices();
-
-        // ✅ 기존 공지사항 목록만 삭제 (헤더 유지)
-        Component[] components = noticePanel.getComponents();
-        for (Component c : components) {
-            if (c != headerPanel) { // 헤더 패널은 삭제하지 않음
-                noticePanel.remove(c);
-            }
-        }
+        noticeListPanel.removeAll();
 
         if (notices.isEmpty()) {
             JLabel noDataLabel = new JLabel("📢 등록된 공지사항이 없습니다.");
             noDataLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-            noDataLabel.setBounds(100, 200, 300, 30);
-            noticePanel.add(noDataLabel);
+            noDataLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            noDataLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            noDataLabel.setMaximumSize(new Dimension(360, 100));
+            noDataLabel.setPreferredSize(new Dimension(360, 100));
+            noticeListPanel.add(noDataLabel);
         } else {
-            for (int i = 0; i < notices.size(); i++) {
-                NoticeBean notice = notices.get(i);
-
-                JLabel number = new JLabel(String.valueOf(notice.getNotice_num()));
-                JLabel title = new JLabel(notice.getNotice_title());
-                JLabel author = new JLabel(notice.getAdmin_id());
-                JLabel date = new JLabel(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                        .format(new Date(notice.getNotice_time().getTime())));
-
-                number.setBounds(10, 100 + (i * 40), 50, 30);
-                title.setBounds(50, 100 + (i * 40), 120, 30);  // 제목 너비 조정
-                author.setBounds(190, 100 + (i * 40), 80, 30); // 작성자 왼쪽 이동
-                date.setBounds(270, 100 + (i * 40), 140, 30);  // 날짜도 왼쪽 이동
-
-                title.addMouseListener(new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseClicked(java.awt.event.MouseEvent e) {
-                        int noticeNum = notice.getNotice_num();
-                        NoticeBean selectedNotice = new NoticeDAO().getNoticeById(noticeNum);
-
-                        if (selectedNotice != null) {
-                            mainUserPanel.getNoticeDetailPanel().updateNoticeDetail(selectedNotice);
-                        } else {
-                            System.err.println("❌ 공지사항 상세 데이터 없음!");
-                        }
-
-                        mainUserPanel.showPanel("noticeDetailPanel");
-                    }
-                });
-
-
-                noticePanel.add(number);
-                noticePanel.add(title);
-                noticePanel.add(author);
-                noticePanel.add(date);
+            for (NoticeBean notice : notices) {
+                noticeListPanel.add(createNoticeCard(notice, mainUserPanel));
+                noticeListPanel.add(Box.createVerticalStrut(10));
             }
-            
         }
 
-        // ✅ UI 강제 갱신
-        noticePanel.revalidate();
-        noticePanel.repaint();
+        noticeListPanel.revalidate();
+        noticeListPanel.repaint();
+    }
+
+    private JPanel createNoticeCard(NoticeBean notice, MainUserPanel mainUserPanel) {
+        JPanel card = new JPanel(null);
+        card.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.setMaximumSize(new Dimension(360, 82));
+        card.setPreferredSize(new Dimension(360, 82));
+        card.setBackground(new Color(0xF8FAF6));
+        card.setBorder(BorderFactory.createLineBorder(new Color(0xD7E2D0)));
+        card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        JLabel numberLabel = new JLabel("#" + notice.getNotice_num());
+        numberLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 12));
+        numberLabel.setForeground(new Color(0x609056));
+        numberLabel.setBounds(12, 8, 45, 20);
+
+        JLabel titleLabel = new JLabel(notice.getNotice_title());
+        titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        titleLabel.setBounds(55, 8, 290, 24);
+
+        JLabel authorLabel = new JLabel("작성자: " + notice.getAdmin_id());
+        authorLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+        authorLabel.setForeground(Color.DARK_GRAY);
+        authorLabel.setBounds(55, 42, 135, 20);
+
+        JLabel dateLabel = new JLabel(new SimpleDateFormat("yyyy-MM-dd").format(new Date(notice.getNotice_time().getTime())));
+        dateLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
+        dateLabel.setForeground(Color.GRAY);
+        dateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        dateLabel.setBounds(220, 42, 125, 20);
+
+        java.awt.event.MouseAdapter openListener = new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                NoticeBean selectedNotice = noticeDAO.getNoticeById(notice.getNotice_num());
+                if (selectedNotice == null) {
+                    JOptionPane.showMessageDialog(NoticePanel.this,
+                            "공지사항을 불러오지 못했습니다.", "공지사항", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                mainUserPanel.getNoticeDetailPanel().updateNoticeDetail(selectedNotice);
+                mainUserPanel.showPanel("noticeDetailPanel");
+            }
+        };
+
+        card.addMouseListener(openListener);
+        numberLabel.addMouseListener(openListener);
+        titleLabel.addMouseListener(openListener);
+        authorLabel.addMouseListener(openListener);
+        dateLabel.addMouseListener(openListener);
+        card.add(numberLabel);
+        card.add(titleLabel);
+        card.add(authorLabel);
+        card.add(dateLabel);
+        return card;
     }
 }

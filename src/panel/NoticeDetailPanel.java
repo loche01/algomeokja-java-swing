@@ -69,7 +69,6 @@ public class NoticeDetailPanel extends JPanel {
             if (mainUserPanel != null) {
                 // 이전 패널로 돌아가기
                 String previousPanel = mainUserPanel.getPreviousPanel();
-                System.out.println("🔙 공지사항 상세 닫기: 이전 패널(" + previousPanel + ")로 돌아갑니다.");
                 
                 // 이전 패널이 Notice인 경우 Notice로, 그 외의 경우 이전 패널로 이동
                 if (previousPanel.equals("Notice")) {
@@ -128,15 +127,17 @@ public class NoticeDetailPanel extends JPanel {
         contentArea.setMargin(new Insets(5, 5, 5, 5));
 
         contentScrollPane = new JScrollPane(contentArea);
-        contentScrollPane.setBounds(10, 130, 360, 300);
+        contentScrollPane.setBounds(10, 130, 360, 360);
         contentScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        contentScrollPane.setBorder(null);
+        contentScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        contentScrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xE0E0E0)));
         noticePanel.add(contentScrollPane);
 
         // 🔹 파일 목록 패널 추가
         fileListPanel = new JPanel();
         fileListPanel.setLayout(new BoxLayout(fileListPanel, BoxLayout.Y_AXIS));
-        fileListPanel.setBounds(10, 450, 360, 150);
+        fileListPanel.setBounds(10, 510, 360, 100);
         fileListPanel.setBackground(Color.WHITE);
         noticePanel.add(fileListPanel);
 
