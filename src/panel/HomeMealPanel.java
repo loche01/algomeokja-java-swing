@@ -92,18 +92,8 @@ public class HomeMealPanel extends JPanel {
 		imageLabel.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
 		aPanel.add(imageLabel); // aPanel에 이미지 추가
 
-		// 십자가 버튼 생성
-		JButton crossButton = new JButton();
-		ImageIcon crossIcon = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\십자가버튼.PNG");
-		Image crossIcona = crossIcon.getImage(); // 원본 이미지 가져오기
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImagee = crossIcona.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIcone = new ImageIcon(resizedImagee); // 조정된 이미지로 ImageIcon 생성
-
-		crossButton.setIcon(resizedIcone); // 리사이즈된 아이콘으로 설정
-		crossButton.setContentAreaFilled(true); // 버튼 배경 투명하게 설정
-		crossButton.setBorder(BorderFactory.createEmptyBorder()); // 버튼 테두리 제거
-		crossButton.setBounds(115, 15, 50, 50); // 버튼 위치 및 크기 설정
+		// 식단 추가 버튼 생성
+		JButton crossButton = createMealAddButton();
 
 		// 버튼 클릭 이벤트 리스너 추가
 		crossButton.addActionListener(new ActionListener() {
@@ -151,18 +141,8 @@ public class HomeMealPanel extends JPanel {
 		imageLabela.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
 		bPanel.add(imageLabela); // aPanel에 이미지 추가
 		
-		// 십자가 버튼 생성
-		JButton crossaButton = new JButton();
-		ImageIcon crossaIcon = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\십자가버튼.PNG");
-		Image crossaIcona = crossaIcon.getImage(); // 원본 이미지 가져오기
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImageca = crossaIcona.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIconca = new ImageIcon(resizedImageca); // 조정된 이미지로 ImageIcon 생성
-
-		crossaButton.setIcon(resizedIconca); // 리사이즈된 아이콘으로 설정
-		crossaButton.setContentAreaFilled(true); // 버튼 배경 투명하게 설정
-		crossaButton.setBorder(BorderFactory.createEmptyBorder()); // 버튼 테두리 제거
-		crossaButton.setBounds(115, 15, 50, 50); // 버튼 위치 및 크기 설정
+		// 식단 추가 버튼 생성
+		JButton crossaButton = createMealAddButton();
 
 		// 버튼 클릭 이벤트 리스너 추가
 		crossaButton.addActionListener(new ActionListener() {
@@ -211,18 +191,8 @@ public class HomeMealPanel extends JPanel {
 		imageLabelb.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
 		dPanel.add(imageLabelb); // aPanel에 이미지 추가
 
-		// 십자가 버튼 생성
-		JButton crossbButton = new JButton();
-		ImageIcon crossbIcon = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\십자가버튼.PNG");
-		Image crossbIconb = crossbIcon.getImage(); // 원본 이미지 가져오기
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImagecb = crossbIconb.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIconcb = new ImageIcon(resizedImagecb); // 조정된 이미지로 ImageIcon 생성
-
-		crossbButton.setIcon(resizedIconcb); // 리사이즈된 아이콘으로 설정
-		crossbButton.setContentAreaFilled(true); // 버튼 배경 투명하게 설정
-		crossbButton.setBorder(BorderFactory.createEmptyBorder()); // 버튼 테두리 제거
-		crossbButton.setBounds(115, 15, 50, 50); // 버튼 위치 및 크기 설정
+		// 식단 추가 버튼 생성
+		JButton crossbButton = createMealAddButton();
 
 		// 버튼 클릭 이벤트 리스너 추가
 		crossbButton.addActionListener(new ActionListener() {
@@ -271,18 +241,8 @@ public class HomeMealPanel extends JPanel {
 		imageLabelc.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
 		cPanel.add(imageLabelc); // aPanel에 이미지 추가
 
-		// 십자가 버튼 생성
-		JButton crosscButton = new JButton();
-		ImageIcon crosscIcon = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\십자가버튼.PNG");
-		Image crosscIcona = crosscIcon.getImage(); // 원본 이미지 가져오기
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImagecc = crosscIcona.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIconcc = new ImageIcon(resizedImagecc); // 조정된 이미지로 ImageIcon 생성
-
-		crosscButton.setIcon(resizedIconcc); // 리사이즈된 아이콘으로 설정
-		crosscButton.setContentAreaFilled(true); // 버튼 배경 투명하게 설정
-		crosscButton.setBorder(BorderFactory.createEmptyBorder()); // 버튼 테두리 제거
-		crosscButton.setBounds(115, 15, 50, 50); // 버튼 위치 및 크기 설정
+		// 식단 추가 버튼 생성
+		JButton crosscButton = createMealAddButton();
 
 		// 버튼 클릭 이벤트 리스너 추가
 		crosscButton.addActionListener(new ActionListener() {
@@ -335,6 +295,18 @@ public class HomeMealPanel extends JPanel {
 				SwingUtilities.invokeLater(() -> updateCalories());
 			}
 		});
+	}
+
+	private JButton createMealAddButton() {
+		JButton button = new JButton("추가");
+		button.setBounds(115, 15, 50, 50);
+		button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+		button.setForeground(Color.WHITE);
+		button.setFocusPainted(false);
+		button.setContentAreaFilled(false);
+		button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1, true));
+		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		return button;
 	}
 
 	// 사용자 이름만 업데이트하는 간소화된 메서드
