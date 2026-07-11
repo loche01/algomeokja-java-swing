@@ -108,4 +108,36 @@ public class UserDAO {
         
         return user;
     }
-} 
+
+    public String findUserIdByNameAndPhone(String userName, String userPhone) {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        String foundUserId = null;
+        int matchCount = 0;
+
+        try {
+            con = pool.getConnection();
+            String sql = "SELECT user_id FROM user WHERE user_name=? AND user_phone=? ORDER BY user_id";
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, userName);
+            pstmt.setString(2, userPhone);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                foundUserId = rs.getString("user_id");
+                matchCount++;
+                if (matchCount > 1) {
+                    return null;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            pool.freeConnection(con, pstmt, rs);
+        }
+
+        return matchCount == 1 ? foundUserId : null;
+    }
+}
