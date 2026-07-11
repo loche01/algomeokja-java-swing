@@ -26,6 +26,7 @@ public class CalendarPanel extends JPanel {
     private final JLabel selectedDateLabel;
     private final JPanel calendarGridPanel;
     private final JPanel recordListPanel;
+    private final JScrollPane recordScrollPane;
     private YearMonth displayedMonth;
     private LocalDate selectedDate;
 
@@ -83,11 +84,14 @@ public class CalendarPanel extends JPanel {
         recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
         recordListPanel.setBackground(Color.WHITE);
 
-        JScrollPane scrollPane = new JScrollPane(recordListPanel);
-        scrollPane.setBounds(25, 425, 390, 275);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDDDDDD)));
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        add(scrollPane);
+        recordScrollPane = new JScrollPane(recordListPanel);
+        recordScrollPane.setBounds(25, 425, 390, 275);
+        recordScrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDDDDDD)));
+        recordScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        recordScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        recordScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        recordScrollPane.getViewport().setBackground(Color.WHITE);
+        add(recordScrollPane);
 
         renderCalendar();
         loadSelectedDateRecords();
@@ -215,7 +219,7 @@ public class CalendarPanel extends JPanel {
         }
 
         refreshRecordList();
-        SwingUtilities.invokeLater(() -> recordListPanel.scrollRectToVisible(new Rectangle(0, 0, 1, 1)));
+        SwingUtilities.invokeLater(() -> recordScrollPane.getViewport().setViewPosition(new Point(0, 0)));
     }
 
     private void addSectionTitle(String title) {
@@ -223,17 +227,17 @@ public class CalendarPanel extends JPanel {
         titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
         titleLabel.setForeground(PRIMARY_COLOR);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(6, 12, 4, 0));
-        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        titleLabel.setMaximumSize(new Dimension(370, 32));
-        titleLabel.setPreferredSize(new Dimension(370, 32));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setMaximumSize(new Dimension(360, 32));
+        titleLabel.setPreferredSize(new Dimension(360, 32));
         recordListPanel.add(titleLabel);
     }
 
     private JPanel createExerciseRecordPanel(Map<String, Object> log) {
         JPanel panel = new JPanel(null);
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setMaximumSize(new Dimension(370, 96));
-        panel.setPreferredSize(new Dimension(370, 96));
+        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.setMaximumSize(new Dimension(360, 112));
+        panel.setPreferredSize(new Dimension(360, 112));
         panel.setBackground(new Color(0xF5F5F5));
         panel.setBorder(BorderFactory.createLineBorder(new Color(0xDDDDDD)));
 
@@ -245,20 +249,19 @@ public class CalendarPanel extends JPanel {
         Object caloriesValue = log.get("exercise_calories");
         int calories = caloriesValue instanceof Number ? ((Number) caloriesValue).intValue() : 0;
 
-        JLabel nameLabel = new JLabel(exerciseName);
-        nameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        nameLabel.setBounds(16, 10, 330, 24);
-        panel.add(nameLabel);
+        JTextArea nameArea = createWrappedTextArea(exerciseName, Font.BOLD, 15);
+        nameArea.setBounds(16, 8, 328, 40);
+        panel.add(nameArea);
 
         JLabel calorieLabel = new JLabel(calories + " kcal");
         calorieLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-        calorieLabel.setBounds(16, 40, 120, 22);
+        calorieLabel.setBounds(16, 52, 120, 22);
         panel.add(calorieLabel);
 
         JLabel timeLabel = new JLabel("저장 시간: " + formatTime(log.get("exercise_date")));
         timeLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
         timeLabel.setForeground(Color.DARK_GRAY);
-        timeLabel.setBounds(16, 66, 220, 20);
+        timeLabel.setBounds(16, 80, 220, 20);
         panel.add(timeLabel);
 
         return panel;
@@ -266,9 +269,9 @@ public class CalendarPanel extends JPanel {
 
     private JPanel createMealRecordPanel(Map<String, Object> log) {
         JPanel panel = new JPanel(null);
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.setMaximumSize(new Dimension(370, 105));
-        panel.setPreferredSize(new Dimension(370, 105));
+        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.setMaximumSize(new Dimension(360, 125));
+        panel.setPreferredSize(new Dimension(360, 125));
         panel.setBackground(new Color(0xFFF9EE));
         panel.setBorder(BorderFactory.createLineBorder(new Color(0xE4D7BE)));
 
@@ -290,18 +293,30 @@ public class CalendarPanel extends JPanel {
         typeLabel.setBounds(16, 10, 330, 24);
         panel.add(typeLabel);
 
-        JLabel foodLabel = new JLabel(foodNames);
-        foodLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-        foodLabel.setForeground(Color.DARK_GRAY);
-        foodLabel.setBounds(16, 40, 335, 24);
-        panel.add(foodLabel);
+        JTextArea foodArea = createWrappedTextArea(foodNames, Font.PLAIN, 14);
+        foodArea.setForeground(Color.DARK_GRAY);
+        foodArea.setBounds(16, 38, 328, 48);
+        panel.add(foodArea);
 
         JLabel calorieLabel = new JLabel(String.format("총 %.0f kcal", calories));
         calorieLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-        calorieLabel.setBounds(16, 70, 180, 22);
+        calorieLabel.setBounds(16, 92, 180, 22);
         panel.add(calorieLabel);
 
         return panel;
+    }
+
+    private JTextArea createWrappedTextArea(String text, int fontStyle, int fontSize) {
+        JTextArea textArea = new JTextArea(text);
+        textArea.setFont(new Font("Malgun Gothic", fontStyle, fontSize));
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setEditable(false);
+        textArea.setFocusable(false);
+        textArea.setOpaque(false);
+        textArea.setBorder(null);
+        textArea.setMargin(new Insets(0, 0, 0, 0));
+        return textArea;
     }
 
     private String formatTime(Object value) {
@@ -320,9 +335,9 @@ public class CalendarPanel extends JPanel {
     private void addMessageLabel(String message) {
         JLabel messageLabel = new JLabel(message, SwingConstants.CENTER);
         messageLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
-        messageLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        messageLabel.setMaximumSize(new Dimension(370, 80));
-        messageLabel.setPreferredSize(new Dimension(370, 80));
+        messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        messageLabel.setMaximumSize(new Dimension(360, 80));
+        messageLabel.setPreferredSize(new Dimension(360, 80));
         recordListPanel.add(messageLabel);
     }
 
