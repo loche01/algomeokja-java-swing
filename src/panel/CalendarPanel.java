@@ -1,13 +1,13 @@
 package panel;
 
-import DB.ExerciseLogDAO;
+import DB.CalendarDAO;
 import java.awt.*;
+import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
@@ -19,8 +19,9 @@ public class CalendarPanel extends JPanel {
     private static final Color TODAY_COLOR = new Color(0xC0E993);
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy년 M월");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy년 M월 d일");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    private final ExerciseLogDAO exerciseLogDAO;
+    private final CalendarDAO calendarDAO;
     private final JLabel monthLabel;
     private final JLabel selectedDateLabel;
     private final JPanel calendarGridPanel;
@@ -29,7 +30,7 @@ public class CalendarPanel extends JPanel {
     private LocalDate selectedDate;
 
     public CalendarPanel() {
-        exerciseLogDAO = new ExerciseLogDAO();
+        calendarDAO = new CalendarDAO();
         selectedDate = LocalDate.now();
         displayedMonth = YearMonth.from(selectedDate);
 
@@ -89,12 +90,12 @@ public class CalendarPanel extends JPanel {
         add(scrollPane);
 
         renderCalendar();
-        loadSelectedDatePreview();
+        loadSelectedDateRecords();
     }
 
     public void refresh() {
         renderCalendar();
-        loadSelectedDatePreview();
+        loadSelectedDateRecords();
     }
 
     private JButton createMonthButton(String text) {
@@ -112,13 +113,13 @@ public class CalendarPanel extends JPanel {
         displayedMonth = displayedMonth.plusMonths(amount);
         selectedDate = displayedMonth.atDay(1);
         renderCalendar();
-        loadSelectedDatePreview();
+        loadSelectedDateRecords();
     }
 
     private void selectDate(LocalDate date) {
         selectedDate = date;
         renderCalendar();
-        loadSelectedDatePreview();
+        loadSelectedDateRecords();
     }
 
     private void renderCalendar() {
@@ -179,17 +180,7 @@ public class CalendarPanel extends JPanel {
         }
     }
 
-    private void loadSelectedDatePreview() {
-        if (selectedDate.equals(LocalDate.now())) {
-            loadTodayExerciseLogs();
-        } else {
-            recordListPanel.removeAll();
-            addMessageLabel("선택한 날짜의 기록을 준비 중입니다.");
-            refreshRecordList();
-        }
-    }
-
-    private void loadTodayExerciseLogs() {
+    private void loadSelectedDateRecords() {
         recordListPanel.removeAll();
 
         String userId = LoginManager.getInstance().getUserId();
@@ -199,20 +190,46 @@ public class CalendarPanel extends JPanel {
             return;
         }
 
-        List<Map<String, Object>> logs = exerciseLogDAO.getTodayExerciseLogs(userId);
-        if (logs.isEmpty()) {
-            addMessageLabel("오늘 저장된 운동 기록이 없습니다.");
+        List<Map<String, Object>> exerciseLogs = calendarDAO.getExerciseLogsByDate(userId, selectedDate);
+        List<Map<String, Object>> mealLogs = calendarDAO.getMealLogsByDate(userId, selectedDate);
+
+        addSectionTitle("운동 기록");
+        if (exerciseLogs.isEmpty()) {
+            addMessageLabel("선택한 날짜의 운동 기록이 없습니다.");
         } else {
-            for (Map<String, Object> log : logs) {
-                recordListPanel.add(createRecordPanel(log));
+            for (Map<String, Object> log : exerciseLogs) {
+                recordListPanel.add(createExerciseRecordPanel(log));
+                recordListPanel.add(Box.createVerticalStrut(8));
+            }
+        }
+
+        recordListPanel.add(Box.createVerticalStrut(8));
+        addSectionTitle("식단 기록");
+        if (mealLogs.isEmpty()) {
+            addMessageLabel("선택한 날짜의 식단 기록이 없습니다.");
+        } else {
+            for (Map<String, Object> log : mealLogs) {
+                recordListPanel.add(createMealRecordPanel(log));
                 recordListPanel.add(Box.createVerticalStrut(8));
             }
         }
 
         refreshRecordList();
+        SwingUtilities.invokeLater(() -> recordListPanel.scrollRectToVisible(new Rectangle(0, 0, 1, 1)));
     }
 
-    private JPanel createRecordPanel(Map<String, Object> log) {
+    private void addSectionTitle(String title) {
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        titleLabel.setForeground(PRIMARY_COLOR);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(6, 12, 4, 0));
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleLabel.setMaximumSize(new Dimension(370, 32));
+        titleLabel.setPreferredSize(new Dimension(370, 32));
+        recordListPanel.add(titleLabel);
+    }
+
+    private JPanel createExerciseRecordPanel(Map<String, Object> log) {
         JPanel panel = new JPanel(null);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.setMaximumSize(new Dimension(370, 96));
@@ -238,7 +255,7 @@ public class CalendarPanel extends JPanel {
         calorieLabel.setBounds(16, 40, 120, 22);
         panel.add(calorieLabel);
 
-        JLabel timeLabel = new JLabel("저장 시간: " + formatExerciseTime(log.get("exercise_date")));
+        JLabel timeLabel = new JLabel("저장 시간: " + formatTime(log.get("exercise_date")));
         timeLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
         timeLabel.setForeground(Color.DARK_GRAY);
         timeLabel.setBounds(16, 66, 220, 20);
@@ -247,12 +264,55 @@ public class CalendarPanel extends JPanel {
         return panel;
     }
 
-    private String formatExerciseTime(Object value) {
-        if (value instanceof Timestamp) {
-            return new SimpleDateFormat("HH:mm").format((Timestamp) value);
+    private JPanel createMealRecordPanel(Map<String, Object> log) {
+        JPanel panel = new JPanel(null);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setMaximumSize(new Dimension(370, 105));
+        panel.setPreferredSize(new Dimension(370, 105));
+        panel.setBackground(new Color(0xFFF9EE));
+        panel.setBorder(BorderFactory.createLineBorder(new Color(0xE4D7BE)));
+
+        String mealType = (String) log.get("meal_type");
+        if (mealType == null || mealType.trim().isEmpty()) {
+            mealType = "식사 유형 없음";
         }
-        if (value instanceof Date) {
-            return new SimpleDateFormat("HH:mm").format((Date) value);
+
+        String foodNames = (String) log.get("food_names");
+        if (foodNames == null || foodNames.trim().isEmpty()) {
+            foodNames = "담긴 음식 없음";
+        }
+
+        Object caloriesValue = log.get("total_calories");
+        double calories = caloriesValue instanceof Number ? ((Number) caloriesValue).doubleValue() : 0;
+
+        JLabel typeLabel = new JLabel(mealType + " · " + formatTime(log.get("meal_time")));
+        typeLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        typeLabel.setBounds(16, 10, 330, 24);
+        panel.add(typeLabel);
+
+        JLabel foodLabel = new JLabel(foodNames);
+        foodLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        foodLabel.setForeground(Color.DARK_GRAY);
+        foodLabel.setBounds(16, 40, 335, 24);
+        panel.add(foodLabel);
+
+        JLabel calorieLabel = new JLabel(String.format("총 %.0f kcal", calories));
+        calorieLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        calorieLabel.setBounds(16, 70, 180, 22);
+        panel.add(calorieLabel);
+
+        return panel;
+    }
+
+    private String formatTime(Object value) {
+        if (value instanceof Timestamp) {
+            return ((Timestamp) value).toLocalDateTime().toLocalTime().format(TIME_FORMATTER);
+        }
+        if (value instanceof Time) {
+            return ((Time) value).toLocalTime().format(TIME_FORMATTER);
+        }
+        if (value instanceof LocalTime) {
+            return ((LocalTime) value).format(TIME_FORMATTER);
         }
         return "";
     }
