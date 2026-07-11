@@ -117,7 +117,7 @@ public class HomeTargetPanel extends JPanel {
             
             System.out.println("✅ 목표 데이터 로드 성공! 시작 체중: " + startWeight + "kg, 목표 체중: " + targetWeight + "kg, 기간: " + targetDuration + "일");
 
-            SwingUtilities.invokeLater(this::updateUI);
+            SwingUtilities.invokeLater(this::updateTargetUI);
         } else {
             System.err.println("❌ 목표 데이터 로드 실패! userId=" + userId);
             SwingUtilities.invokeLater(this::showNoDataMessage);
@@ -135,7 +135,7 @@ public class HomeTargetPanel extends JPanel {
         }
     }
 
-    public void updateUI() {
+    public void updateTargetUI() {
         if (nowWeightLabel == null || weightChangeLabel == null || targetChangeLabel == null) {
             System.err.println("❌ [오류] UI 요소가 초기화되지 않음! (updateUI 중단)");
             return;
