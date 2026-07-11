@@ -15,12 +15,15 @@ import ui_n_utils.ValidationUtils;
 
 public class FindIdPwPhone extends JPanel implements ActionListener {
     private RoundedComponent findIdButton, phoneTabButton,emailTabButton,sendCodeButton1,sendCodeButton2,  findPwButton;
-    private SmartTextField nameField1,nameField2,idField2,phoneField1,phoneField2, verifyField2;
+    private SmartTextField nameField1,nameField2,idField2,phoneField1,phoneField2;
     private MainFrame mainFrame;
     private UserDAO userDAO;
     private String verifiedId;
     private String verifiedIdName;
     private String verifiedIdPhone;
+    private String verifiedPasswordUserId;
+    private String verifiedPasswordName;
+    private String verifiedPasswordPhone;
 
     public FindIdPwPhone(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
@@ -44,7 +47,7 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         backButton.setBorderPainted(false);
         backButton.setContentAreaFilled(false);
         backButton.setFocusPainted(false);
-        backButton.addActionListener(e -> mainFrame.showPanel("login")); // 🔹 로그인 화면으로 돌아가기
+        backButton.addActionListener(e -> returnToLogin());
         add(backButton);
         
         // 구분선
@@ -122,17 +125,13 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         phoneField2.setBounds(centerX+50, startY + 595, 170, 30);
         add(phoneField2);
 
-        sendCodeButton2 = new RoundedComponent(90, 30, 0, "button","인증 전송",Color.black, Color.black, Color.white, "Inter", Font.BOLD, 15 );
+        sendCodeButton2 = new RoundedComponent(90, 30, 0, "button","사용자 확인",Color.black, Color.black, Color.white, "Inter", Font.BOLD, 13 );
         sendCodeButton2.setBounds(centerX + 230, startY + 595, 90, 30);
         sendCodeButton2.getButton().addActionListener(this);
         
         add(sendCodeButton2);
-        // 인증번호 입력 필드
-        verifyField2 = new SmartTextField("인증번호를 입력해 주세요", 30);
-        verifyField2.setBounds(centerX+50, startY + 635, formWidth, 30);
-        add(verifyField2);
         
-        findPwButton = new RoundedComponent(198, 44, 35, "button", "비밀번호 찾기", new Color(0xC0E993),  new Color(0xC0E993), Color.white, "Inter", Font.BOLD, 15);
+        findPwButton = new RoundedComponent(198, 44, 35, "button", "새 비밀번호 설정", new Color(0xC0E993),  new Color(0xC0E993), Color.white, "Inter", Font.BOLD, 15);
         findPwButton.setBounds(centerX+50, startY + 700, 198, 44);
         findPwButton.getButton().addActionListener(this);
         add(findPwButton);
@@ -153,9 +152,9 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         } else if (e.getSource() == findIdButton.getButton()) {
             showFoundId();
         } else if (e.getSource() == sendCodeButton2.getButton()) {
-            System.out.println("비밀번호 찾기 - 인증번호 전송 클릭!");
+            verifyPasswordOwner();
         } else if (e.getSource() == findPwButton.getButton()) {
-            System.out.println("비밀번호 찾기 버튼 클릭!");
+            resetPassword();
         }
     }
 
@@ -208,6 +207,108 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         verifiedId = null;
         verifiedIdName = null;
         verifiedIdPhone = null;
+    }
+
+    private void verifyPasswordOwner() {
+        String userName = nameField2.getRealText().trim();
+        String userId = idField2.getRealText().trim();
+        String userPhone = phoneField2.getRealText().trim();
+
+        if (!ValidationUtils.isValidName(userName)) {
+            CustomDialog.showDialog(mainFrame, "이름을 올바르게 입력해주세요.", "사용자 확인");
+            clearPasswordVerification();
+            return;
+        }
+        if (userId.isEmpty()) {
+            CustomDialog.showDialog(mainFrame, "아이디를 입력해주세요.", "사용자 확인");
+            clearPasswordVerification();
+            return;
+        }
+        if (!ValidationUtils.isValidPhone(userPhone)) {
+            CustomDialog.showDialog(mainFrame, "휴대폰 번호를 010-1234-5678 형식으로 입력해주세요.", "사용자 확인");
+            clearPasswordVerification();
+            return;
+        }
+        if (!userDAO.verifyUserIdentity(userId, userName, userPhone)) {
+            CustomDialog.showDialog(mainFrame, "입력한 정보와 일치하는 사용자를 찾을 수 없습니다.", "사용자 확인");
+            clearPasswordVerification();
+            return;
+        }
+
+        verifiedPasswordUserId = userId;
+        verifiedPasswordName = userName;
+        verifiedPasswordPhone = userPhone;
+        CustomDialog.showDialog(mainFrame, "사용자 확인이 완료되었습니다.", "사용자 확인");
+    }
+
+    private void resetPassword() {
+        String userName = nameField2.getRealText().trim();
+        String userId = idField2.getRealText().trim();
+        String userPhone = phoneField2.getRealText().trim();
+        if (verifiedPasswordUserId == null
+                || !userId.equals(verifiedPasswordUserId)
+                || !userName.equals(verifiedPasswordName)
+                || !userPhone.equals(verifiedPasswordPhone)) {
+            CustomDialog.showDialog(mainFrame, "이름·아이디·휴대폰 번호로 사용자 확인을 먼저 완료해주세요.", "비밀번호 재설정");
+            clearPasswordVerification();
+            return;
+        }
+
+        while (true) {
+            JPasswordField newPasswordField = new JPasswordField(20);
+            JPasswordField confirmPasswordField = new JPasswordField(20);
+            JPanel resetPanel = new JPanel(new GridLayout(0, 1, 0, 6));
+            resetPanel.add(new JLabel("새 비밀번호"));
+            resetPanel.add(newPasswordField);
+            resetPanel.add(new JLabel("새 비밀번호 확인"));
+            resetPanel.add(confirmPasswordField);
+            resetPanel.add(new JLabel("6~20자, 영문과 특수문자를 함께 사용하세요."));
+
+            int result = JOptionPane.showConfirmDialog(mainFrame, resetPanel,
+                    "새 비밀번호 설정", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (result != JOptionPane.OK_OPTION) {
+                clearPasswordVerification();
+                mainFrame.showPanel("login");
+                return;
+            }
+
+            char[] newPasswordChars = newPasswordField.getPassword();
+            char[] confirmPasswordChars = confirmPasswordField.getPassword();
+            String newPassword = new String(newPasswordChars);
+            String confirmPassword = new String(confirmPasswordChars);
+            java.util.Arrays.fill(newPasswordChars, '\0');
+            java.util.Arrays.fill(confirmPasswordChars, '\0');
+
+            if (!newPassword.equals(confirmPassword)) {
+                CustomDialog.showDialog(mainFrame, "새 비밀번호와 확인값이 일치하지 않습니다.", "비밀번호 재설정");
+                continue;
+            }
+            if (!ValidationUtils.isCreateUserPw(newPassword)) {
+                CustomDialog.showDialog(mainFrame, "비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.", "비밀번호 재설정");
+                continue;
+            }
+            if (!userDAO.updateUserPassword(verifiedPasswordUserId, newPassword)) {
+                CustomDialog.showDialog(mainFrame, "비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.", "비밀번호 재설정");
+                return;
+            }
+
+            CustomDialog.showDialog(mainFrame, "새 비밀번호가 설정되었습니다.", "비밀번호 재설정");
+            clearPasswordVerification();
+            mainFrame.showPanel("login");
+            return;
+        }
+    }
+
+    private void clearPasswordVerification() {
+        verifiedPasswordUserId = null;
+        verifiedPasswordName = null;
+        verifiedPasswordPhone = null;
+    }
+
+    private void returnToLogin() {
+        clearIdVerification();
+        clearPasswordVerification();
+        mainFrame.showPanel("login");
     }
 
 }
