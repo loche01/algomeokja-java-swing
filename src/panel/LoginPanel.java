@@ -85,6 +85,12 @@ public class LoginPanel extends JPanel implements ActionListener {
 		});
 		add(passwordVisibilityButton);
 
+		JLabel passwordRuleLabel = new JLabel("6~20자, 영문과 특수문자를 함께 사용하세요.");
+		passwordRuleLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 11));
+		passwordRuleLabel.setForeground(Color.DARK_GRAY);
+		passwordRuleLabel.setBounds(64, 540, 313, 18);
+		add(passwordRuleLabel);
+
 		// 엔터키 입력 시 로그인 시도 기능 추가
 		// 아이디 필드에 KeyListener 추가
 		if (loginField.getTextField() != null) {
