@@ -104,13 +104,13 @@ public class MainUserPanel extends JPanel {
         userInfoLabel.setBounds(10, 10, 400, 25);
         add(userInfoLabel);
 
-        // ✅ 패널 초기화 후 `showPanel()` 실행 - 항상 일일현황 패널로 시작
-        showPanel("HomeDaily");
-        TabUtil.setSelectedTab("일일 현황");
-        
         // 📌 4. 하단 네비게이션 바 (NavUtil 적용)
         navPanel = NavUtil.createNavigationBar(this, e -> handleNavButtonClick(e));
         add(navPanel);
+
+        // ✅ 패널 및 네비게이션 바 초기화 후 `showPanel()` 실행 - 항상 일일현황 패널로 시작
+        showPanel("HomeDaily");
+        TabUtil.setSelectedTab("일일 현황");
         
         // 초기화 시 네비게이션 바의 홈 버튼 선택
         ui_n_utils.NavUtil.selectHomeButton();
