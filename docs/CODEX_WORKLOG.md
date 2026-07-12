@@ -3,10 +3,10 @@
 ## 현재 상태
 
 - 현재 브랜치: `codex-stabilization`
-- 기준 커밋: `38fc56d`
-- 현재 단계: 6단계 최종 정리 준비
-- 마지막 완료 커밋: `479ca98 수정: 사용자 공지 상세 정보 배치 및 목록 복귀 보정`
-- 다음 작업: 전체 변경 정적 검토, 정상 로그 정리와 README 반영
+- 기준 커밋: `0486460`
+- 현재 단계: 6단계 최종 정리 완료
+- 마지막 완료 기능 커밋: `33a8408 정리: 안정화 작업 정상 로그 정돈`
+- 다음 작업: 최종 병합 준비 보고 후 사용자 지시 대기
 - 사용자 테스트 대기 여부: 아니요
 
 ## 작업별 기록
@@ -234,3 +234,26 @@
 - 정적 검증 완료·실행 검증 보류: 공지가 한 건뿐이어서 사용자 목록 세로 스크롤, 긴 본문 데이터가 없어 본문 줄바꿈·세로 스크롤, 카드 빈 여백 클릭은 실행 검증하지 못했다.
 - 관리자 실행 검증 보류: 관리자 로그인 정보를 사용자가 기억하지 못해 관리자 공지 목록·상세·작성·수정·삭제 UI는 실행하지 않았다. 목록·상세 스크롤, 본문 줄바꿈과 기존 기능 연결은 정적으로 확인했으며 관리자 인증 우회나 비밀번호 조회·출력은 수행하지 않았다.
 - 다음 단계: 6단계 전체 정적 검토, 정상 로그 정리, README와 최종 작업일지 반영
+
+### 2026-07-12 / 6단계 안정화 작업 정상 로그 정돈
+
+- 상태: 정적 검토·기능 커밋 완료
+- 분석 범위: 전체 `src` Java 파일의 `System.out`, `System.err`와 stack trace를 검색하고 `0486460` 이후 안정화 diff에서 추가·삭제된 로그를 대조했다.
+- 수정 파일: `src/DB/BodyInfoDAO.java`, `src/DB/ExerciseLogDAO.java`, `src/DB/GoalDAO.java`, `src/DB/JoinDAO.java`, `src/DB/LoginDAO.java`, `src/DB/NoticeDAO.java`, `src/DB/NoticeFileDAO.java`, `src/model/LoginManager.java`, `src/panel/BodyInfoSetPanel.java`, `src/panel/ExerciseCaloriePanel.java`, `src/panel/ExerciseSearchPanel.java`, `src/panel/FindIdPwEmail.java`, `src/panel/HomeTargetPanel.java`, `src/panel/LoginPanel.java`, `src/panel/MymeGoalPanel.java`, `src/panel/NoticeEditPanel.java`, `src/ui_n_utils/HeaderUtil.java`, `src/ui_n_utils/UserSessionManager.java`
+- 제거 내용: 로그인·회원가입 사용자 ID, 관리자 ID, 신체·목표 체중, 운동 저장 입력값, 공지 제목·본문·작성자·날짜, 검색어, 첨부파일명과 로컬 다운로드 경로를 출력하던 정상·디버그 로그를 제거했다.
+- 오류 로그 처리: 사용자 식별값이 포함된 실패 문구는 기능 단위의 일반 오류 문구로 바꾸고, DAO 실패·예외 stack trace, 세션·패널 초기화 오류와 별도 `TableChecker` 진단 출력은 유지했다.
+- 기능 영향: SQL, 인증 조건, 세션 저장, 화면 전환, 사용자 안내와 DAO 반환 계약은 변경하지 않았다.
+- 검증 결과: `git diff --check` 통과, 개인정보성 정상 출력 정적 검색 통과, JDK 21 전체 `src` 컴파일 통과. 기존 `DBConnectionMgr.finalize()` 제거 예정 경고 1건은 유지된다.
+- 커밋: `33a8408 정리: 안정화 작업 정상 로그 정돈`
+
+### 2026-07-12 / 6단계 통합 안정화 최종 검토
+
+- 상태: 최종 정리 완료, 병합 준비 보고 대기
+- 전체 검토 기준: `0486460..HEAD`의 기능·문서 커밋과 변경 파일을 단계별로 재검토했다.
+- 사용자 검증 완료: 네비게이션 초기화, 음식 검색·상세·중량 조절·담기·식단 저장·홈 복귀, 월 이동·오늘·날짜 선택·선택일 식단과 운동 기록, 로그인 비밀번호 보기·숨김, 아이디 찾기, 본인 확인 후 비밀번호 재설정, 사용자 공지 작성 정보 표시와 목록 복귀가 Eclipse 테스트를 통과했다.
+- 정적 검증만 완료: 사용자 공지 다건 목록 스크롤, 긴 본문 줄바꿈·스크롤, 카드 빈 여백 클릭과 관리자 공지 목록·상세·작성·수정·삭제 UI는 데이터 또는 관리자 로그인 정보 부족으로 실행 검증을 보류한다.
+- README 반영: 사용자 검증을 통과한 안정화 기능을 주요 기능과 복구 내역에 반영하고, 관리자 공지 UI 및 데이터 부족 항목은 실행 미검증으로 명시했다.
+- 후속 작업: 기능이 안정화된 식단 화면의 디자인·편의성·사용자 경험 개선, 공지 다건·긴 본문·카드 여백 실행 확인, 관리자 공지 UI 실행 확인과 `DBConnectionMgr.finalize()` 경고 정리를 유지한다.
+- 최종 검증: 전체 변경 대상 `git diff --check`와 JDK 21 전체 `src` 정적 컴파일을 통과했다. 컴파일 오류는 없고 기존 제거 예정 API 경고 1건만 남는다.
+- 작업 제한 준수: DB 스키마·SQL·실제 DB를 변경하거나 실행하지 않았고, `src/db.properties`, 기존 stash, 관리자 인증 정보에 접근하지 않았다. push·merge·rebase·reset·clean도 실행하지 않았다.
+- 병합 준비 상태: `codex-stabilization`에 기능별 한국어 커밋과 별도 작업일지 커밋이 정리되어 있다. `codex-audit`와 `main` 병합은 수행하지 않고 최종 보고 후 중단한다.
