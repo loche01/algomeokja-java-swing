@@ -513,7 +513,9 @@ public class FoodListPanel extends JPanel {
         emptyPanel.setBackground(Color.WHITE);
         emptyPanel.setBorder(BorderFactory.createLineBorder(new Color(0xD8E6D2), 1, true));
 
-        JLabel messageLabel = new JLabel(message, SwingConstants.CENTER);
+        JLabel messageLabel = new JLabel(
+                "<html><div style='text-align:center;width:340px'>" + message + "</div></html>",
+                SwingConstants.CENTER);
         messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
         messageLabel.setForeground(new Color(0x666666));
         emptyPanel.add(messageLabel, BorderLayout.CENTER);
