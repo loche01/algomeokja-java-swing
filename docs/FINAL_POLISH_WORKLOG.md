@@ -5,10 +5,10 @@
 - 작업 브랜치: `codex-final-polish`
 - 기준 브랜치: `codex-audit`
 - 기준 커밋: `4089009`
-- 현재 단계: 체크포인트 3 로그인 전 세션 없음 정상 로그 정리 완료
-- 마지막 기능 커밋: `5a61d94 정리: 로그인 전 세션 없음 정상 로그 제거`
-- 다음 작업: `DBConnectionMgr.finalize()` 경고 정리
-- 사용자 Eclipse 검증 대기: 아니요
+- 현재 단계: 체크포인트 3 정적 작업 완료 및 Eclipse 검증 대기
+- 마지막 기능 커밋: `587750d 정리: DBConnectionMgr finalize 의존 제거`
+- 다음 작업: 로그인 전 콘솔과 기존 DB 기능 Eclipse 재검증
+- 사용자 Eclipse 검증 대기: 예
 
 ## 작업 기록
 
@@ -150,3 +150,15 @@
 - 호출 범위: `LoginManager`, `UserSessionManager`, 로그인 인증, DAO 공개 메서드와 SQL은 변경하지 않았다. 세션이 없을 때 사용자 전용 DAO가 호출되지 않는 기존 구조도 유지된다.
 - 검증 결과: 대상 문구 재검색, 호출 흐름과 diff 직접 검토, `git diff --check`, JDK 21 전체 `src` 컴파일을 수행했다. 컴파일은 통과했고 기존 `DBConnectionMgr.finalize()` 제거 예정 경고 1건만 남았다.
 - 커밋: `5a61d94 정리: 로그인 전 세션 없음 정상 로그 제거`
+
+### 2026-07-12 / DB 연결 관리자 finalize 의존 제거
+
+- 상태: 기능 커밋 및 정적 검증 완료, 체크포인트 3 Eclipse 검증 대기
+- 기존 역할: `finalize()`가 호출되면 풀에 들어 있는 사용 중·미사용 커넥션을 모두 닫고 목록을 비우도록 구현돼 있었다.
+- 호출 분석: `DBConnectionMgr`는 정적 싱글톤 참조로 앱 수명 동안 유지되며 프로젝트 안에서 `finalize()`를 직접 호출하는 코드는 없다. JVM의 비결정적인 객체 소멸 시점에만 기대하는 종료 정리였으므로 정상 DAO 반환 흐름에는 관여하지 않았다.
+- 제거 방식: 제거 예정 API인 `finalize()` 재정의만 삭제했다. 별도 `Cleaner`나 `AutoCloseable` 수명 구조는 추가하지 않았다.
+- 유지 경로: DAO가 결과 집합·명령문을 닫고 커넥션을 풀에 반환하는 `freeConnection(...)`, 개별 커넥션을 닫는 `removeConnection(...)`, 미사용 커넥션을 해제하는 `releaseFreeConnections()`와 `getConnection()` 계약은 변경하지 않았다.
+- 검증 결과: 전체 Java 소스에서 `finalize()` 참조가 없어졌고 `git diff --check`와 JDK 21 전체 `src` 컴파일을 통과했다. 제거 예정 `finalize()` 경고는 사라졌다. `-Xlint:deprecation`에서는 기존 `Class.newInstance()` 사용 경고 1건과 raw `Vector`의 unchecked 안내가 별도 잔여 항목으로 확인됐다.
+- 제한 준수: DAO·SQL·스키마를 변경하지 않았고 DB 접속이나 SQL 실행 없이 정적으로 검증했다.
+- 커밋: `587750d 정리: DBConnectionMgr finalize 의존 제거`
+- 사용자 확인 필요: 앱 시작부터 로그인 화면 대기 중 세션 없음 문구가 반복되지 않는지, 일반 사용자 로그인 후 일일 현황·목표 달성 조회와 기존 주요 DB 기능이 정상인지 확인한다.
