@@ -64,15 +64,19 @@ public class LoginPanel extends JPanel implements ActionListener {
 
 		JPasswordField passwordInput = (JPasswordField) passwordField.getComponent();
 		char defaultEchoChar = passwordInput.getEchoChar();
-		passwordInput.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 58));
+		passwordInput.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		JButton passwordVisibilityButton = new JButton("보기");
 		passwordVisibilityButton.setFont(new Font("Malgun Gothic", Font.BOLD, 11));
 		passwordVisibilityButton.setForeground(new Color(0x4F6F46));
-		passwordVisibilityButton.setBounds(325, 495, 52, 40);
+		passwordVisibilityButton.setBackground(Color.WHITE);
+		passwordVisibilityButton.setBounds(382, 495, 50, 40);
 		passwordVisibilityButton.setFocusPainted(false);
-		passwordVisibilityButton.setBorderPainted(false);
-		passwordVisibilityButton.setContentAreaFilled(false);
+		passwordVisibilityButton.setBorder(BorderFactory.createLineBorder(new Color(0x609056), 1, true));
+		passwordVisibilityButton.setContentAreaFilled(true);
+		passwordVisibilityButton.setOpaque(true);
+		passwordVisibilityButton.setVisible(true);
+		passwordVisibilityButton.setEnabled(true);
 		passwordVisibilityButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		passwordVisibilityButton.addActionListener(e -> {
 			int caretPosition = passwordInput.getCaretPosition();
