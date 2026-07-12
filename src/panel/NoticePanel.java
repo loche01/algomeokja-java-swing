@@ -19,6 +19,7 @@ public class NoticePanel extends JPanel {
 
     private JPanel headerPanel; // ✅ 헤더 패널을 따로 관리
     private JPanel noticeListPanel;
+    private JScrollPane noticeScrollPane;
 
     public NoticePanel(MainUserPanel mainUserPanel) {
         this.noticeDAO = new NoticeDAO(); // NoticeDAO 객체 생성
@@ -91,7 +92,7 @@ public class NoticePanel extends JPanel {
         noticeListPanel.setLayout(new BoxLayout(noticeListPanel, BoxLayout.Y_AXIS));
         noticeListPanel.setBackground(Color.WHITE);
 
-        JScrollPane noticeScrollPane = new JScrollPane(noticeListPanel);
+        noticeScrollPane = new JScrollPane(noticeListPanel);
         noticeScrollPane.setBounds(10, 90, 380, 550);
         noticeScrollPane.setBorder(BorderFactory.createEmptyBorder());
         noticeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -105,6 +106,7 @@ public class NoticePanel extends JPanel {
 
     // 🔹 공지사항 목록 불러오기 (DB 연동)
     private void loadNotices(MainUserPanel mainUserPanel) {
+        int scrollPosition = noticeScrollPane.getVerticalScrollBar().getValue();
         List<NoticeBean> notices = noticeDAO.getAllNotices();
         noticeListPanel.removeAll();
 
@@ -125,6 +127,7 @@ public class NoticePanel extends JPanel {
 
         noticeListPanel.revalidate();
         noticeListPanel.repaint();
+        SwingUtilities.invokeLater(() -> noticeScrollPane.getVerticalScrollBar().setValue(scrollPosition));
     }
 
     private JPanel createNoticeCard(NoticeBean notice, MainUserPanel mainUserPanel) {
