@@ -3,8 +3,8 @@ package DB;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import model.UserBean; 
-import ui_n_utils.UserSessionManager;
+import model.UserBean;
+import security.PasswordHasher;
 
 
 public class LoginDAO {
@@ -19,208 +19,144 @@ public class LoginDAO {
         }
     }
 
- // 🔹 로그인 검증 메서드 (관리자 & 일반 사용자 구분)
-    public boolean checkLogin(String userId, String userPwd) {
+    // 사용자 또는 관리자 정보 조회 (관리자 인증 실패 시 일반 사용자 확인)
+    public UserBean getUserInfo(String userId, char[] rawPassword) {
+        UserBean admin = getAdminInfo(userId, rawPassword);
+        if (admin != null) {
+            return admin;
+        }
+
+        return getRegularUserInfo(userId, rawPassword);
+    }
+
+    private UserBean getAdminInfo(String adminId, char[] rawPassword) {
         Connection conn = null;
-        boolean loginSuccess = false;
 
         try {
             conn = pool.getConnection();
-
-            // 1️⃣ 관리자(admin) 테이블에서 조회
-            String adminQuery = "SELECT * FROM admin WHERE admin_id = ? AND admin_pwd = ?";
-            try (PreparedStatement pstmt = conn.prepareStatement(adminQuery)) {
-                pstmt.setString(1, userId);
-                pstmt.setString(2, userPwd);
+            String sql = "SELECT admin_id, admin_pwd FROM admin WHERE admin_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, adminId);
                 try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        loginSuccess = true;
-                        UserSessionManager.getInstance().setAdminSession(userId);
-                        return loginSuccess;
+                    if (!rs.next()) {
+                        return null;
                     }
+
+                    String storedPassword = rs.getString("admin_pwd");
+                    if (!matchesStoredPassword(rawPassword, storedPassword)) {
+                        return null;
+                    }
+
+                    upgradeLegacyPassword("admin", "admin_id", "admin_pwd",
+                            adminId, rawPassword, storedPassword);
+
+                    UserBean admin = new UserBean();
+                    admin.setUser_id(rs.getString("admin_id"));
+                    admin.setUser_name("관리자");
+                    admin.setUser_role("ADMIN");
+                    return admin;
                 }
             }
-
-            // 2️⃣ 일반 사용자(user) 테이블에서 조회
-            String userQuery = "SELECT * FROM user WHERE user_id = ? AND user_pwd = ?";
-            try (PreparedStatement pstmt = conn.prepareStatement(userQuery)) {
-                pstmt.setString(1, userId);
-                pstmt.setString(2, userPwd);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        loginSuccess = true;
-
-                        // ✅ 새로운 로그인 유저 정보 저장
-                        UserBean user = new UserBean();
-                        user.setUser_id(rs.getString("user_id"));
-                        user.setUser_name(rs.getString("user_name"));
-                        user.setUser_email(rs.getString("user_email"));
-                        user.setUser_phone(rs.getString("user_phone"));
-
-                        // ✅ 세션에 저장
-                        UserSessionManager.getInstance().setCurrentUser(user);
-
-                        // 🔹 세션 유지 확인
-                        UserBean sessionUser = UserSessionManager.getInstance().getCurrentUser();
-                        if (sessionUser == null || sessionUser.getUser_id() == null) {
-                            System.err.println("❌ 로그인 직후 세션 정보가 없습니다.");
-                        }
-                    }
-                }
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             pool.freeConnection(conn);
         }
-        return loginSuccess;
+        return null;
     }
 
-    // ✅ 회원 정보 업데이트
-    public boolean updateUserInfo(UserBean user) {
-        UserBean sessionUser = UserSessionManager.getInstance().getCurrentUser();
-        if (sessionUser == null || sessionUser.getUser_id() == null) {
-            System.err.println("❌ 회원 정보 수정에 필요한 로그인 정보가 없습니다.");
+    private UserBean getRegularUserInfo(String userId, char[] rawPassword) {
+        Connection conn = null;
+
+        try {
+            conn = pool.getConnection();
+            String sql = "SELECT user_id, user_pwd, user_name, user_phone, user_email, user_createdtime "
+                    + "FROM user WHERE user_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, userId);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (!rs.next()) {
+                        return null;
+                    }
+
+                    String storedPassword = rs.getString("user_pwd");
+                    if (!matchesStoredPassword(rawPassword, storedPassword)) {
+                        return null;
+                    }
+
+                    upgradeLegacyPassword("user", "user_id", "user_pwd",
+                            userId, rawPassword, storedPassword);
+
+                    UserBean user = new UserBean();
+                    user.setUser_id(rs.getString("user_id"));
+                    user.setUser_name(rs.getString("user_name"));
+                    user.setUser_phone(rs.getString("user_phone"));
+                    user.setUser_email(rs.getString("user_email"));
+                    user.setUser_createdtime(rs.getTimestamp("user_createdtime"));
+                    user.setUser_role("USER");
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            pool.freeConnection(conn);
+        }
+        return null;
+    }
+
+    private boolean matchesStoredPassword(char[] rawPassword, String storedPassword) {
+        if (rawPassword == null || storedPassword == null) {
             return false;
         }
+        if (PasswordHasher.hasRecognizedPrefix(storedPassword)) {
+            return PasswordHasher.verify(rawPassword, storedPassword);
+        }
+
+        int difference = rawPassword.length ^ storedPassword.length();
+        int length = Math.max(rawPassword.length, storedPassword.length());
+        for (int i = 0; i < length; i++) {
+            char rawCharacter = i < rawPassword.length ? rawPassword[i] : 0;
+            char storedCharacter = i < storedPassword.length() ? storedPassword.charAt(i) : 0;
+            difference |= rawCharacter ^ storedCharacter;
+        }
+        return difference == 0;
+    }
+
+    private void upgradeLegacyPassword(String tableName, String idColumn, String passwordColumn,
+            String accountId, char[] rawPassword, String storedPassword) {
+        boolean legacyPassword = !PasswordHasher.hasRecognizedPrefix(storedPassword);
+        boolean outdatedHash = PasswordHasher.isEncoded(storedPassword)
+                && PasswordHasher.needsUpgrade(storedPassword);
+        if (!legacyPassword && !outdatedHash) {
+            return;
+        }
+
+        String encodedPassword;
+        try {
+            encodedPassword = PasswordHasher.hash(rawPassword);
+        } catch (RuntimeException e) {
+            System.err.println("비밀번호 해시 점진 전환을 준비하지 못했습니다. 다음 로그인에서 다시 시도합니다.");
+            return;
+        }
 
         Connection conn = null;
-        boolean success = false;
-
         try {
             conn = pool.getConnection();
-            String sql = "UPDATE user SET user_name = ?, user_email = ?, user_phone = ?, user_pwd = ? WHERE user_id = ?";
+            String sql = "UPDATE " + tableName + " SET " + passwordColumn + " = ? WHERE "
+                    + idColumn + " = ? AND " + passwordColumn + " = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, user.getUser_name());
-                pstmt.setString(2, user.getUser_email());
-                pstmt.setString(3, user.getUser_phone());
-                pstmt.setString(4, user.getUser_pwd());
-                pstmt.setString(5, user.getUser_id());
-
-                int rows = pstmt.executeUpdate();
-                if (rows > 0) {
-                    success = true;
-
-                    // ✅ 최신 데이터 가져와서 세션에 반영
-                    UserBean updatedUser = getUserById(user.getUser_id());
-                    if (updatedUser != null) {
-                        UserSessionManager.getInstance().setCurrentUser(updatedUser);
-                    } else {
-                        System.err.println("❌ 회원 정보 수정 후 세션 갱신에 실패했습니다.");
-                    }
-                } else {
-                    System.err.println("❌ 수정할 회원 정보를 찾을 수 없습니다.");
+                pstmt.setString(1, encodedPassword);
+                pstmt.setString(2, accountId);
+                pstmt.setString(3, storedPassword);
+                if (pstmt.executeUpdate() != 1) {
+                    System.err.println("비밀번호 해시 점진 전환을 완료하지 못했습니다. 다음 로그인에서 다시 시도합니다.");
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("비밀번호 해시 점진 전환 중 오류가 발생했습니다. 다음 로그인에서 다시 시도합니다.");
         } finally {
             pool.freeConnection(conn);
         }
-        return success;
     }
-
-    // ✅ 회원 정보 조회 (보안 강화: 비밀번호 제외)
-    public UserBean getUserById(String userId) {
-        Connection conn = null;
-        UserBean user = null;
-
-        try {
-            conn = pool.getConnection();
-            String sql = "SELECT * FROM user WHERE user_id = ?";
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, userId);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next()) {
-                        user = new UserBean();
-                        user.setUser_id(rs.getString("user_id"));
-                        user.setUser_name(rs.getString("user_name"));
-                        user.setUser_email(rs.getString("user_email"));
-                        user.setUser_phone(rs.getString("user_phone"));
-                        // 🔹 비밀번호는 보안상 저장하지 않음
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            pool.freeConnection(conn);
-        }
-        return user;
-    }
-
-    // 관리자 정보 조회 메서드 추가
-    public UserBean getAdminInfo(String adminId, String adminPwd) {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        UserBean admin = null;
-
-        try {
-            conn = pool.getConnection();
-            String sql = "SELECT * FROM admin WHERE admin_id = ? AND admin_pwd = ?";
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, adminId);
-            pstmt.setString(2, adminPwd);
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                // 관리자 로그인 성공 시, UserBean 객체 생성 및 정보 담기
-                admin = new UserBean();
-                admin.setUser_id(rs.getString("admin_id"));
-                admin.setUser_pwd(rs.getString("admin_pwd"));
-                admin.setUser_name("관리자"); // 관리자 이름 설정
-                admin.setUser_role("ADMIN"); // 관리자 역할 설정
-                
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            pool.freeConnection(conn, pstmt, rs);
-        }
-        return admin; // 없으면 null
-    }
-
-    // 사용자 또는 관리자 정보 조회 (통합 메서드)
-    public UserBean getUserInfo(String userId, String userPwd) {
-        // 먼저 관리자 테이블에서 조회
-        UserBean admin = getAdminInfo(userId, userPwd);
-        if (admin != null) {
-            return admin; // 관리자 정보 반환
-        }
-        
-        // 관리자가 아니면 일반 사용자 테이블에서 조회
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        UserBean user = null;
-
-        try {
-            conn = pool.getConnection();
-            String sql = "SELECT * FROM user WHERE user_id = ? AND user_pwd = ?";
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, userId);
-            pstmt.setString(2, userPwd);
-            rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                // 로그인 성공 시, UserBean 객체 생성 및 정보 담기
-                user = new UserBean();
-                user.setUser_id(rs.getString("user_id"));
-                user.setUser_pwd(rs.getString("user_pwd"));
-                user.setUser_name(rs.getString("user_name"));
-                user.setUser_phone(rs.getString("user_phone"));
-                user.setUser_email(rs.getString("user_email"));
-                user.setUser_createdtime(rs.getTimestamp("user_createdtime"));
-                user.setUser_role("USER"); // 일반 사용자 역할 설정
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            pool.freeConnection(conn, pstmt, rs);
-        }
-        return user; // 없으면 null
-    }
-
 }
