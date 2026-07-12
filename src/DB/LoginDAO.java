@@ -36,7 +36,6 @@ public class LoginDAO {
                     if (rs.next()) {
                         loginSuccess = true;
                         UserSessionManager.getInstance().setAdminSession(userId);
-                        System.out.println("✅ 관리자 로그인 성공! ID: " + userId);
                         return loginSuccess;
                     }
                 }
@@ -61,17 +60,11 @@ public class LoginDAO {
                         // ✅ 세션에 저장
                         UserSessionManager.getInstance().setCurrentUser(user);
 
-                        System.out.println("✅ 로그인 성공! 세션 저장된 유저: " + user.getUser_id());
-
                         // 🔹 세션 유지 확인
                         UserBean sessionUser = UserSessionManager.getInstance().getCurrentUser();
                         if (sessionUser == null || sessionUser.getUser_id() == null) {
-                            System.out.println("❌ [UserSessionManager] 로그인 직후에도 세션 정보가 없습니다!");
-                        } else {
-                            System.out.println("✅ [UserSessionManager] 로그인 후 세션 유지 확인: " + sessionUser.getUser_id());
+                            System.err.println("❌ 로그인 직후 세션 정보가 없습니다.");
                         }
-                    } else {
-                        System.out.println("❌ 로그인 실패! 아이디 또는 비밀번호가 일치하지 않습니다.");
                     }
                 }
             }
@@ -88,11 +81,9 @@ public class LoginDAO {
     public boolean updateUserInfo(UserBean user) {
         UserBean sessionUser = UserSessionManager.getInstance().getCurrentUser();
         if (sessionUser == null || sessionUser.getUser_id() == null) {
-            System.out.println("❌ [UserSessionManager] 패널 전환 후에도 로그인 정보가 없습니다!");
+            System.err.println("❌ 회원 정보 수정에 필요한 로그인 정보가 없습니다.");
             return false;
         }
-
-        System.out.println("✅ [UserSessionManager] 패널 전환 후에도 로그인 정보 유지: " + sessionUser.getUser_id());
 
         Connection conn = null;
         boolean success = false;
@@ -110,18 +101,16 @@ public class LoginDAO {
                 int rows = pstmt.executeUpdate();
                 if (rows > 0) {
                     success = true;
-                    System.out.println("✅ 회원 정보 수정 완료! userId: " + user.getUser_id());
 
                     // ✅ 최신 데이터 가져와서 세션에 반영
                     UserBean updatedUser = getUserById(user.getUser_id());
                     if (updatedUser != null) {
                         UserSessionManager.getInstance().setCurrentUser(updatedUser);
-                        System.out.println("✅ 세션 정보 갱신 완료! userId: " + updatedUser.getUser_id());
                     } else {
-                        System.out.println("❌ 회원 정보 수정은 성공했지만 세션 갱신 실패!");
+                        System.err.println("❌ 회원 정보 수정 후 세션 갱신에 실패했습니다.");
                     }
                 } else {
-                    System.out.println("❌ 회원 정보 업데이트 실패! userId: " + user.getUser_id());
+                    System.err.println("❌ 수정할 회원 정보를 찾을 수 없습니다.");
                 }
             }
         } catch (Exception e) {
@@ -184,7 +173,6 @@ public class LoginDAO {
                 admin.setUser_name("관리자"); // 관리자 이름 설정
                 admin.setUser_role("ADMIN"); // 관리자 역할 설정
                 
-                System.out.println("✅ 관리자 정보 조회 성공: " + admin.getUser_id());
             }
         } catch (Exception e) {
             e.printStackTrace();

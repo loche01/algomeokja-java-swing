@@ -36,7 +36,6 @@ public class UserSessionManager {
         currentUser.setUser_name("관리자"); // 관리자 이름 설정
         currentUser.setUser_role("ADMIN"); // 관리자 역할 설정
         isAdmin = true;  // ✅ 관리자 로그인 시 플래그 설정
-        System.out.println("✅ [UserSessionManager] 관리자 로그인 성공: " + adminId);
     }
 
     // 🔹 현재 로그인한 사용자 가져오기
@@ -59,7 +58,6 @@ public class UserSessionManager {
     
     // 🔹 세션 초기화 (로그아웃 시 사용)
     public void clearSession() {
-        System.out.println("🔄 [UserSessionManager] 로그아웃 완료 - 세션 초기화");
         currentUser = null;
         isAdmin = false;
     }

@@ -106,7 +106,6 @@ public class HomeTargetPanel extends JPanel {
         }
 
         String userId = UserSessionManager.getInstance().getCurrentUser().getUser_id();
-        System.out.println("✅ 목표 데이터 로드 시도: userId=" + userId);
 
         UserGoal goal = goalDAO.getUserGoal(userId);
 
@@ -115,11 +114,9 @@ public class HomeTargetPanel extends JPanel {
             this.targetWeight = goal.getTargetWeight().intValue();
             this.targetDuration = goal.getTargetDuration();
             
-            System.out.println("✅ 목표 데이터 로드 성공! 시작 체중: " + startWeight + "kg, 목표 체중: " + targetWeight + "kg, 기간: " + targetDuration + "일");
-
             SwingUtilities.invokeLater(this::updateTargetUI);
         } else {
-            System.err.println("❌ 목표 데이터 로드 실패! userId=" + userId);
+            System.err.println("❌ 목표 데이터를 불러오지 못했습니다.");
             SwingUtilities.invokeLater(this::showNoDataMessage);
         }
     }

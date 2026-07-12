@@ -47,7 +47,6 @@ public class ExerciseLogDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isSaved = true;
-                System.out.println("✅ 운동 로그 저장 완료! 사용자 ID: " + userId + ", 운동 코드: " + exerciseCode);
             }
 
         } catch (SQLException e) {

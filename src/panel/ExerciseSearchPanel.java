@@ -176,10 +176,6 @@ public class ExerciseSearchPanel extends JPanel {
     
     // 검색 기능 메서드
     private void performSearch(String keyword) {
-        if (mainUserPanel != null) {
-            // 검색 결과 패널을 보여주는 로직 (필요에 따라 구현)
-            // mainUserPanel.showSearchResults(keyword);
-            System.out.println("검색어: " + keyword);
-        }
+        // 검색 결과 화면 연결 전까지 입력값을 콘솔에 출력하지 않는다.
     }
 }

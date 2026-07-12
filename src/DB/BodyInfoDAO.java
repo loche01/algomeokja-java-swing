@@ -60,7 +60,7 @@ public class BodyInfoDAO {
         try {
             // ✅ `user_id` 존재 여부 확인
             if (!userExists(userId)) {
-                System.err.println("❌ 오류: user_id '" + userId + "'가 user 테이블에 존재하지 않습니다.");
+                System.err.println("❌ 신체 정보를 저장할 사용자를 찾을 수 없습니다.");
                 return false;
             }
 
@@ -78,13 +78,12 @@ public class BodyInfoDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isSaved = true;
-                System.out.println("✅ 신체 정보 저장 완료! userId: " + userId);
             }
 
   
 
         } catch (SQLException e) {
-            System.err.println("❌ SQL 실행 중 오류 발생! userId: " + userId);
+            System.err.println("❌ 신체 정보 저장 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } catch (Exception e) {  // ✅ 예외 처리 추가
             e.printStackTrace();

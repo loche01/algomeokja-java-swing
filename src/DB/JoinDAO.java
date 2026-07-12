@@ -45,7 +45,6 @@ public class JoinDAO {
             
             if (result > 0) { // ✅ 회원가입 성공 시
                 UserSessionManager.getInstance().setCurrentUser(user); // ✅ 세션에 저장
-                System.out.println("✅ 회원가입 성공! 현재 로그인한 유저: " + user.getUser_id());
                 return true;
             }
             return false;

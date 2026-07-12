@@ -28,7 +28,6 @@ public class LoginManager {
             if (user.isAdmin()) {
                 // 관리자인 경우
                 ui_n_utils.UserSessionManager.getInstance().setAdminSession(user.getUser_id());
-                System.out.println("✅ [LoginManager] 관리자 정보 설정 완료: " + user.getUser_id());
             } else {
                 // 일반 사용자인 경우
                 ui_n_utils.UserSessionManager.getInstance().setCurrentUser(user);
@@ -68,4 +67,4 @@ public class LoginManager {
         UserBean user = getCurrentUser();
         return user != null && user.isAdmin();
     }
-} 
+}
