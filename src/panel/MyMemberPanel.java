@@ -1,20 +1,22 @@
 package panel;
 
 import DB.UserDAO;
+import DB.UserDAO.UpdateUserResult;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
 import javax.swing.*;
 import main.MainUserPanel;
 import model.LoginManager;
 import model.UserBean;
 import ui_n_utils.RoundedComponent;
+import ui_n_utils.ValidationUtils;
 
 public class MyMemberPanel extends JPanel implements ActionListener {
 	private MainUserPanel mainUserPanel;
-    private final RoundedComponent mainPanel, finishButton, backButton, a;
+    private final RoundedComponent mainPanel, finishButton, backButton;
     private RoundedComponent[] fields;
     private UserDAO userDAO;
-    private String oldPassword;
 
     public MyMemberPanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
@@ -45,22 +47,24 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         // 텍스트 필드 생성
        
         // 📌 회원 정보 라벨 & 입력 필드 배치 조정
-        String[] memberInfo = {"이름", "이메일", "전화번호", "ID", "비밀번호"};
-        fields = new RoundedComponent[5];
+        String[] memberInfo = {"이름", "이메일", "전화번호", "ID",
+                "현재 비밀번호", "새 비밀번호", "새 비밀번호 확인"};
+        fields = new RoundedComponent[memberInfo.length];
 
-        int labelStartY = 180; // 📌 라벨 시작 위치
-        int fieldStartY = 180; // 📌 입력 필드 시작 위치
-        int spacing = 65; // 📌 간격
+        int labelStartY = 155;
+        int fieldStartY = 150;
+        int spacing = 55;
 
         for (int i = 0; i < memberInfo.length; i++) {
             JLabel label = new JLabel(memberInfo[i]);
-            label.setFont(new Font("맑은 고딕", Font.BOLD, 17));
-            label.setBounds(65, labelStartY + (i * spacing), 100, 25);
+            label.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+            label.setBounds(35, labelStartY + (i * spacing), 135, 25);
             mainPanel.add(label);
 
-            fields[i] = new RoundedComponent(140, 32, 7, "textField", " ", 
+            String fieldType = i >= 4 ? "password" : "textField";
+            fields[i] = new RoundedComponent(180, 36, 7, fieldType, "",
                     Color.lightGray, new Color(0xD9D9D9), Color.black, "맑은 고딕", Font.BOLD, 12);
-            fields[i].setBounds(180, fieldStartY + (i * spacing), 140, 35);
+            fields[i].setBounds(170, fieldStartY + (i * spacing), 180, 36);
             mainPanel.add(fields[i]);
         }
         
@@ -68,19 +72,17 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         fields[3].getTextField().setEditable(false);
         fields[3].getTextField().setBackground(new Color(0xCCCCCC));
         
-        // 완료 버튼 생성
+        JLabel passwordRuleLabel = new JLabel("새 비밀번호: 6~20자, 영문과 특수문자 포함");
+        passwordRuleLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 11));
+        passwordRuleLabel.setForeground(Color.DARK_GRAY);
+        passwordRuleLabel.setBounds(65, 535, 280, 20);
+        mainPanel.add(passwordRuleLabel);
+
         finishButton = new RoundedComponent(100, 40, 10, "button", "완료", 
                 Color.BLACK, Color.BLACK, Color.WHITE, "맑은고딕", Font.BOLD, 14);
-        finishButton.setBounds(140, 530, 100, 40);
+        finishButton.setBounds(140, 565, 100, 40);
         finishButton.getButton().addActionListener(this);
         mainPanel.add(finishButton);
-
-        // 완료 버튼 생성
-        a = new RoundedComponent(0, 0, 10, "button", "", 
-                Color.BLACK, Color.BLACK, Color.WHITE, "맑은고딕", Font.BOLD, 14);
-        a.setBounds(140, 530, 100, 40);
-        a.getButton().addActionListener(this);
-        mainPanel.add(a);
     }
     
     // 패널이 표시될 때 사용자 정보 로드
@@ -100,10 +102,9 @@ public class MyMemberPanel extends JPanel implements ActionListener {
             fields[1].getTextField().setText(user.getUser_email());
             fields[2].getTextField().setText(user.getUser_phone());
             fields[3].getTextField().setText(user.getUser_id());
-            fields[4].getTextField().setText("");  // 비밀번호는 보안상 표시하지 않음
-            
-            // 현재 비밀번호 저장
-            oldPassword = user.getUser_pwd();
+            fields[4].setText("");
+            fields[5].setText("");
+            fields[6].setText("");
         }
     }
     
@@ -119,24 +120,60 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         
         UserBean user = LoginManager.getInstance().getCurrentUser();
         if (user != null) {
-            // 사용자 정보 업데이트
-            user.setUser_name(fields[0].getTextField().getText().trim());
-            user.setUser_email(fields[1].getTextField().getText().trim());
-            user.setUser_phone(fields[2].getTextField().getText().trim());
-            
-            // 비밀번호가 입력된 경우에만 업데이트
-            String newPassword = fields[4].getTextField().getText().trim();
-            if (!newPassword.isEmpty()) {
-                user.setUser_pwd(newPassword);
-            }
-            
-            // DB 업데이트
-            boolean success = userDAO.updateUser(user, oldPassword);
-            if (success) {
+            char[] currentPassword = ((JPasswordField) fields[4].getComponent()).getPassword();
+            char[] newPassword = ((JPasswordField) fields[5].getComponent()).getPassword();
+            char[] confirmPassword = ((JPasswordField) fields[6].getComponent()).getPassword();
+
+            try {
+                boolean passwordChangeRequested = newPassword.length > 0 || confirmPassword.length > 0;
+                if (passwordChangeRequested && currentPassword.length == 0) {
+                    JOptionPane.showMessageDialog(this, "새 비밀번호 변경 시 현재 비밀번호를 입력해주세요.",
+                            "입력 오류", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (passwordChangeRequested && !Arrays.equals(newPassword, confirmPassword)) {
+                    JOptionPane.showMessageDialog(this, "새 비밀번호와 확인값이 일치하지 않습니다.",
+                            "입력 오류", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (passwordChangeRequested && !ValidationUtils.isCreateUserPw(newPassword)) {
+                    JOptionPane.showMessageDialog(this,
+                            "새 비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.",
+                            "입력 오류", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                UserBean updatedUser = new UserBean();
+                updatedUser.setUser_id(user.getUser_id());
+                updatedUser.setUser_name(fields[0].getTextField().getText().trim());
+                updatedUser.setUser_email(fields[1].getTextField().getText().trim());
+                updatedUser.setUser_phone(fields[2].getTextField().getText().trim());
+
+                UpdateUserResult result = userDAO.updateUserWithOptionalRawPassword(
+                        updatedUser, currentPassword, passwordChangeRequested ? newPassword : null);
+                if (result == UpdateUserResult.CURRENT_PASSWORD_MISMATCH) {
+                    JOptionPane.showMessageDialog(this, "현재 비밀번호가 올바르지 않습니다.",
+                            "업데이트 실패", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (result != UpdateUserResult.SUCCESS) {
+                    JOptionPane.showMessageDialog(this, "회원 정보 업데이트에 실패했습니다.",
+                            "업데이트 실패", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                user.setUser_name(updatedUser.getUser_name());
+                user.setUser_email(updatedUser.getUser_email());
+                user.setUser_phone(updatedUser.getUser_phone());
                 JOptionPane.showMessageDialog(this, "회원 정보가 성공적으로 업데이트되었습니다.", "업데이트 성공", JOptionPane.INFORMATION_MESSAGE);
                 mainUserPanel.showPanel("MyPage");
-            } else {
-                JOptionPane.showMessageDialog(this, "회원 정보 업데이트에 실패했습니다.", "업데이트 실패", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                Arrays.fill(currentPassword, '\0');
+                Arrays.fill(newPassword, '\0');
+                Arrays.fill(confirmPassword, '\0');
+                fields[4].setText("");
+                fields[5].setText("");
+                fields[6].setText("");
             }
         }
     }
