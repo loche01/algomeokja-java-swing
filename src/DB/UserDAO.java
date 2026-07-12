@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import model.UserBean;
+import security.PasswordHasher;
 
 public class UserDAO {
     private DBConnectionMgr pool;
@@ -163,15 +164,23 @@ public class UserDAO {
         }
     }
 
-    public boolean updateUserPassword(String userId, String newPassword) {
+    public boolean updateUserPasswordFromRaw(String userId, char[] rawPassword) {
         Connection con = null;
         PreparedStatement pstmt = null;
+
+        String encodedPassword;
+        try {
+            encodedPassword = PasswordHasher.hash(rawPassword);
+        } catch (RuntimeException e) {
+            System.err.println("새 비밀번호를 안전하게 처리하지 못했습니다.");
+            return false;
+        }
 
         try {
             con = pool.getConnection();
             String sql = "UPDATE user SET user_pwd=? WHERE user_id=?";
             pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, newPassword);
+            pstmt.setString(1, encodedPassword);
             pstmt.setString(2, userId);
             return pstmt.executeUpdate() == 1;
         } catch (Exception e) {

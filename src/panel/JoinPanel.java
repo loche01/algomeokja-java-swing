@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 import javax.swing.*;
 import main.MainFrame;
 import model.UserBean;
@@ -103,13 +104,17 @@ public class JoinPanel extends JPanel implements ActionListener {
 		passwordField.getComponent().addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				String userpw = passwordField.getText().trim();
-				if (userpw.isEmpty()) {
-					UIUtils.showError(PwErrLbl, "비밀번호를 입력하세요.");
-				} else if (!ValidationUtils.isCreateUserPw(userpw)) {
-					UIUtils.showError(PwErrLbl, "비밀번호는 영문(대소문자) + 특수문자를 포함한 6~20자여야 합니다.");
-				} else {
-					UIUtils.hideError(PwErrLbl);
+				char[] userPassword = ((JPasswordField) passwordField.getComponent()).getPassword();
+				try {
+					if (userPassword.length == 0) {
+						UIUtils.showError(PwErrLbl, "비밀번호를 입력하세요.");
+					} else if (!ValidationUtils.isCreateUserPw(userPassword)) {
+						UIUtils.showError(PwErrLbl, "비밀번호는 영문(대소문자) + 특수문자를 포함한 6~20자여야 합니다.");
+					} else {
+						UIUtils.hideError(PwErrLbl);
+					}
+				} finally {
+					Arrays.fill(userPassword, '\0');
 				}
 			}
 		}); // -- passwordField.addKeyListener
@@ -127,14 +132,19 @@ public class JoinPanel extends JPanel implements ActionListener {
 		confirmPasswordField.getComponent().addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				String userPw = new String(passwordField.getText()).trim();
-				String confirmPw = new String(confirmPasswordField.getText()).trim();
-				if (confirmPw.isEmpty()) {
-					UIUtils.showError(PwCkErrLbl, "비밀번호 확인을 입력하세요.");
-				} else if (!userPw.equals(confirmPw)) {
-					UIUtils.showError(PwCkErrLbl, "비밀번호가 일치하지 않습니다.");
-				} else {
-					UIUtils.hideError(PwCkErrLbl);
+				char[] userPassword = ((JPasswordField) passwordField.getComponent()).getPassword();
+				char[] confirmPassword = ((JPasswordField) confirmPasswordField.getComponent()).getPassword();
+				try {
+					if (confirmPassword.length == 0) {
+						UIUtils.showError(PwCkErrLbl, "비밀번호 확인을 입력하세요.");
+					} else if (!Arrays.equals(userPassword, confirmPassword)) {
+						UIUtils.showError(PwCkErrLbl, "비밀번호가 일치하지 않습니다.");
+					} else {
+						UIUtils.hideError(PwCkErrLbl);
+					}
+				} finally {
+					Arrays.fill(userPassword, '\0');
+					Arrays.fill(confirmPassword, '\0');
 				}
 			}
 		}); // -- confirmPasswordField.addKeyListener
@@ -241,14 +251,16 @@ public class JoinPanel extends JPanel implements ActionListener {
 	@Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == joinButton.getButton()) {
-        	// 🔹 입력값 가져오기
-        	String userId = userIdField.getText();
-            String userPwd = passwordField.getText();
-            String confirmPwd = confirmPasswordField.getText();
+            // 🔹 입력값 가져오기
+            String userId = userIdField.getText();
+            char[] userPassword = ((JPasswordField) passwordField.getComponent()).getPassword();
+            char[] confirmPassword = ((JPasswordField) confirmPasswordField.getComponent()).getPassword();
             String userName = userNameField.getText();
             String userPhone = userPhoneField.getText();
             String userEmail = userEmailField.getText();
             String userBirthdate = userBirthdateField.getText();
+
+            try {
             
             // 성별 값 가져오기
             String userGender = "";
@@ -283,7 +295,7 @@ public class JoinPanel extends JPanel implements ActionListener {
             }
             
             // 🔹 아이디 중복 체크 했는지 검증
-            if (userId.isEmpty() || userPwd.isEmpty() || confirmPwd.isEmpty() || 
+            if (userId.isEmpty() || userPassword.length == 0 || confirmPassword.length == 0 ||
                 userName.isEmpty() || userPhone.isEmpty() || userEmail.isEmpty() || 
                 userBirthdate.isEmpty() || userGender.isEmpty()) {
                 CustomDialog.showDialog(mainFrame, "모든 필수 입력 사항을 입력해주세요.", "회원가입 오류");
@@ -291,12 +303,17 @@ public class JoinPanel extends JPanel implements ActionListener {
             }
             
             // 🔹 비밀번호 불일치 경고 무시 검증
-            if(!userPwd.equals(confirmPwd)) {
-            	CustomDialog.showDialog(mainFrame, "비밀번호가 일치하지 않습니다.", "회원가입 오류");
-            	return;
+            if(!Arrays.equals(userPassword, confirmPassword)) {
+                CustomDialog.showDialog(mainFrame, "비밀번호가 일치하지 않습니다.", "회원가입 오류");
+                return;
             }
-            
-           
+
+            if (!ValidationUtils.isCreateUserPw(userPassword)) {
+                CustomDialog.showDialog(mainFrame,
+                        "비밀번호는 영문(대소문자) + 특수문자를 포함한 6~20자여야 합니다.",
+                        "회원가입 오류");
+                return;
+            }
             
             // 🔹 이메일 양식 검증
             if (!ValidationUtils.isValidEmail(userEmail)) {
@@ -340,7 +357,6 @@ public class JoinPanel extends JPanel implements ActionListener {
             // 🔹 회원 객체 생성
             UserBean user = new UserBean();
             user.setUser_id(userId);
-            user.setUser_pwd(userPwd);
             user.setUser_name(userName);
             user.setUser_phone(userPhone);
             user.setUser_email(userEmail);
@@ -348,7 +364,7 @@ public class JoinPanel extends JPanel implements ActionListener {
             user.setUser_gender(userGender);
             
             // 🔹 회원가입 처리
-            boolean isJoin = joinDAO.joinUser(user);
+            boolean isJoin = joinDAO.joinUserWithRawPassword(user, userPassword);
             
             if (isJoin) {
                 CustomDialog.showDialog(mainFrame, userId + "님 환영합니다! 회원가입이 완료되었습니다!", "회원가입 완료");
@@ -360,6 +376,10 @@ public class JoinPanel extends JPanel implements ActionListener {
             else {
                 CustomDialog.showDialog(mainFrame, "회원가입에 실패했습니다. 다시 시도해주세요.", "회원가입 오류");
                 return;
+            }
+            } finally {
+                Arrays.fill(userPassword, '\0');
+                Arrays.fill(confirmPassword, '\0');
             }
         } //-- if  회원가입 버튼 작동
         
