@@ -67,15 +67,7 @@ public class NoticeDetailPanel extends JPanel {
 
         closeButton.addActionListener(e -> {
             if (mainUserPanel != null) {
-                // 이전 패널로 돌아가기
-                String previousPanel = mainUserPanel.getPreviousPanel();
-                
-                // 이전 패널이 Notice인 경우 Notice로, 그 외의 경우 이전 패널로 이동
-                if (previousPanel.equals("Notice")) {
-                    mainUserPanel.showPanel("Notice");
-                } else {
-                    mainUserPanel.goToPreviousPanel();
-                }
+                mainUserPanel.showPanel("Notice");
             } else {
                 JOptionPane.showMessageDialog(null, "메인 패널이 설정되지 않았습니다.");
             }
@@ -102,18 +94,19 @@ public class NoticeDetailPanel extends JPanel {
         authorLabel = new JLabel();
         authorLabel.setFont(new Font("Inter", Font.BOLD, 12));
         authorLabel.setForeground(Color.GRAY);
-        authorLabel.setBounds(10, 95, 250, 20);
+        authorLabel.setBounds(10, 95, 360, 20);
         noticePanel.add(authorLabel);
 
         dateLabel = new JLabel();
         dateLabel.setFont(new Font("Inter", Font.BOLD, 12));
         dateLabel.setForeground(Color.GRAY);
-        dateLabel.setBounds(200, 95, 180, 20);
+        dateLabel.setBounds(10, 118, 360, 20);
+        dateLabel.setHorizontalAlignment(SwingConstants.LEFT);
         noticePanel.add(dateLabel);
 
         // 🔹 구분선 추가 (작성자/날짜 아래)
         JSeparator separator2 = new JSeparator();
-        separator2.setBounds(10, 120, 360, 1);
+        separator2.setBounds(10, 145, 360, 1);
         separator2.setForeground(Color.BLACK);
         noticePanel.add(separator2);
 
@@ -127,7 +120,7 @@ public class NoticeDetailPanel extends JPanel {
         contentArea.setMargin(new Insets(5, 5, 5, 5));
 
         contentScrollPane = new JScrollPane(contentArea);
-        contentScrollPane.setBounds(10, 130, 360, 360);
+        contentScrollPane.setBounds(10, 155, 360, 335);
         contentScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         contentScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
