@@ -88,8 +88,7 @@ public class NoticePanel extends JPanel {
         separator.setForeground(Color.BLACK);
         headerPanel.add(separator);
 
-        noticeListPanel = new JPanel();
-        noticeListPanel.setLayout(new BoxLayout(noticeListPanel, BoxLayout.Y_AXIS));
+        noticeListPanel = new NoticeListPanel();
         noticeListPanel.setBackground(Color.WHITE);
 
         noticeScrollPane = new JScrollPane(noticeListPanel);
@@ -114,9 +113,9 @@ public class NoticePanel extends JPanel {
             JLabel noDataLabel = new JLabel("📢 등록된 공지사항이 없습니다.");
             noDataLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
             noDataLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            noDataLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            noDataLabel.setMaximumSize(new Dimension(360, 100));
-            noDataLabel.setPreferredSize(new Dimension(360, 100));
+            noDataLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            noDataLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+            noDataLabel.setPreferredSize(new Dimension(0, 100));
             noticeListPanel.add(noDataLabel);
         } else {
             for (NoticeBean notice : notices) {
@@ -131,33 +130,50 @@ public class NoticePanel extends JPanel {
     }
 
     private JPanel createNoticeCard(NoticeBean notice, MainUserPanel mainUserPanel) {
-        JPanel card = new JPanel(null);
-        card.setAlignmentX(Component.CENTER_ALIGNMENT);
-        card.setMaximumSize(new Dimension(360, 82));
-        card.setPreferredSize(new Dimension(360, 82));
+        JPanel card = new JPanel(new BorderLayout(0, 8));
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 104));
+        card.setPreferredSize(new Dimension(0, 104));
+        card.setMinimumSize(new Dimension(0, 104));
         card.setBackground(new Color(0xF8FAF6));
-        card.setBorder(BorderFactory.createLineBorder(new Color(0xD7E2D0)));
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xD7E2D0)),
+                BorderFactory.createEmptyBorder(10, 12, 10, 12)));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        card.setToolTipText("클릭하여 공지사항 상세 보기");
+
+        JPanel titleRow = new JPanel(new BorderLayout(8, 0));
+        titleRow.setOpaque(false);
+        titleRow.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel numberLabel = new JLabel("#" + notice.getNotice_num());
         numberLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 12));
         numberLabel.setForeground(new Color(0x609056));
-        numberLabel.setBounds(12, 8, 45, 20);
+        numberLabel.setPreferredSize(new Dimension(42, 24));
 
         JLabel titleLabel = new JLabel(notice.getNotice_title());
         titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        titleLabel.setBounds(55, 8, 290, 24);
+        titleLabel.setToolTipText(notice.getNotice_title());
+
+        titleRow.add(numberLabel, BorderLayout.WEST);
+        titleRow.add(titleLabel, BorderLayout.CENTER);
+
+        JPanel infoRow = new JPanel(new BorderLayout(10, 0));
+        infoRow.setOpaque(false);
+        infoRow.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel authorLabel = new JLabel("작성자: " + notice.getAdmin_id());
         authorLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
         authorLabel.setForeground(Color.DARK_GRAY);
-        authorLabel.setBounds(55, 42, 135, 20);
 
-        JLabel dateLabel = new JLabel(new SimpleDateFormat("yyyy-MM-dd").format(new Date(notice.getNotice_time().getTime())));
+        JLabel dateLabel = new JLabel("작성일: " + new SimpleDateFormat("yyyy-MM-dd HH:mm")
+                .format(new Date(notice.getNotice_time().getTime())));
         dateLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
         dateLabel.setForeground(Color.GRAY);
         dateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        dateLabel.setBounds(220, 42, 125, 20);
+
+        infoRow.add(authorLabel, BorderLayout.WEST);
+        infoRow.add(dateLabel, BorderLayout.EAST);
 
         java.awt.event.MouseAdapter openListener = new java.awt.event.MouseAdapter() {
             @Override
@@ -174,14 +190,45 @@ public class NoticePanel extends JPanel {
         };
 
         card.addMouseListener(openListener);
+        titleRow.addMouseListener(openListener);
+        infoRow.addMouseListener(openListener);
         numberLabel.addMouseListener(openListener);
         titleLabel.addMouseListener(openListener);
         authorLabel.addMouseListener(openListener);
         dateLabel.addMouseListener(openListener);
-        card.add(numberLabel);
-        card.add(titleLabel);
-        card.add(authorLabel);
-        card.add(dateLabel);
+        card.add(titleRow, BorderLayout.CENTER);
+        card.add(infoRow, BorderLayout.SOUTH);
         return card;
+    }
+
+    private static class NoticeListPanel extends JPanel implements Scrollable {
+        NoticeListPanel() {
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return Math.max(visibleRect.height - 32, 16);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 }
