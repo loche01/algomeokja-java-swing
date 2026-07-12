@@ -165,8 +165,7 @@ public class FoodListPanel extends JPanel {
         add(searchPanel);
   
         // ✅ 검색 결과 리스트 패널
-        searchContentPanel = new JPanel();
-        searchContentPanel.setLayout(new BoxLayout(searchContentPanel, BoxLayout.Y_AXIS));
+        searchContentPanel = new VerticalListPanel();
         searchContentPanel.setBackground(new Color(0xF3F5F0));
         searchContentPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
         
@@ -181,8 +180,7 @@ public class FoodListPanel extends JPanel {
         add(searchScrollPane);
         
         // ✅ 담은 목록 리스트 패널
-        favoriteContentPanel = new JPanel();
-        favoriteContentPanel.setLayout(new BoxLayout(favoriteContentPanel, BoxLayout.Y_AXIS));
+        favoriteContentPanel = new VerticalListPanel();
         favoriteContentPanel.setBackground(new Color(0xF3F5F0));
         favoriteContentPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 
@@ -395,15 +393,19 @@ public class FoodListPanel extends JPanel {
         }
     }
     
-    // ✅ 둥근 네모 박스를 생성하는 메서드
+    // ✅ 음식 행 생성
     private JPanel createRoundedItem(FoodBean food) {
-    	
-    	// ✅ 둥근 네모 박스 패널 (음식 아이템)
-        RoundedComponent itemPanel = new RoundedComponent(390, 96, 18, "panel", "",
-                new Color(0xD8E6D2), Color.WHITE, Color.BLACK, "Inter", Font.BOLD, 16);
-        itemPanel.setLayout(null);
-        itemPanel.setBounds(0, 0, 390, 96);
+        JPanel itemPanel = new JPanel(new BorderLayout(12, 0));
+        itemPanel.setPreferredSize(new Dimension(0, 104));
+        itemPanel.setMinimumSize(new Dimension(0, 104));
+        itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 104));
+        itemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        itemPanel.setBackground(Color.WHITE);
+        itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xD8E6D2), 1, true),
+                BorderFactory.createEmptyBorder(10, 14, 10, 12)));
         itemPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        itemPanel.setToolTipText("클릭하여 상세 보기");
 
         java.awt.event.MouseAdapter openDetailListener = new java.awt.event.MouseAdapter() {
             @Override
@@ -415,85 +417,83 @@ public class FoodListPanel extends JPanel {
         // ✅ 음식 아이템을 클릭했을 때 FoodInfoPanel로 이동
         itemPanel.addMouseListener(openDetailListener);
 
-        
-        // ✅ 음식명
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setOpaque(false);
+        infoPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        infoPanel.addMouseListener(openDetailListener);
+
         JTextArea nameLabel = new JTextArea(food.getFoodName());
         nameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 17));
-        nameLabel.setBounds(14, 10, 268, 44);
         nameLabel.setLineWrap(true);
         nameLabel.setWrapStyleWord(true);
         nameLabel.setEditable(false);
         nameLabel.setFocusable(false);
         nameLabel.setOpaque(false);
+        nameLabel.setRows(2);
+        nameLabel.setPreferredSize(new Dimension(0, 48));
+        nameLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         nameLabel.setToolTipText(food.getFoodName());
         nameLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         nameLabel.addMouseListener(openDetailListener);
-        
-        // ✅ 그램 표시 라벨 수정
-        JLabel weightLabel = new JLabel();
-        if (isFavoriteList) {
-            // 담은 목록에서는 설정된 그램 값 표시
-            weightLabel.setText(food.getWeight() + "g");
-        } else {
-            // 검색 목록에서는 기본 100g 표시
-            weightLabel.setText("100g");
-        }
-        weightLabel.setFont(new Font("Inter", Font.PLAIN, 12));
-        weightLabel.setForeground(Color.GRAY);
-        weightLabel.setBounds(14, 65, 100, 20);
+
+        JPanel metaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        metaPanel.setOpaque(false);
+        metaPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        metaPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        metaPanel.addMouseListener(openDetailListener);
+
+        JLabel weightLabel = new JLabel(isFavoriteList
+                ? "적용 중량 " + food.getWeight() + "g"
+                : "기준 중량 100g");
+        weightLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
+        weightLabel.setForeground(new Color(0x666666));
         weightLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         weightLabel.addMouseListener(openDetailListener);
-        
-        // ✅ 칼로리 정보 (실제 그램 기준으로 표시)
-        JLabel kcalLabel = new JLabel();
-        if (isFavoriteList) {
-            // 담은 목록에서는 설정된 그램에 따른 실제 칼로리 표시
-            kcalLabel.setText((int)food.getFoodKcal() + " kcal");
-        } else {
-            // 검색 목록에서는 100g 기준 칼로리 표시
-            kcalLabel.setText((int)food.getFoodKcal() + " kcal");
-        }
-        kcalLabel.setFont(new Font("Inter", Font.PLAIN, 14));
-        kcalLabel.setBounds(177, 63, 105, 25);
-        kcalLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        JLabel dividerLabel = new JLabel("  |  ");
+        dividerLabel.setForeground(new Color(0xA0A0A0));
+        dividerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        dividerLabel.addMouseListener(openDetailListener);
+
+        JLabel kcalLabel = new JLabel("열량 " + (int) food.getFoodKcal() + " kcal");
+        kcalLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 13));
+        kcalLabel.setForeground(new Color(0x406E38));
         kcalLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         kcalLabel.addMouseListener(openDetailListener);
-       
-     // ✅ 담기 버튼 추가
-        RoundedComponent addButton = new RoundedComponent(82, 40, 12, "button", "담기",
-                new Color(0x609056), new Color(0x609056), Color.WHITE, "Malgun Gothic", Font.BOLD, 14);
-        addButton.setBounds(294, 14, 82, 40);
-        addButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        addButton.getButton().addActionListener(e -> addToFavoriteList(food));
-        
-        if (!isFavoriteList) { // 담은 목록이 아닐 때만 + 버튼 추가
-            itemPanel.add(addButton);
-        }
-        
-        // ✅ 빼기 버튼 추가 (담은 목록에서만 표시)
-        RoundedComponent removeButton = new RoundedComponent(82, 40, 12, "button", "빼기",
-                new Color(0x7A7A7A), Color.WHITE, new Color(0x4A4A4A), "Malgun Gothic", Font.BOLD, 14);
-        removeButton.setBounds(294, 14, 82, 40);
-        removeButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        removeButton.getButton().addActionListener(e -> removeFavoriteItem(food));
-        if(isFavoriteList) {
-        	itemPanel.add(removeButton);
-        }
-        
-        // ✅ 패널에 추가
-        itemPanel.add(nameLabel);
-        itemPanel.add(weightLabel);
-        itemPanel.add(kcalLabel);
-      
-        // ✅ 감싸는 패널 추가
-        JPanel wrapper = new JPanel();
-        wrapper.setLayout(new BorderLayout()); // FlowLayout 대신 BorderLayout 사용
-        wrapper.setPreferredSize(new Dimension(390, 104));
-        wrapper.setMaximumSize(new Dimension(390, 104));
-        wrapper.setBackground(new Color(0xF3F5F0));
-        wrapper.add(itemPanel, BorderLayout.CENTER);
 
-        return wrapper;
+        metaPanel.add(weightLabel);
+        metaPanel.add(dividerLabel);
+        metaPanel.add(kcalLabel);
+        infoPanel.add(nameLabel);
+        infoPanel.add(metaPanel);
+
+        JButton actionButton = new JButton(isFavoriteList ? "빼기" : "상세 보기");
+        actionButton.setPreferredSize(new Dimension(90, 42));
+        actionButton.setMinimumSize(new Dimension(90, 42));
+        actionButton.setMaximumSize(new Dimension(90, 42));
+        actionButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
+        actionButton.setFocusPainted(false);
+        actionButton.setOpaque(true);
+        actionButton.setContentAreaFilled(true);
+        actionButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        if (isFavoriteList) {
+            actionButton.setForeground(new Color(0x4A4A4A));
+            actionButton.setBackground(Color.WHITE);
+            actionButton.setBorder(BorderFactory.createLineBorder(new Color(0x8A8A8A), 1, true));
+            actionButton.addActionListener(e -> removeFavoriteItem(food));
+        } else {
+            actionButton.setForeground(Color.WHITE);
+            actionButton.setBackground(new Color(0x609056));
+            actionButton.setBorder(BorderFactory.createLineBorder(new Color(0x609056), 1, true));
+            actionButton.addActionListener(e -> openFoodDetail(food));
+        }
+
+        itemPanel.add(infoPanel, BorderLayout.CENTER);
+        itemPanel.add(actionButton, BorderLayout.EAST);
+        return itemPanel;
     }
 
     private void openFoodDetail(FoodBean food) {
@@ -508,8 +508,9 @@ public class FoodListPanel extends JPanel {
 
     private JPanel createEmptyMessage(String message) {
         JPanel emptyPanel = new JPanel(new BorderLayout());
-        emptyPanel.setPreferredSize(new Dimension(390, 150));
-        emptyPanel.setMaximumSize(new Dimension(390, 150));
+        emptyPanel.setPreferredSize(new Dimension(0, 150));
+        emptyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
+        emptyPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         emptyPanel.setBackground(Color.WHITE);
         emptyPanel.setBorder(BorderFactory.createLineBorder(new Color(0xD8E6D2), 1, true));
 
@@ -597,5 +598,36 @@ public class FoodListPanel extends JPanel {
         favoriteScrollPane.setVisible(false);
         saveButtonComponent.setVisible(false);
         isFavoriteList = false;
+    }
+
+    private static class VerticalListPanel extends JPanel implements Scrollable {
+        VerticalListPanel() {
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return Math.max(visibleRect.height - 32, 16);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 }

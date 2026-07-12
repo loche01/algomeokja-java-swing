@@ -88,7 +88,7 @@ public class FoodInfoPanel extends JPanel {
         aButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         gPanel.add(aButton);
         
-        searchField = new RoundedComponent(80, 40, 20, "textfield", weightValue + "",
+        searchField = new RoundedComponent(80, 40, 20, "textfield", weightValue + "g",
                 new Color(0x609056), new Color(0x609056), Color.black,
                 "Malgun Gothic", Font.BOLD , 18);
         searchField.setBounds(110, 5, 80, 40);
@@ -235,7 +235,7 @@ public class FoodInfoPanel extends JPanel {
         
         // g 값 초기화
         weightValue = 100;
-        searchField.getTextField().setText(weightValue + "");
+        searchField.getTextField().setText(weightValue + "g");
         
         repaint();
         revalidate();
@@ -283,7 +283,7 @@ public class FoodInfoPanel extends JPanel {
         if (weightValue < 10) weightValue = 10; // 🔹 최소 10g
         if (weightValue > 500) weightValue = 500; // 🔹 최대 500g
 
-        searchField.getTextField().setText(weightValue + ""); // 🔹 g 값 업데이트
+        searchField.getTextField().setText(weightValue + "g"); // 🔹 g 값 업데이트
         kcalLabel.setText(calculateKcal(currentFood) + " kcal"); // 🔹 칼로리 재계산
 
         ((JLabel) carbPanel.getComponent(2)).setText(calculateCarb(currentFood) + "g");
@@ -303,7 +303,7 @@ public class FoodInfoPanel extends JPanel {
         foodNameLabel.setToolTipText(null);
         mealTypeLabel.setText("선택한 식사: -");
         kcalLabel.setText("0 kcal");
-        searchField.getTextField().setText(weightValue + ""); 
+        searchField.getTextField().setText(weightValue + "g");
 
         ((JLabel) carbPanel.getComponent(2)).setText("0g");
         ((JLabel) proteinPanel.getComponent(2)).setText("0g");
