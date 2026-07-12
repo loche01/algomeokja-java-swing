@@ -349,29 +349,6 @@ public class DBConnectionMgr {
         }
     }
 
-
-    /** Closes all connections and clears out the connection pool */
-    public void finalize() {
-        trace("ConnectionPoolManager.finalize()");
-
-        Connection c = null;
-        ConnectionObject co = null;
-
-        for (int i = 0; i < connections.size(); i++) {
-            co = (ConnectionObject) connections.elementAt(i);
-            try {
-                co.connection.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            co = null;
-        }
-
-        connections.removeAllElements();
-    }
-
-
     private void trace(String s) {
         if (_traceOn)
             System.err.println(s);
