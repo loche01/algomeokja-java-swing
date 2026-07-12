@@ -125,7 +125,6 @@ public class NoticeEditPanel extends JPanel {
         saveButton.setBounds(80, 600, 100, 40);
         noticePanel.add(saveButton);
         saveButton.getButton().addActionListener(e -> {
-            System.out.println("🔹 Saving notice NUM: " + noticeId); // ✅ 로그 추가
             updateNotice();
         });
 
@@ -147,9 +146,6 @@ public class NoticeEditPanel extends JPanel {
             JOptionPane.showMessageDialog(null, "제목과 내용을 입력해주세요!", "입력 오류", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        // 🔹 현재 공지사항 NUM 유지 확인
-        System.out.println("🔹 Updating Notice NUM: " + noticeId); // ✅ noticeId가 아니라 noticeNum으로 바뀌어야 함.
 
         // 🔹 데이터베이스에 공지사항 업데이트
         boolean success = noticeDAO.updateNotice(noticeId, newTitle, newContent); // ✅ noticeId → noticeNum
@@ -180,8 +176,6 @@ public class NoticeEditPanel extends JPanel {
     }
 
     public void loadNoticeForEdit(int noticeId) {  // ✅ noticeId 사용
-        System.out.println("🔹 Loading notice ID: " + noticeId);
-
         clearFields();
 
         this.noticeId = noticeId; // ✅ 올바른 ID 저장
@@ -202,12 +196,10 @@ public class NoticeEditPanel extends JPanel {
             fileListModel.addElement(fileName);
         }
 
-        System.out.println("🔹 Loaded " + fileList.size() + " files.");
     }
 
 
     private void clearFields() {
-        System.out.println("🔹 Clearing fields before loading new notice.");
         titleField.setText("");
         contentArea.setText("");
         existingFiles.clear();

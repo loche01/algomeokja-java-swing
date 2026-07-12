@@ -228,8 +228,6 @@ public class ExerciseCaloriePanel extends JPanel {
             String calorieText = calorieValue.getText().replaceAll("[^0-9.]", "");
             double kcal = Double.parseDouble(calorieText);
 
-            System.out.println("저장할 운동 데이터: 운동코드=" + currentExerciseCode + ", 사용자ID=" + currentUserId + ", 시간=" + runtime + ", 체중=" + weight + ", 칼로리=" + kcal);
-
             return exerciseLogDAO.saveExerciseLog(currentExerciseCode, currentExerciseName, currentUserId, runtime, weight, kcal);
         } catch (Exception e) {
             e.printStackTrace();

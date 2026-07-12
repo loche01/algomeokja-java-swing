@@ -69,13 +69,6 @@ public class HeaderUtil {
 			titleButton.setContentAreaFilled(false);
 			titleButton.setFocusPainted(false);
 			
-			// 관리자 헤더의 타이틀 버튼 클릭 시 홈으로 이동
-			titleButton.addActionListener(e -> {
-				// 관리자 홈 화면으로 이동 (필요한 경우 구현)
-				System.out.println("✅ 관리자 홈 화면으로 이동합니다.");
-				// 여기에 관리자 홈 화면으로 이동하는 코드 추가
-			});
-
 			JButton noticeButton = new JButton("<html>공지<br>사항</html>");
 			noticeButton.setFont(new Font("Inter", Font.BOLD, 20));
 			noticeButton.setHorizontalAlignment(JButton.RIGHT);

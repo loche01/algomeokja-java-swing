@@ -38,11 +38,10 @@ public class NoticeDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isAdded = true;
-                System.out.println("✅ 공지사항 추가 완료! 제목: " + title);
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ SQL 실행 중 오류 발생! adminId: " + adminId);
+            System.err.println("❌ 공지사항 추가 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } catch (Exception e) {
             System.err.println("❌ 알 수 없는 오류 발생!");
@@ -119,19 +118,10 @@ public class NoticeDAO {
                     notice.setNotice_content(rs.getString("notice_coment"));
                     notice.setNotice_time(rs.getTimestamp("notice_time"));
 
-                    // ✅ 디버깅: 조회된 데이터 확인
-                    System.out.println("✅ 공지사항 조회 성공! ID: " + noticeNum);
-                    System.out.println("제목: " + notice.getNotice_title());
-                    System.out.println("작성자: " + notice.getAdmin_id());
-                    System.out.println("내용: " + notice.getNotice_content());
-                    System.out.println("작성 날짜: " + notice.getNotice_time());
-
-                } else {
-                    System.out.println("⚠ 공지사항 없음. ID: " + noticeNum);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ SQL 실행 중 오류 발생! ID: " + noticeNum);
+            System.err.println("❌ 공지사항 상세 조회 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } catch (Exception e) {
             System.err.println("❌ 알 수 없는 오류 발생!");
@@ -159,16 +149,15 @@ public class NoticeDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isUpdated = true;
-                System.out.println("✅ 공지사항 수정 완료! ID: " + noticeNum);
             } else {
-                System.out.println("⚠ 공지사항 수정 실패! ID: " + noticeNum);
+                System.err.println("❌ 수정할 공지사항을 찾을 수 없습니다.");
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ SQL 오류 발생! ID: " + noticeNum);
+            System.err.println("❌ 공지사항 수정 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("❌ 알 수 없는 오류 발생! ID: " + noticeNum);
+            System.err.println("❌ 공지사항 수정 중 알 수 없는 오류가 발생했습니다.");
             e.printStackTrace();
         } finally {
             try {
@@ -196,16 +185,15 @@ public class NoticeDAO {
             int rows = pstmt.executeUpdate();
             if (rows > 0) {
                 isDeleted = true;
-                System.out.println("✅ 공지사항 삭제 완료! ID: " + noticeNum);
             } else {
-                System.out.println("⚠ 공지사항 삭제 실패! ID: " + noticeNum);
+                System.err.println("❌ 삭제할 공지사항을 찾을 수 없습니다.");
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ SQL 오류 발생! ID: " + noticeNum);
+            System.err.println("❌ 공지사항 삭제 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("❌ 알 수 없는 오류 발생! ID: " + noticeNum);
+            System.err.println("❌ 공지사항 삭제 중 알 수 없는 오류가 발생했습니다.");
             e.printStackTrace();
         } finally {
             try {
@@ -285,7 +273,7 @@ public class NoticeDAO {
                 fileList.add(fileData);
             }
         } catch (SQLException e) {
-            System.err.println("❌ SQL 실행 중 오류 발생! noticeId: " + noticeId);
+            System.err.println("❌ 공지사항 첨부파일 조회 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } finally {
             try {

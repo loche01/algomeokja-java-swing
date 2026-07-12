@@ -31,10 +31,10 @@ public class GoalDAO {
                 return rs.next() && rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            System.err.println("❌ SQL 실행 중 오류 발생! (isUserExists) userId: " + userId);
+            System.err.println("❌ 목표 사용자 확인 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } catch (Exception e) {  
-            System.err.println("❌ 알 수 없는 오류 발생! userId: " + userId);
+            System.err.println("❌ 목표 사용자 확인 중 알 수 없는 오류가 발생했습니다.");
             e.printStackTrace();
         }
         return false;
@@ -68,7 +68,7 @@ public class GoalDAO {
                         if (rowsUpdated > 0) {
                             return true;
                         } else {
-                            System.err.println("❌ 목표 데이터 수정 실패! userId: " + goal.getUserId());
+                            System.err.println("❌ 수정할 목표 데이터를 찾을 수 없습니다.");
                         }
                     }
                 } else { 
@@ -82,19 +82,19 @@ public class GoalDAO {
                         if (rowsInserted > 0) {
                             return true;
                         } else {
-                            System.err.println("❌ 목표 데이터 저장 실패! userId: " + goal.getUserId());
+                            System.err.println("❌ 목표 데이터를 저장하지 못했습니다.");
                         }
                     }
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ SQL 실행 중 오류 발생! userId: " + goal.getUserId());
+            System.err.println("❌ 목표 데이터 저장 중 SQL 오류가 발생했습니다.");
             System.err.println("❌ SQL 오류 메시지: " + e.getMessage());
             System.err.println("❌ SQL 상태: " + e.getSQLState());
             System.err.println("❌ 오류 코드: " + e.getErrorCode());
             e.printStackTrace();
         } catch (Exception e) {  
-            System.err.println("❌ 알 수 없는 오류 발생! userId: " + goal.getUserId());
+            System.err.println("❌ 목표 데이터 저장 중 알 수 없는 오류가 발생했습니다.");
             System.err.println("❌ 오류 메시지: " + e.getMessage());
             e.printStackTrace();
         }
@@ -127,13 +127,13 @@ public class GoalDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ 목표 체중 정보 불러오기 실패! userId: " + userId);
+            System.err.println("❌ 목표 체중 정보 조회 중 SQL 오류가 발생했습니다.");
             System.err.println("❌ SQL 오류 메시지: " + e.getMessage());
             System.err.println("❌ SQL 상태: " + e.getSQLState());
             System.err.println("❌ 오류 코드: " + e.getErrorCode());
             e.printStackTrace();
         } catch (Exception e) {  
-            System.err.println("❌ 알 수 없는 오류 발생! userId: " + userId);
+            System.err.println("❌ 목표 체중 정보 조회 중 알 수 없는 오류가 발생했습니다.");
             System.err.println("❌ 오류 메시지: " + e.getMessage());
             e.printStackTrace();
         }

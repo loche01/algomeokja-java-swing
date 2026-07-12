@@ -126,15 +126,7 @@ public class FindIdPwEmail extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == sendCodeButton1.getButton()) {
-            System.out.println("ID 찾기 - 인증번호 전송 클릭!");
-        } else if (e.getSource() == findIdButton.getButton()) {
-            System.out.println("아이디 찾기 버튼 클릭!");
-        } else if (e.getSource() == sendCodeButton2.getButton()) {
-            System.out.println("비밀번호 찾기 - 인증번호 전송 클릭!");
-        } else if (e.getSource() == findPwButton.getButton()) {
-            System.out.println("비밀번호 찾기 버튼 클릭!");
-        }
+        // 이메일 기반 찾기 화면은 아직 실제 기능과 연결되지 않았다.
     }
 
     public static void main(String[] args) {

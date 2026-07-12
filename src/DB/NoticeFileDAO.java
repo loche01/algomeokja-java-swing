@@ -56,7 +56,6 @@ public class NoticeFileDAO {
             if (rows > 0) {
                 isUploaded = true;
                 conn.commit();
-                System.out.println("✅ 파일 업로드 성공: " + file.getName());
             } else {
                 System.err.println("❌ 파일 업로드 실패!");
             }
@@ -159,7 +158,6 @@ public class NoticeFileDAO {
                         outputStream.write(buffer, 0, bytesRead);
                     }
                 }
-                System.out.println("📂 파일 다운로드 완료: " + outputFile.getAbsolutePath());
                 return true;
             }
         } catch (SQLException | IOException e) {
@@ -209,7 +207,7 @@ public class NoticeFileDAO {
                 fileList.add(fileData);
             }
         } catch (SQLException e) {
-            System.err.println("❌ SQL 실행 중 오류 발생! noticeNum: " + noticeNum);
+            System.err.println("❌ 공지사항 첨부파일 조회 중 SQL 오류가 발생했습니다.");
             e.printStackTrace();
         } finally {
             try {

@@ -157,15 +157,9 @@ public class MymeGoalPanel extends JPanel implements ActionListener {
         if (e.getSource() == finishButton) {
             UserGoal goal = getUserInput();
             if (goal != null) {
-                System.out.println("✅ 목표 데이터 저장 시도: " + 
-                                  "시작 체중=" + goal.getStartWeight() + 
-                                  ", 목표 체중=" + goal.getTargetWeight() + 
-                                  ", 기간=" + goal.getTargetDuration() + "일");
-                
                 boolean success = goalDAO.saveOrUpdateGoal(goal);
                 
                 if (success) {
-                    System.out.println("✅ 목표 데이터 저장 성공!");
                     JOptionPane.showMessageDialog(this, "목표가 성공적으로 저장되었습니다.", "저장 완료", JOptionPane.INFORMATION_MESSAGE);
                     mainUserPanel.getHomeTargetPanel().loadUserTargetData();
                     mainUserPanel.showPanel("HomeTarget");

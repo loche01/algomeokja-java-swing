@@ -65,7 +65,6 @@ public class BodyInfoSetPanel extends JPanel implements ActionListener {
     // 🔹 사용자 ID 설정 메서드 (MainFrame에서 전달)
     public void setUserId(String userId) {
         this.userId = userId;
-        System.out.println("✅ BodyInfoSetPanel에 userId 설정됨: " + userId);
     }
 
     // 🔹 입력 필드와 단위를 추가하는 메서드
@@ -97,8 +96,6 @@ public class BodyInfoSetPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == registerButton.getButton()) {
-            System.out.println("✅ 확인 버튼 클릭!");
-
             try {
                 // 🔹 userId가 설정되지 않은 경우 방어 코드 추가
                 if (userId == null || userId.isEmpty()) {
@@ -128,7 +125,6 @@ public class BodyInfoSetPanel extends JPanel implements ActionListener {
                 ex.printStackTrace();
             }
         } else if (e.getSource() == skipButton.getButton()) {
-            System.out.println("Skip 버튼 클릭! 메인 화면으로 이동");
             mainFrame.showPanel("mainUser");
         }
     }

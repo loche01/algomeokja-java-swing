@@ -196,7 +196,6 @@ public class LoginPanel extends JPanel implements ActionListener {
 					
 					// 관리자 여부에 따라 다른 패널 표시
 					if (user.isAdmin() || LoginManager.getInstance().isAdmin()) {
-						System.out.println("✅ 관리자로 로그인 성공! 관리자 패널로 이동합니다.");
 						mainFrame.showPanel("mainAdmin");
 					} else {
 						// 일반 사용자 패널로 이동
