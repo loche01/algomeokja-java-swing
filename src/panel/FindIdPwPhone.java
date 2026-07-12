@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import main.MainFrame;
 import ui_n_utils.CustomDialog;
 import ui_n_utils.RoundedComponent;
@@ -274,28 +275,28 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
 
             char[] newPasswordChars = newPasswordField.getPassword();
             char[] confirmPasswordChars = confirmPasswordField.getPassword();
-            String newPassword = new String(newPasswordChars);
-            String confirmPassword = new String(confirmPasswordChars);
-            java.util.Arrays.fill(newPasswordChars, '\0');
-            java.util.Arrays.fill(confirmPasswordChars, '\0');
+            try {
+                if (!Arrays.equals(newPasswordChars, confirmPasswordChars)) {
+                    CustomDialog.showDialog(mainFrame, "새 비밀번호와 확인값이 일치하지 않습니다.", "비밀번호 재설정");
+                    continue;
+                }
+                if (!ValidationUtils.isCreateUserPw(newPasswordChars)) {
+                    CustomDialog.showDialog(mainFrame, "비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.", "비밀번호 재설정");
+                    continue;
+                }
+                if (!userDAO.updateUserPasswordFromRaw(verifiedPasswordUserId, newPasswordChars)) {
+                    CustomDialog.showDialog(mainFrame, "비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.", "비밀번호 재설정");
+                    return;
+                }
 
-            if (!newPassword.equals(confirmPassword)) {
-                CustomDialog.showDialog(mainFrame, "새 비밀번호와 확인값이 일치하지 않습니다.", "비밀번호 재설정");
-                continue;
-            }
-            if (!ValidationUtils.isCreateUserPw(newPassword)) {
-                CustomDialog.showDialog(mainFrame, "비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.", "비밀번호 재설정");
-                continue;
-            }
-            if (!userDAO.updateUserPassword(verifiedPasswordUserId, newPassword)) {
-                CustomDialog.showDialog(mainFrame, "비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.", "비밀번호 재설정");
+                CustomDialog.showDialog(mainFrame, "새 비밀번호가 설정되었습니다.", "비밀번호 재설정");
+                clearPasswordVerification();
+                mainFrame.showPanel("login");
                 return;
+            } finally {
+                Arrays.fill(newPasswordChars, '\0');
+                Arrays.fill(confirmPasswordChars, '\0');
             }
-
-            CustomDialog.showDialog(mainFrame, "새 비밀번호가 설정되었습니다.", "비밀번호 재설정");
-            clearPasswordVerification();
-            mainFrame.showPanel("login");
-            return;
         }
     }
 

@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import model.UserBean;
+import security.PasswordHasher;
 import ui_n_utils.UserSessionManager;
 
 public class JoinDAO {
@@ -22,9 +23,17 @@ public class JoinDAO {
     }
 
     // 🔹 회원가입 정보 DB에 저장
-    public boolean joinUser(UserBean user) {
+    public boolean joinUserWithRawPassword(UserBean user, char[] rawPassword) {
         Connection con = null;
         PreparedStatement pstmt = null;
+
+        String encodedPassword;
+        try {
+            encodedPassword = PasswordHasher.hash(rawPassword);
+        } catch (RuntimeException e) {
+            System.err.println("회원가입 비밀번호를 안전하게 처리하지 못했습니다.");
+            return false;
+        }
 
         String sql = "INSERT INTO user (user_id, user_pwd, user_name, user_phone, user_email, user_createdtime, user_birthdate, user_gender) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -33,7 +42,7 @@ public class JoinDAO {
             con = pool.getConnection(); // 🔹 예외 발생 가능 코드 → try-catch 추가
             pstmt = con.prepareStatement(sql);
             pstmt.setString(1, user.getUser_id());
-            pstmt.setString(2, user.getUser_pwd());
+            pstmt.setString(2, encodedPassword);
             pstmt.setString(3, user.getUser_name());
             pstmt.setString(4, user.getUser_phone());
             pstmt.setString(5, user.getUser_email());
@@ -58,9 +67,7 @@ public class JoinDAO {
             System.out.println("DB 연결 중 오류 발생!");
             return false;
         } finally {
-            if (con != null && pstmt != null) {
-                pool.freeConnection(con, pstmt);
-            }
+            pool.freeConnection(con, pstmt);
         }
     } //--registerUser
     

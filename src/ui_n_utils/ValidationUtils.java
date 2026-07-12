@@ -2,9 +2,13 @@ package ui_n_utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.nio.CharBuffer;
 import java.util.regex.Pattern;
 
 public class ValidationUtils {
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+            "^(?=.*[A-Za-z])(?=.*[@#$%^&+=*!?])[A-Za-z0-9@#$%^&+=*!?]{6,20}$");
+
     // 아이디 양식 검사
     public static boolean isValidUserId(String userId) {
         // 영문 대소문자, 숫자, 특수문자 중 하나 이상 포함된 6~20자의 아이디
@@ -14,7 +18,11 @@ public class ValidationUtils {
     //비밀번호 양식검사
     public static boolean isCreateUserPw(String userPw) {
         // 영문 대소문자와 특수문자가 반드시 포함된 6~20자의 아이디
-        return Pattern.matches("^(?=.*[A-Za-z])(?=.*[@#$%^&+=*!?])[A-Za-z0-9@#$%^&+=*!?]{6,20}$", userPw);
+        return userPw != null && PASSWORD_PATTERN.matcher(userPw).matches();
+    }
+
+    public static boolean isCreateUserPw(char[] userPw) {
+        return userPw != null && PASSWORD_PATTERN.matcher(CharBuffer.wrap(userPw)).matches();
     }
     
     //이메일 양식검사
