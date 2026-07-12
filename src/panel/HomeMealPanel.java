@@ -41,7 +41,7 @@ public class HomeMealPanel extends JPanel {
 		
 		setLayout(null);
 		setBackground(new Color(192, 233, 147));
-		setBounds(0, 140, 440, 700);
+		setBounds(0, 140, 440, 686);
 		
 		// 사용자 이름과 안내 문구를 분리해 긴 이름에서도 겹치지 않도록 배치
 		userIdLabel = new JLabel();
