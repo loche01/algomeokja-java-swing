@@ -8,7 +8,7 @@ import ui_n_utils.RoundedComponent;
 
 public class FoodInfoPanel extends JPanel {
     private MainUserPanel mainUserPanel;
-    private JLabel foodNameLabel, kcalLabel;
+    private JLabel foodNameLabel, kcalLabel, mealTypeLabel;
     private RoundedComponent proteinPanel, carbPanel, fatPanel, gPanel, searchField;
     private RoundedComponent backButton, mainPanel, finishButton, aButton, bButton;
     private int weightValue = 100; // 🔹 기본 g 값 (100g)
@@ -20,86 +20,108 @@ public class FoodInfoPanel extends JPanel {
         
         setLayout(null);
         setBackground(new Color(192, 233, 147));
-        setBounds(0, 0, 440, 956);
+        setBounds(0, 0, 440, 736);
 
         // 메인 패널 생성
-        mainPanel = new RoundedComponent(380, 600, 30, "panel", " ", 
+        mainPanel = new RoundedComponent(400, 650, 30, "panel", " ",
                 new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
-        mainPanel.setBounds(20, 90, 380, 600);
+        mainPanel.setBounds(20, 20, 400, 650);
         mainPanel.setLayout(null);
         add(mainPanel);
 
         // 뒤로가기 버튼
-        backButton = new RoundedComponent(40, 40, 10, "button", "<",
-                Color.white, Color.white, Color.black, "Inter", Font.BOLD, 25);
-        backButton.setBounds(10, 10, 40, 40);
+        backButton = new RoundedComponent(100, 40, 10, "button", "목록으로",
+                new Color(0x7A7A7A), Color.white, new Color(0x4A4A4A), "Malgun Gothic", Font.BOLD, 14);
+        backButton.setBounds(16, 16, 100, 40);
+        backButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         backButton.getButton().addActionListener(e ->{
         	 resetFoodInfo(); // 🔹 뒤로가기 시 음식 정보 초기화
         	mainUserPanel.showPanel("foodList");
         }); 
         mainPanel.add(backButton);
 
+        mealTypeLabel = new JLabel("선택한 식사: -", SwingConstants.RIGHT);
+        mealTypeLabel.setForeground(new Color(0x406E38));
+        mealTypeLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
+        mealTypeLabel.setBounds(126, 22, 250, 28);
+        mainPanel.add(mealTypeLabel);
+
         // 음식명 라벨
-        foodNameLabel = new JLabel("음식 이름");
+        foodNameLabel = new JLabel("음식 이름", SwingConstants.CENTER);
         foodNameLabel.setForeground(new Color(0x609056));
-        foodNameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 26));
-        foodNameLabel.setBounds(130, 50, 300, 30);
+        foodNameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
+        foodNameLabel.setBounds(20, 72, 360, 62);
+        foodNameLabel.setVerticalAlignment(SwingConstants.CENTER);
         mainPanel.add(foodNameLabel);
 
         // 🔹 탄수화물 패널
-        carbPanel = createNutritionPanel(15, 100, "탄수화물", "", 
+		carbPanel = createNutritionPanel(15, 155, "탄수화물", "",
         		new Color(243,243,243),new Color(255,203,164));
         mainPanel.add(carbPanel);
         
         // 🔹 단백질 패널
-        proteinPanel = createNutritionPanel(135, 100, "단백질", "", 
+		proteinPanel = createNutritionPanel(145, 155, "단백질", "",
         		new Color(255,203,164),new Color(0x002D62));
         mainPanel.add(proteinPanel);
 
         // 🔹 지방 패널
-        fatPanel = createNutritionPanel(255, 100, "지방", "", 
+		fatPanel = createNutritionPanel(275, 155, "지방", "",
         		new Color(0x002D62), Color.white);
         mainPanel.add(fatPanel);
 
+        JLabel weightLabel = new JLabel("선택 중량 (10g 단위)", SwingConstants.CENTER);
+        weightLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        weightLabel.setForeground(new Color(0x406E38));
+        weightLabel.setBounds(50, 282, 300, 26);
+        mainPanel.add(weightLabel);
+
         // 🔹 단위 선택 패널
-        gPanel = new RoundedComponent(300, 33, 30, "panel", " ", 
+        gPanel = new RoundedComponent(300, 50, 24, "panel", " ",
                 new Color(0x609056), new Color(0x609056), Color.black, " ", 0, 0);
-        gPanel.setBounds(50, 275, 300, 33);
+        gPanel.setBounds(50, 315, 300, 50);
         gPanel.setLayout(null);
         mainPanel.add(gPanel);
 
         // 🔹 + / - 버튼 및 텍스트 필드
-        aButton = createRoundButton("-", 8, 3, 40, 20, 36);
+		aButton = createRoundButton("-10g", 10, 5, 80, 40, 14);
         aButton.getButton().addActionListener(e -> updateWeight(-10)); // 🔹 10g 감소
+        aButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         gPanel.add(aButton);
         
-        searchField = new RoundedComponent(70, 40, 30, "textfield", weightValue + "", 
+        searchField = new RoundedComponent(80, 40, 20, "textfield", weightValue + "",
                 new Color(0x609056), new Color(0x609056), Color.black,
                 "Malgun Gothic", Font.BOLD , 18);
-        searchField.setBounds(120, 0, 70, 35);
+        searchField.setBounds(110, 5, 80, 40);
+        searchField.getTextField().setHorizontalAlignment(SwingConstants.CENTER);
+        searchField.getTextField().setEditable(false);
+        searchField.getTextField().setFocusable(false);
         gPanel.add(searchField);
 		
-        bButton = createRoundButton("+", 250, 4, 40, 20, 28);
+		bButton = createRoundButton("+10g", 210, 5, 80, 40, 14);
         bButton.getButton().addActionListener(e -> updateWeight(10)); // 🔹 10g 증가
+        bButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         gPanel.add(bButton);
 		
 
         // 🔹 총 열량 라벨
         JLabel calorieLabel = new JLabel("총 열량");
         calorieLabel.setFont(new Font("Inter", Font.BOLD, 25));
-        calorieLabel.setBounds(145, 380, 200, 30);
+		calorieLabel.setBounds(20, 405, 360, 30);
+		calorieLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(calorieLabel);
 
         kcalLabel = new JLabel();
         kcalLabel.setFont(new Font("Inter", Font.BOLD, 26));
-        kcalLabel.setBounds(140, 420, 150, 80);
+		kcalLabel.setBounds(20, 440, 360, 62);
+		kcalLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(kcalLabel);
 
         // 🔹 담기 버튼
-        finishButton = new RoundedComponent(100, 40, 10, "button", "담기", 
-                Color.BLACK, Color.BLACK, Color.WHITE, "Inter",
-                Font.BOLD, 14);
-        finishButton.setBounds(140, 500, 100, 40);
+        finishButton = new RoundedComponent(240, 48, 12, "button", "담은 목록에 반영",
+                new Color(0x609056), new Color(0x609056), Color.WHITE, "Malgun Gothic",
+                Font.BOLD, 16);
+        finishButton.setBounds(80, 535, 240, 48);
+        finishButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mainPanel.add(finishButton);
         finishButton.getButton().addActionListener(e -> {
             FoodBean updatedFood = getUpdatedFood(); // 수정된 g 기준 반영
@@ -200,7 +222,10 @@ public class FoodInfoPanel extends JPanel {
 
     // UI 값을 업데이트하는 메서드 추가
     private void updateUIValues() {
-        foodNameLabel.setText(currentFood.getFoodName());
+        foodNameLabel.setText("<html><div style='text-align:center;width:330px'>"
+                + escapeHtml(currentFood.getFoodName()) + "</div></html>");
+        foodNameLabel.setToolTipText(currentFood.getFoodName());
+        updateMealTypeLabel();
         kcalLabel.setText(calculateKcal(currentFood) + " kcal");
         
         // 영양소 값 UI 업데이트
@@ -218,9 +243,9 @@ public class FoodInfoPanel extends JPanel {
 
     // 🔹 둥근 버튼 생성 함수
     private RoundedComponent createRoundButton(String text, int x, int y, int width, int height, int fontSize) {
-        RoundedComponent button = new RoundedComponent(width, height, 0, "button.left", text,
+        RoundedComponent button = new RoundedComponent(width, height, 10, "button", text,
                 new Color(0x609056), new Color(0x609056),
-                Color.black, "Inter", Font.BOLD, fontSize);
+                Color.WHITE, "Malgun Gothic", Font.BOLD, fontSize);
         button.setBounds(x, y, width, height);
         return button;
     }
@@ -275,6 +300,8 @@ public class FoodInfoPanel extends JPanel {
         weightValue = 100; // 기본 g 값 초기화
         
         foodNameLabel.setText("음식 이름");
+        foodNameLabel.setToolTipText(null);
+        mealTypeLabel.setText("선택한 식사: -");
         kcalLabel.setText("0 kcal");
         searchField.getTextField().setText(weightValue + ""); 
 
@@ -297,6 +324,20 @@ public class FoodInfoPanel extends JPanel {
         updatedFood.setFat(calculateFat(currentFood));
         updatedFood.setWeight(weightValue); // 현재 설정된 그램 값 저장
         return updatedFood;
+    }
+
+    private void updateMealTypeLabel() {
+        String mealType = mainUserPanel.foodListPanel.getCurrentMealType();
+        mealTypeLabel.setText(mealType == null || mealType.isBlank()
+                ? "선택한 식사: -"
+                : "선택한 식사: " + mealType);
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
 }
