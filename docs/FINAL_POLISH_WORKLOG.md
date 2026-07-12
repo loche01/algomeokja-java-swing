@@ -5,10 +5,10 @@
 - 작업 브랜치: `codex-final-polish`
 - 기준 브랜치: `codex-audit`
 - 기준 커밋: `4089009`
-- 현재 단계: 체크포인트 3 사용자 검증 완료
-- 마지막 기능 커밋: `587750d 정리: DBConnectionMgr finalize 의존 제거`
-- 다음 작업: 체크포인트 4 식단 저장 트랜잭션화
-- 사용자 Eclipse 검증 대기: 아니요
+- 현재 단계: 체크포인트 4 식단 저장 트랜잭션 정적 작업 완료
+- 마지막 기능 커밋: `78b807f 개선: 식단 저장을 단일 트랜잭션으로 통합`
+- 다음 작업: 정상 저장 흐름 Eclipse 검증
+- 사용자 Eclipse 검증 대기: 예
 
 ## 작업 기록
 
@@ -172,3 +172,19 @@
 - 예외·로그: 새로운 Java 예외와 DB 커넥션 오류가 없었다. 콘솔에는 프로젝트 오류에서 제외한 macOS TSM·`IMKCFRunLoop` 시스템 메시지만 관찰됐다.
 - 결론: 로그인 전 정상 로그와 `finalize()` 경고 정리를 포함한 체크포인트 3을 완료 상태로 확정한다.
 - 다음 단계: 식단 헤더와 상세 저장을 하나의 JDBC 트랜잭션으로 묶는 체크포인트 4
+
+### 2026-07-12 / 식단 저장 단일 트랜잭션 통합
+
+- 상태: 기능 커밋 및 정적 검증 완료, 체크포인트 4 Eclipse 검증 대기
+- 기존 위험: `FoodListPanel`이 `MealDAO.insertMeal()`로 헤더를 먼저 저장한 뒤 `MealLogDAO.insertMealLogs()`를 호출했다. 두 메서드가 풀에서 각각 다른 `Connection`을 빌렸고 상세 저장 트랜잭션은 헤더 INSERT를 포함하지 않아, 헤더 성공 후 상세 실패 시 빈 `meal` 행을 되돌릴 수 없었다.
+- 설계 선택: 식단 저장 전용 `MealSaveService`를 추가하는 A안을 선택했다. UI에 JDBC 코드를 넣지 않고 트랜잭션 경계를 한 곳에 모으면서 기존 DAO의 독립 호출 메서드를 유지할 수 있어 변경 책임이 가장 명확하다.
+- 동일 연결: 서비스가 풀에서 `Connection`을 한 번 빌려 `MealDAO.insertMeal(Connection, ...)`과 `MealLogDAO.insertMealLogs(Connection, ...)` 오버로드에 차례로 전달한다. 두 DAO 오버로드는 전달받은 연결을 닫거나 풀에 반환하지 않는다.
+- 트랜잭션 흐름: 기존 `autoCommit` 값을 보관하고 `setAutoCommit(false)` 후 헤더 INSERT·생성 키 확인·모든 상세 INSERT를 수행한다. 모든 작업 성공 후에만 `commit()`하며 헤더 실패, 생성 키 미반환, 상세 1건 실패와 예외는 모두 `rollback()` 경로로 합류한다.
+- 오류 복구: 롤백 자체가 실패하면 원래 예외에 suppressed 예외로 연결해 최초 원인을 가리지 않는다. `finally`에서 기존 `autoCommit` 값을 복원한 뒤 커넥션을 한 번 반환하고, 상태 복원이 실패한 연결은 풀에 돌려놓지 않고 제거한다.
+- 자원 관리: 헤더의 `PreparedStatement`·생성 키 `ResultSet`과 상세 `PreparedStatement`는 try-with-resources로 닫힌다. 서비스만 트랜잭션 커넥션 수명을 관리한다.
+- DAO 호환: 기존 `MealDAO.insertMeal(String, String)`과 `MealLogDAO.insertMealLogs(int, Vector<FoodBean>)` 시그니처는 유지하고 새 오버로드가 실제 INSERT를 공유한다. 기존 SQL 컬럼·날짜/시간 함수·생성 키 방식과 음식 중량·열량 저장 의미는 변경하지 않았다.
+- UI 처리: `FoodListPanel`은 서비스의 성공 여부만 확인한다. 실패 시 기존 저장 오류 안내 후 현재 화면과 담은 목록을 유지한다. 성공 안내, `clearPanel()`, `HomeMeal` 열량 갱신과 복귀는 커밋 성공 뒤에만 실행된다. 식사 유형·로그인·빈 목록 사전 차단도 유지된다.
+- 검증 결과: 동일 `Connection` 전달, `setAutoCommit(false)`·`commit()`·모든 저장 실패의 `rollback()` 합류, auto-commit 복원, 단일 커넥션 반환, try-with-resources와 UI 성공 분기 순서를 정적으로 확인했다. `git diff --check`와 JDK 21 전체 `src` 컴파일을 통과했다.
+- 제한 준수: `sql/schema.sql`의 기존 `meal`·`meal_log` 구조만 정적으로 확인했으며 스키마·SQL 의미를 변경하거나 DB에 접속·실행하지 않았다. 개인정보나 선택 음식 상세를 출력하는 로그를 추가하지 않았다.
+- 실행 검증 범위: 정상 다건 저장은 Eclipse에서 검증할 수 있다. 데이터·스키마·설정을 변경하지 않고 상세 INSERT만 안전하게 실패시키는 기존 정상 경로는 없어 롤백 실행 검증은 보류한다. 테스트 전용 강제 예외나 장애 플래그는 추가하지 않았다.
+- 커밋: `78b807f 개선: 식단 저장을 단일 트랜잭션으로 통합`
