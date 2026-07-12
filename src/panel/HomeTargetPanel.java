@@ -101,7 +101,9 @@ public class HomeTargetPanel extends JPanel {
 
     public void loadUserTargetData() {
         if (UserSessionManager.getInstance().getCurrentUser() == null) {
-            System.err.println("❌ [UserSessionManager] 현재 로그인한 사용자가 없습니다.");
+            if (isShowing()) {
+                System.err.println("⚠ [UserSessionManager] 목표 달성 화면에 필요한 로그인 세션이 없습니다.");
+            }
             return;
         }
 

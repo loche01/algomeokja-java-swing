@@ -253,7 +253,6 @@ public class HomeDailyPanel extends JPanel {
     public void updateNutritionData() {
         String userId = LoginManager.getInstance().getUserId();
         if (userId == null || userId.isEmpty()) {
-            System.out.println("로그인된 사용자가 없습니다.");
             return;
         }
         
