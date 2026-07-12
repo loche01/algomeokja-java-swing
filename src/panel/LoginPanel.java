@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 import javax.swing.*;
 import main.MainFrame;
@@ -176,14 +177,15 @@ public class LoginPanel extends JPanel implements ActionListener {
 	// 로그인 시도 메서드 추가 (코드 중복 방지)
 	private void attemptLogin() {
 		String userId = loginField.getText();
-		String userPwd = new String(passwordField.getText());
+		JPasswordField passwordInput = (JPasswordField) passwordField.getComponent();
+		char[] userPassword = passwordInput.getPassword();
 
-		if (userId.isEmpty() || userPwd.isEmpty()) {
-			CustomDialog.showDialog(mainFrame, "아이디와 비밀번호를 입력하세요.", "로그인 오류");
-		} else {
-			try {
+		try {
+			if (userId.isEmpty() || userPassword.length == 0) {
+				CustomDialog.showDialog(mainFrame, "아이디와 비밀번호를 입력하세요.", "로그인 오류");
+			} else {
 				// 사용자 또는 관리자 정보를 가져옵니다
-				UserBean user = loginDAO.getUserInfo(userId, userPwd);
+				UserBean user = loginDAO.getUserInfo(userId, userPassword);
 				if (user != null) {
 					// 로그인 성공 시 즉시 LoginManager에 사용자 정보를 저장
 					LoginManager.getInstance().setCurrentUser(user);
@@ -212,10 +214,12 @@ public class LoginPanel extends JPanel implements ActionListener {
 				} else {
 					CustomDialog.showDialog(mainFrame, "아이디 혹은 비밀번호가 틀렸습니다.", "로그인 실패");
 				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				CustomDialog.showDialog(mainFrame, "로그인 처리 중 오류가 발생했습니다.", "로그인 오류");
 			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			CustomDialog.showDialog(mainFrame, "로그인 처리 중 오류가 발생했습니다.", "로그인 오류");
+		} finally {
+			Arrays.fill(userPassword, '\0');
 		}
 	}
 
