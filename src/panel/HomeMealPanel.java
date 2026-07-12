@@ -4,8 +4,6 @@ import DB.MealDAO;
 import DB.MealLogDAO;
 import DB.UserDAO;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.time.LocalTime;
 import javax.swing.*;
 import main.MainUserPanel;
@@ -45,245 +43,60 @@ public class HomeMealPanel extends JPanel {
 		setBackground(new Color(192, 233, 147));
 		setBounds(0, 140, 440, 700);
 		
-		// 사용자 이름 표시 레이블 - 너비 조정
+		// 사용자 이름과 안내 문구를 분리해 긴 이름에서도 겹치지 않도록 배치
 		userIdLabel = new JLabel();
-		userIdLabel.setFont(new Font("Inter", Font.BOLD, 32));
-		userIdLabel.setBounds(22, 25, 180, 40); // 너비를 380에서 180으로 줄임
+		userIdLabel.setFont(new Font("Inter", Font.BOLD, 28));
+		userIdLabel.setBounds(22, 18, 396, 38);
 		userIdLabel.setForeground(Color.white);
 		add(userIdLabel);
 		
-		// 식단 입력 안내 메시지 - 위치 조정하여 유저 이름 오른쪽에 배치
-		mealGuideLabel = new JLabel("식단을 입력해주세요");
-		mealGuideLabel.setFont(new Font("Inter", Font.BOLD, 18));
-		mealGuideLabel.setBounds(220, 35, 200, 25);
+		mealGuideLabel = new JLabel("식사별 기록을 확인하고 음식을 추가해보세요");
+		mealGuideLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+		mealGuideLabel.setBounds(22, 58, 396, 26);
 		mealGuideLabel.setForeground(new Color(255, 255, 255));
 		mealGuideLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 		add(mealGuideLabel);
 
-		//아침
-		aPanel = new RoundedComponent(180, 180, 30, "panel", " ", new Color(0x609056),new Color(0x609056), Color.black,
-				" ", 0, 0);
-		aPanel.setBounds(22, 100, 180, 180);
-		aPanel.setLayout(null);
-		aPanel.setEnabled(false);
-		add(aPanel);
-		
-		JLabel aLabel = new JLabel("아침");
-		aLabel.setForeground(Color.white);
-		aLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
-		aLabel.setBounds(15, 15, 80, 20);
-		aPanel.add(aLabel);
-		
 		aaLabel = new JLabel("아직이에요");
-		aaLabel.setForeground(new Color(0xC0E993));
-		aaLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-		aaLabel.setBounds(20, 145, 80, 20);
-		aPanel.add(aaLabel);
-		
-		// 사과 이미지 로드 및 추가
-		ImageIcon originalIcon = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\사과.PNG"); // 원본 이미지 경로 설정
-		Image originalImage = originalIcon.getImage(); // 원본 이미지 가져오기
+		aPanel = createMealCard("아침", 22, 100, aaLabel);
+		add(aPanel);
 
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImage = originalImage.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIcon = new ImageIcon(resizedImage); // 조정된 이미지로 ImageIcon 생성
-
-		JLabel imageLabel = new JLabel(resizedIcon);
-		imageLabel.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
-		aPanel.add(imageLabel); // aPanel에 이미지 추가
-
-		// 식단 추가 버튼 생성
-		JButton crossButton = createMealAddButton();
-
-		// 버튼 클릭 이벤트 리스너 추가
-		crossButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String userId = LoginManager.getInstance().getUserId();
-				if (userId != null) {
-					mainUserPanel.foodListPanel.setMealType("아침");
-					mainUserPanel.showPanel("foodList");
-				}
-			}
-		});
-
-		aPanel.add(crossButton); // aPanel에 십자가 버튼 추가
-
-		//점심
-		bPanel = new RoundedComponent(180, 180, 30, "panel", " ", new Color(0x609056), new Color(0x609056), Color.black,
-				" ", 0, 0);
-		bPanel.setBounds(222, 100, 180, 180);
-		bPanel.setLayout(null);
-		bPanel.setEnabled(false);
-		add(bPanel);
-		
-		JLabel bLabel = new JLabel("점심");
-		bLabel.setForeground(Color.white);
-		bLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
-		bLabel.setBounds(15, 15, 80, 20);
-		bPanel.add(bLabel);
-		
 		baLabel = new JLabel("아직이에요");
-		baLabel.setForeground(new Color(0xC0E993));
-		baLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-		baLabel.setBounds(20, 145, 80, 20);
-		bPanel.add(baLabel);
-		
-		// 점심 이미지 로드 및 추가
-		ImageIcon originalIcona = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\점심.PNG"); // 원본 이미지 경로 설정
-		Image originalImagea = originalIcona.getImage(); // 원본 이미지 가져오기
+		bPanel = createMealCard("점심", 230, 100, baLabel);
+		add(bPanel);
 
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImagea = originalImagea.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIcona = new ImageIcon(resizedImagea); // 조정된 이미지로 ImageIcon 생성
-
-		JLabel imageLabela = new JLabel(resizedIcona);
-		imageLabela.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
-		bPanel.add(imageLabela); // aPanel에 이미지 추가
-		
-		// 식단 추가 버튼 생성
-		JButton crossaButton = createMealAddButton();
-
-		// 버튼 클릭 이벤트 리스너 추가
-		crossaButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String userId = LoginManager.getInstance().getUserId();
-				if (userId != null) {
-					mainUserPanel.foodListPanel.setMealType("점심");
-					mainUserPanel.showPanel("foodList");
-				}
-			}
-		});
-
-		bPanel.add(crossaButton); // aPanel에 십자가 버튼 추가
-
-		
-		//저녁
-		dPanel = new RoundedComponent(180, 180, 30, "panel", " ",new Color(0x609056), new Color(0x609056), Color.black,
-				" ", 0, 0);
-		dPanel.setBounds(22, 300, 180, 180);
-		dPanel.setLayout(null);
-		dPanel.setEnabled(false);
-		add(dPanel);
-		
-		JLabel dLabel = new JLabel("저녁");
-		dLabel.setForeground( Color.white);
-		dLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
-		dLabel.setBounds(15, 15, 80, 20);
-		dPanel.add(dLabel);
-		
 		daLabel = new JLabel("아직이에요");
-		daLabel.setForeground(new Color(0xC0E993));
-		daLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-		daLabel.setBounds(20, 145, 80, 20);
-		dPanel.add(daLabel);
-		
-		// 저녁 이미지 로드 및 추가
-		ImageIcon originalIconb = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\저녁.PNG"); // 원본 이미지 경로 설정
-		Image originalImageb = originalIconb.getImage(); // 원본 이미지 가져오기
+		dPanel = createMealCard("저녁", 22, 286, daLabel);
+		add(dPanel);
 
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImageb = originalImageb.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIconb = new ImageIcon(resizedImageb); // 조정된 이미지로 ImageIcon 생성
-
-		JLabel imageLabelb = new JLabel(resizedIconb);
-		imageLabelb.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
-		dPanel.add(imageLabelb); // aPanel에 이미지 추가
-
-		// 식단 추가 버튼 생성
-		JButton crossbButton = createMealAddButton();
-
-		// 버튼 클릭 이벤트 리스너 추가
-		crossbButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String userId = LoginManager.getInstance().getUserId();
-				if (userId != null) {
-					mainUserPanel.foodListPanel.setMealType("저녁");
-					mainUserPanel.showPanel("foodList");
-				}
-			}
-		});
-
-		dPanel.add(crossbButton); // aPanel에 십자가 버튼 추가
-
-		
-		//간식
-		cPanel = new RoundedComponent(180, 180, 30, "panel", " ", new Color(0x609056), new Color(0x609056), Color.black,
-				" ", 0, 0);
-		cPanel.setBounds(222, 300, 180, 180);
-		cPanel.setLayout(null);
-		cPanel.setEnabled(false);
+		caLabel = new JLabel("아직이에요");
+		cPanel = createMealCard("간식", 230, 286, caLabel);
 		add(cPanel);
 		
-		caLabel = new JLabel("아직이에요");
-		caLabel.setForeground(new Color(0xC0E993));
-		caLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-		caLabel.setBounds(20, 145, 80, 20);
-		cPanel.add(caLabel);
-		
-		JLabel cLabel = new JLabel("간식");
-		cLabel.setForeground(Color.white);
-		cLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
-		cLabel.setBounds(15, 15, 80, 20);
-		cPanel.add(cLabel);
-		
-		// 간식 이미지 로드 및 추가
-		ImageIcon originalIconc = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\간식.PNG"); // 원본 이미지 경로 설정
-		Image originalImagec = originalIconc.getImage(); // 원본 이미지 가져오기
-
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImagec = originalImagec.getScaledInstance(50, 50, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIconc = new ImageIcon(resizedImagec); // 조정된 이미지로 ImageIcon 생성
-
-		JLabel imageLabelc = new JLabel(resizedIconc);
-		imageLabelc.setBounds(20, 90, 50, 50); // 이미지 위치와 크기 설정
-		cPanel.add(imageLabelc); // aPanel에 이미지 추가
-
-		// 식단 추가 버튼 생성
-		JButton crosscButton = createMealAddButton();
-
-		// 버튼 클릭 이벤트 리스너 추가
-		crosscButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String userId = LoginManager.getInstance().getUserId();
-				if (userId != null) {
-					mainUserPanel.foodListPanel.setMealType("간식");
-					mainUserPanel.showPanel("foodList");
-				}
-			}
-		});
-
-		cPanel.add(crosscButton); // aPanel에 십자가 버튼 추가
-
-		
 		//물섭취
-		ePanel = new RoundedComponent(380, 150, 30, "panel", " ", new Color(0x609056), new Color(0x609056), Color.black,
+		ePanel = new RoundedComponent(396, 150, 30, "panel", " ", new Color(0x609056), new Color(0x609056), Color.black,
 				" ", 0, 0);
-		ePanel.setBounds(22, 500, 400, 150);
+		ePanel.setBounds(22, 472, 396, 150);
 		ePanel.setLayout(null);
-		ePanel.setEnabled(false);
 		add(ePanel);
 		
 		JLabel eLabel = new JLabel("물 섭취");
 		eLabel.setForeground(Color.white);
 		eLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
-		eLabel.setBounds(15, 15, 80, 20);
+		eLabel.setBounds(18, 16, 120, 30);
 		ePanel.add(eLabel);
 		
-		// 간식 이미지 로드 및 추가
-		ImageIcon originalIconwa = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\물섭취.PNG"); // 원본 이미지 경로 설정
-		Image originalImagewa = originalIconwa.getImage(); // 원본 이미지 가져오기
+		JLabel waterMessageLabel = new JLabel("오늘도 잊지 말고 물을 챙겨주세요");
+		waterMessageLabel.setForeground(Color.WHITE);
+		waterMessageLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
+		waterMessageLabel.setBounds(18, 60, 360, 28);
+		ePanel.add(waterMessageLabel);
 
-		// 원하는 크기로 이미지 조정 (예: 50x50)
-		Image resizedImagewa = originalImagewa.getScaledInstance(350, 70, Image.SCALE_SMOOTH); 
-		ImageIcon resizedIconwa = new ImageIcon(resizedImagewa); // 조정된 이미지로 ImageIcon 생성
-
-		JLabel imageLabelwa = new JLabel(resizedIconwa);
-		imageLabelwa.setBounds(15, 60, 350, 70); // 이미지 위치와 크기 설정
-		ePanel.add(imageLabelwa); // aPanel에 이미지 추가
+		JLabel waterGuideLabel = new JLabel("충분한 수분 섭취로 건강한 하루를 만들어요");
+		waterGuideLabel.setForeground(new Color(0xC0E993));
+		waterGuideLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+		waterGuideLabel.setBounds(18, 96, 360, 24);
+		ePanel.add(waterGuideLabel);
 
 		// 패널이 표시될 때마다 정보 업데이트를 위한 리스너 추가
 		addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -297,16 +110,56 @@ public class HomeMealPanel extends JPanel {
 		});
 	}
 
+	private RoundedComponent createMealCard(String mealType, int x, int y, JLabel calorieLabel) {
+		RoundedComponent card = new RoundedComponent(188, 170, 24, "panel", " ",
+				new Color(0x609056), new Color(0x609056), Color.BLACK, " ", 0, 0);
+		card.setBounds(x, y, 188, 170);
+		card.setLayout(null);
+
+		JLabel titleLabel = new JLabel(mealType);
+		titleLabel.setForeground(Color.WHITE);
+		titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
+		titleLabel.setBounds(16, 14, 100, 30);
+		card.add(titleLabel);
+
+		JLabel recordLabel = new JLabel("오늘 기록");
+		recordLabel.setForeground(new Color(0xE4F4D3));
+		recordLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
+		recordLabel.setBounds(16, 55, 100, 22);
+		card.add(recordLabel);
+
+		calorieLabel.setForeground(new Color(0xC0E993));
+		calorieLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 19));
+		calorieLabel.setBounds(16, 78, 156, 30);
+		card.add(calorieLabel);
+
+		JButton addButton = createMealAddButton();
+		addButton.addActionListener(e -> openFoodList(mealType));
+		card.add(addButton);
+
+		return card;
+	}
+
 	private JButton createMealAddButton() {
-		JButton button = new JButton("추가");
-		button.setBounds(115, 15, 50, 50);
+		JButton button = new JButton("음식 추가");
+		button.setBounds(16, 124, 156, 34);
 		button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-		button.setForeground(Color.WHITE);
+		button.setForeground(new Color(0x406E38));
+		button.setBackground(Color.WHITE);
+		button.setOpaque(true);
 		button.setFocusPainted(false);
-		button.setContentAreaFilled(false);
-		button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1, true));
+		button.setContentAreaFilled(true);
+		button.setBorder(BorderFactory.createLineBorder(new Color(0xE4F4D3), 1, true));
 		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		return button;
+	}
+
+	private void openFoodList(String mealType) {
+		String userId = LoginManager.getInstance().getUserId();
+		if (userId != null) {
+			mainUserPanel.foodListPanel.setMealType(mealType);
+			mainUserPanel.showPanel("foodList");
+		}
 	}
 
 	// 사용자 이름만 업데이트하는 간소화된 메서드
