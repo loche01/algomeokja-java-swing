@@ -1,8 +1,7 @@
 package panel;
 
 import DB.FoodDAO;
-import DB.MealDAO;
-import DB.MealLogDAO;
+import DB.MealSaveService;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,8 +30,7 @@ public class FoodListPanel extends JPanel {
     public Vector<FoodBean> favoriteItems = new Vector<>(); // ✅ 담은 목록 저장
     private boolean isFavoriteList = false; // ✅ 현재 담은 목록인지 여부
     private FoodDAO foodDAO;
-    private MealDAO mealDAO;
-    private MealLogDAO mealLogDAO;
+    private MealSaveService mealSaveService;
     private String userId;
     private RoundedComponent saveButtonComponent, backButtonComponent;
     private String currentMealType = "";  // 현재 선택된 식사 유형
@@ -41,8 +39,7 @@ public class FoodListPanel extends JPanel {
     public FoodListPanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
         this.foodDAO = new FoodDAO();
-        this.mealDAO = new MealDAO();
-        this.mealLogDAO = new MealLogDAO();
+        this.mealSaveService = new MealSaveService();
 
         setLayout(null);
         setBackground(new Color(0xF3F5F0));
@@ -345,19 +342,7 @@ public class FoodListPanel extends JPanel {
         }
         
         try {
-            // meal 테이블에 새 레코드 추가 (meal_type 포함)
-            int mealCode = mealDAO.insertMeal(userId, currentMealType);
-            
-            if (mealCode == -1) {
-                JOptionPane.showMessageDialog(this,
-                    "식사 기록을 생성하지 못했습니다. 잠시 후 다시 시도해주세요.",
-                    "저장 오류",
-                    JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            // meal_log 테이블에 담은 음식 목록 추가
-            boolean success = mealLogDAO.insertMealLogs(mealCode, favoriteItems);
+            boolean success = mealSaveService.saveMealWithLogs(userId, currentMealType, favoriteItems);
             
             if (!success) {
                 JOptionPane.showMessageDialog(this,

@@ -25,77 +25,75 @@ public class MealLogDAO {
         }
 
         Connection conn = null;
-        PreparedStatement pstmt = null;
-        boolean success = true;
+        boolean originalAutoCommit = true;
+        boolean transactionStarted = false;
         
         try {
             conn = pool.getConnection();
-            conn.setAutoCommit(false); // 트랜잭션 시작
-            
-            String sql = "INSERT INTO meal_log " +
-                        "(meal_code, food_code, weight_g, meal_kcal, meal_carb, meal_protein, meal_fat) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
-            pstmt = conn.prepareStatement(sql);
-            
-            for (FoodBean food : favoriteItems) {
-                try {
-                    if (food.getFoodCode() <= 0) {
-                        throw new SQLException("유효하지 않은 음식 코드입니다.");
-                    }
-                    
-                    // 이미 FoodInfoPanel에서 계산된 값을 그대로 사용
-                    double finalKcal = food.getFoodKcal();
-                    double finalCarb = food.getCarb();
-                    double finalProtein = food.getProtein();
-                    double finalFat = food.getFat();
-                    
-                    // meal_log 테이블에 삽입
-                    pstmt.setInt(1, mealCode);
-                    pstmt.setInt(2, food.getFoodCode());
-                    pstmt.setDouble(3, food.getWeight());
-                    pstmt.setDouble(4, finalKcal);
-                    pstmt.setDouble(5, finalCarb);
-                    pstmt.setDouble(6, finalProtein);
-                    pstmt.setDouble(7, finalFat);
-                    
-                    int result = pstmt.executeUpdate();
-                    if (result <= 0) {
-                        System.err.println("식단 상세 정보 저장에 실패했습니다.");
-                        success = false;
-                        break;
-                    }
-                } catch (Exception e) {
-                    System.err.println("식단 상세 정보 저장 중 오류가 발생했습니다.");
-                    e.printStackTrace();
-                    success = false;
-                    break;
-                }
-            }
-            
-            if (success) {
-                conn.commit();
-            } else {
-                conn.rollback();
-            }
-            
+            originalAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            transactionStarted = true;
+
+            insertMealLogs(conn, mealCode, favoriteItems);
+            conn.commit();
+            return true;
         } catch (Exception e) {
-            success = false;
+            rollback(conn, transactionStarted, e);
+            System.err.println("식단 상세 정보 저장 중 오류가 발생했습니다.");
             e.printStackTrace();
-            try {
-                if (conn != null) conn.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+            return false;
         } finally {
             try {
-                if (conn != null) conn.setAutoCommit(true);
+                if (conn != null) conn.setAutoCommit(originalAutoCommit);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            pool.freeConnection(conn, pstmt);
+            pool.freeConnection(conn);
         }
-        
-        return success;
+    }
+
+    // 외부 트랜잭션에서 같은 Connection으로 모든 식단 상세를 저장
+    public void insertMealLogs(Connection conn, int mealCode, Vector<FoodBean> favoriteItems)
+            throws SQLException {
+        if (conn == null || mealCode <= 0 || favoriteItems == null || favoriteItems.isEmpty()) {
+            throw new SQLException("식단 상세 정보를 저장할 수 없는 입력입니다.");
+        }
+
+        String sql = "INSERT INTO meal_log " +
+                     "(meal_code, food_code, weight_g, meal_kcal, meal_carb, meal_protein, meal_fat) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            for (FoodBean food : favoriteItems) {
+                if (food == null || food.getFoodCode() <= 0) {
+                    throw new SQLException("유효하지 않은 음식 정보입니다.");
+                }
+
+                pstmt.setInt(1, mealCode);
+                pstmt.setInt(2, food.getFoodCode());
+                pstmt.setDouble(3, food.getWeight());
+                pstmt.setDouble(4, food.getFoodKcal());
+                pstmt.setDouble(5, food.getCarb());
+                pstmt.setDouble(6, food.getProtein());
+                pstmt.setDouble(7, food.getFat());
+
+                if (pstmt.executeUpdate() <= 0) {
+                    throw new SQLException("식단 상세 정보 저장에 실패했습니다.");
+                }
+            }
+        }
+    }
+
+    private void rollback(Connection conn, boolean transactionStarted, Exception originalError) {
+        if (conn == null || !transactionStarted) {
+            return;
+        }
+
+        try {
+            conn.rollback();
+        } catch (SQLException rollbackError) {
+            originalError.addSuppressed(rollbackError);
+        }
     }
     
     // 특정 식사의 음식 목록 조회

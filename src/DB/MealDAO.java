@@ -18,34 +18,41 @@ public class MealDAO {
     // 새로운 식사 기록 추가하고 생성된 meal_code 반환
     public int insertMeal(String userId, String mealType) {
         Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
         int newMealCode = -1;
-        
+
         try {
             conn = pool.getConnection();
-            
-            // meal 테이블에 새 레코드 삽입
-            String sql = "INSERT INTO meal (user_id, meal_date, meal_time, meal_type) " +
-                        "VALUES (?, CURDATE(), CURTIME(), ?)";
-            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstmt.setString(1, userId);
-            pstmt.setString(2, mealType);
-            pstmt.executeUpdate();
-            
-            // 생성된 meal_code 가져오기
-            rs = pstmt.getGeneratedKeys();
-            if (rs.next()) {
-                newMealCode = rs.getInt(1);
-            }
-            
+            newMealCode = insertMeal(conn, userId, mealType);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            pool.freeConnection(conn, pstmt, rs);
+            pool.freeConnection(conn);
         }
-        
+
         return newMealCode;
+    }
+
+    // 외부 트랜잭션에서 같은 Connection으로 식사 헤더를 저장
+    public int insertMeal(Connection conn, String userId, String mealType) throws SQLException {
+        if (conn == null) {
+            throw new SQLException("식단 저장용 DB 연결이 없습니다.");
+        }
+
+        String sql = "INSERT INTO meal (user_id, meal_date, meal_time, meal_type) " +
+                     "VALUES (?, CURDATE(), CURTIME(), ?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, userId);
+            pstmt.setString(2, mealType);
+
+            if (pstmt.executeUpdate() <= 0) {
+                return -1;
+            }
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                return rs.next() ? rs.getInt(1) : -1;
+            }
+        }
     }
     
     // 특정 날짜의 식사 기록 조회
@@ -157,4 +164,4 @@ public class MealDAO {
         
         return success;
     }
-} 
+}
