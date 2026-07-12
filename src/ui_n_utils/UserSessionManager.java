@@ -20,7 +20,6 @@ public class UserSessionManager {
     // 🔹 일반 사용자 로그인 설정
     public void setCurrentUser(UserBean user) {
         if (user != null && user.getUser_id() != null) {
-            user.setUser_pwd(null); // ✅ 보안 강화: 비밀번호 저장 금지
             currentUser = user;
             isAdmin = false;  // ✅ 일반 유저 로그인 시 관리자 플래그 해제
             // System.out.println("✅ [UserSessionManager] 로그인 성공: " + user.getUser_id());
