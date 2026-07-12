@@ -165,6 +165,7 @@ public class NoticeAdminPanel extends JPanel implements ActionListener {
                 author.setForeground(Color.DARK_GRAY);
                 date.setForeground(Color.GRAY);
                 title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                title.setToolTipText(notice.getNotice_title());
 
                 JLabel[] rowLabels = {number, title, author, date};
                 for (JLabel label : rowLabels) {

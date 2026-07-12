@@ -88,17 +88,18 @@ public class AdminNoticeDetailPanel extends JPanel {
         authorLabel = new JLabel();
         authorLabel.setFont(new Font("Inter", Font.BOLD, 12));
         authorLabel.setForeground(Color.GRAY);
-        authorLabel.setBounds(10, 95, 250, 20);
+        authorLabel.setBounds(10, 95, 360, 20);
         noticePanel.add(authorLabel);
 
         dateLabel = new JLabel();
         dateLabel.setFont(new Font("Inter", Font.BOLD, 12));
         dateLabel.setForeground(Color.GRAY);
-        dateLabel.setBounds(200, 95, 180, 20);
+        dateLabel.setBounds(10, 118, 360, 20);
+        dateLabel.setHorizontalAlignment(SwingConstants.LEFT);
         noticePanel.add(dateLabel);
 
         JSeparator separator2 = new JSeparator();
-        separator2.setBounds(10, 120, 360, 1);
+        separator2.setBounds(10, 145, 360, 1);
         separator2.setForeground(Color.BLACK);
         noticePanel.add(separator2);
 
@@ -113,7 +114,7 @@ public class AdminNoticeDetailPanel extends JPanel {
         contentArea.setMargin(new Insets(5, 5, 5, 5));
 
         contentScrollPane = new JScrollPane(contentArea);
-        contentScrollPane.setBounds(10, 130, 360, 350);
+        contentScrollPane.setBounds(10, 155, 360, 325);
         contentScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         contentScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -173,6 +174,7 @@ public class AdminNoticeDetailPanel extends JPanel {
         this.currentNoticeId = notice.getNotice_num();  // ✅ 현재 공지사항 ID 저장
 
         titleValue.setText(notice.getNotice_title());
+        titleValue.setToolTipText(notice.getNotice_title());
         authorLabel.setText("작성자: " + notice.getAdmin_id());
         dateLabel.setText("작성날짜: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(notice.getNotice_time()));
         contentArea.setText(notice.getNotice_content());
