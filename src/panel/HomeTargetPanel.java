@@ -1,255 +1,332 @@
 package panel;
 
 import DB.GoalDAO;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.Font;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Locale;
 import java.util.Map;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingConstants;
 import main.MainUserPanel;
+import model.UserBean;
 import model.UserGoal;
+import ui_n_utils.AppTheme;
 import ui_n_utils.UserSessionManager;
 
-public class HomeTargetPanel extends JPanel {  
-    private MainUserPanel mainUserPanel;
-    private int startWeight = 0;
-    private int targetWeight = 0;
-    private GoalDAO goalDAO;
-    private int targetDuration = 0;
-    
-    private JLabel nowWeightLabel, weightChangeLabel, targetChangeLabel, durationLabel;
-    private GraphPanel graphPanel;
+public class HomeTargetPanel extends JPanel {
+    private static final int CARD_WIDTH = 380;
+
+    private final MainUserPanel mainUserPanel;
+    private final GoalDAO goalDAO;
+    private final JPanel summaryCard;
+    private final JPanel progressCard;
+    private final JPanel stateCard;
+    private final JLabel startWeightValue;
+    private final JLabel currentWeightValue;
+    private final JLabel targetWeightValue;
+    private final JLabel durationValue;
+    private final JLabel progressPercentLabel;
+    private final JLabel progressDetailLabel;
+    private final JLabel stateTitleLabel;
+    private final JLabel stateDescriptionLabel;
+    private final JProgressBar progressBar;
+    private final JButton goalActionButton;
 
     public HomeTargetPanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
         this.goalDAO = new GoalDAO();
 
-        setBounds(0, 40, 440, 700);
-        setBackground(new Color(192, 233, 147));
         setLayout(null);
+        setBounds(0, 0, 440, 686);
+        setBackground(AppTheme.BACKGROUND);
 
-        initializeUIElements();
+        JLabel pageTitle = new JLabel("목표 달성");
+        pageTitle.setFont(AppTheme.TITLE_FONT);
+        pageTitle.setForeground(AppTheme.TEXT);
+        pageTitle.setBounds(AppTheme.HORIZONTAL_MARGIN, 18, CARD_WIDTH, 34);
+        add(pageTitle);
 
-        SwingUtilities.invokeLater(() -> {
-            repaint();
-            loadUserTargetData();
-        });
+        JLabel pageDescription = new JLabel("설정한 체중 목표의 진행 상황을 확인합니다.");
+        pageDescription.setFont(AppTheme.BODY_FONT);
+        pageDescription.setForeground(AppTheme.TEXT_SECONDARY);
+        pageDescription.setBounds(AppTheme.HORIZONTAL_MARGIN, 54, CARD_WIDTH, 24);
+        add(pageDescription);
+
+        summaryCard = createCard(90, 210);
+        summaryCard.add(createSectionTitle("목표 요약"));
+        startWeightValue = addSummaryRow(summaryCard, "시작 체중", 53);
+        currentWeightValue = addSummaryRow(summaryCard, "현재 체중", 89);
+        targetWeightValue = addSummaryRow(summaryCard, "목표 체중", 125);
+        durationValue = addSummaryRow(summaryCard, "목표 기간", 161);
+
+        progressCard = createCard(315, 180);
+        progressCard.add(createSectionTitle("진행률"));
+
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setValue(0);
+        progressBar.setForeground(AppTheme.PRIMARY);
+        progressBar.setBackground(AppTheme.INPUT_BACKGROUND);
+        progressBar.setBorderPainted(false);
+        progressBar.setStringPainted(false);
+        progressBar.setBounds(20, 55, 340, 22);
+        progressCard.add(progressBar);
+
+        progressPercentLabel = new JLabel("0.0%", SwingConstants.CENTER);
+        progressPercentLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
+        progressPercentLabel.setForeground(AppTheme.TEXT);
+        progressPercentLabel.setBounds(20, 82, 340, 32);
+        progressCard.add(progressPercentLabel);
+
+        progressDetailLabel = new JLabel("", SwingConstants.CENTER);
+        progressDetailLabel.setFont(AppTheme.BODY_FONT);
+        progressDetailLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        progressDetailLabel.setBounds(20, 118, 340, 42);
+        progressCard.add(progressDetailLabel);
+
+        stateCard = createCard(510, 135);
+        stateTitleLabel = new JLabel("");
+        stateTitleLabel.setFont(AppTheme.SECTION_TITLE_FONT);
+        stateTitleLabel.setForeground(AppTheme.PRIMARY_DARK);
+        stateTitleLabel.setBounds(20, 14, 340, 28);
+        stateCard.add(stateTitleLabel);
+
+        stateDescriptionLabel = new JLabel("");
+        stateDescriptionLabel.setFont(AppTheme.CAPTION_FONT);
+        stateDescriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        stateDescriptionLabel.setBounds(20, 42, 340, 36);
+        stateCard.add(stateDescriptionLabel);
+
+        goalActionButton = new JButton("목표 설정");
+        AppTheme.stylePrimaryButton(goalActionButton);
+        goalActionButton.setBounds(20, 84, 340, 38);
+        goalActionButton.addActionListener(e -> mainUserPanel.showPanel("MymeGoal"));
+        stateCard.add(goalActionButton);
+
+        showNoGoalState();
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        g.setColor(new Color(192, 233, 147));
-        g.fillRect(0, 0, getWidth(), getHeight());
+    private JPanel createCard(int y, int height) {
+        JPanel card = new JPanel(null);
+        AppTheme.styleCard(card);
+        card.setBounds(AppTheme.HORIZONTAL_MARGIN, y, CARD_WIDTH, height);
+        add(card);
+        return card;
     }
 
-    private void initializeUIElements() {
-        JLabel label = new JLabel("목표 달성");
-        label.setFont(new Font("Inter", Font.BOLD, 42));
-        label.setBounds(124, 45, 192, 40);
-        label.setForeground(new Color(0x609056));
-        add(label);
+    private JLabel createSectionTitle(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(AppTheme.SECTION_TITLE_FONT);
+        label.setForeground(AppTheme.PRIMARY_DARK);
+        label.setBounds(20, 14, 200, 28);
+        return label;
+    }
 
-        // 체중계 이미지
-        ImageIcon icon = new ImageIcon("C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\target.png");
-        JLabel imageLabel = new JLabel(icon);
-        imageLabel.setBounds(65, 115, 300, 200);
-        add(imageLabel);
+    private JLabel addSummaryRow(JPanel card, String title, int y) {
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        titleLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        titleLabel.setBounds(20, y, 110, 28);
+        card.add(titleLabel);
 
-        imageLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (mainUserPanel != null) {
-                    mainUserPanel.showPanel("MymeGoal");
-                }
-            }
-        });
+        JLabel valueLabel = new JLabel("");
+        valueLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+        valueLabel.setForeground(AppTheme.TEXT);
+        valueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        valueLabel.setBounds(135, y, 225, 28);
+        card.add(valueLabel);
+        return valueLabel;
+    }
 
-        nowWeightLabel = new JLabel("", SwingConstants.CENTER);
-        nowWeightLabel.setFont(new Font("Inter", Font.BOLD, 20));
-        nowWeightLabel.setBounds(50, 320, 340, 50);
-        nowWeightLabel.setForeground(Color.white);
-        add(nowWeightLabel);
+    public void refreshTargetData() {
+        resetDisplayedData();
 
-        graphPanel = new GraphPanel();
-        graphPanel.setBounds(50, 380, 350, 80);
-        add(graphPanel);
+        UserBean currentUser = UserSessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            showUnavailableState();
+            return;
+        }
 
-        weightChangeLabel = new JLabel("", SwingConstants.CENTER);
-        weightChangeLabel.setFont(new Font("Inter", Font.BOLD, 20));
-        weightChangeLabel.setBounds(50, 470, 340, 50);
-        weightChangeLabel.setForeground(new Color(0x404040));
-        add(weightChangeLabel);
+        UserGoal goal = goalDAO.getUserGoal(currentUser.getUser_id());
+        if (goal == null || goal.getStartWeight() == null || goal.getTargetWeight() == null) {
+            showNoGoalState();
+            return;
+        }
 
-        targetChangeLabel = new JLabel("", SwingConstants.CENTER);
-        targetChangeLabel.setFont(new Font("Inter", Font.BOLD, 20));
-        targetChangeLabel.setBounds(50, 520, 340, 50);
-        targetChangeLabel.setForeground(new Color(0x404040));
-        add(targetChangeLabel);
-
-        durationLabel = new JLabel("", SwingConstants.CENTER);
-        durationLabel.setFont(new Font("Inter", Font.BOLD, 20));
-        durationLabel.setBounds(50, 570, 340, 50);
-        durationLabel.setForeground(new Color(0x404040));
-        add(durationLabel);
+        BigDecimal latestWeight = goalDAO.getLatestWeight(currentUser.getUser_id());
+        Map<String, Object> weightChangeData =
+                goalDAO.calculateWeightChangeFromMealLogs(currentUser.getUser_id());
+        renderGoal(goal, latestWeight, weightChangeData);
     }
 
     public void refreshData() {
-        SwingUtilities.invokeLater(this::loadUserTargetData);
+        refreshTargetData();
     }
 
     public void loadUserTargetData() {
-        if (UserSessionManager.getInstance().getCurrentUser() == null) {
-            if (isShowing()) {
-                System.err.println("⚠ [UserSessionManager] 목표 달성 화면에 필요한 로그인 세션이 없습니다.");
-            }
-            return;
+        refreshTargetData();
+    }
+
+    private void resetDisplayedData() {
+        setSummaryValue(startWeightValue, "");
+        setSummaryValue(currentWeightValue, "");
+        setSummaryValue(targetWeightValue, "");
+        setSummaryValue(durationValue, "");
+        progressBar.setValue(0);
+        progressPercentLabel.setText("0.0%");
+        progressDetailLabel.setText("");
+        stateTitleLabel.setText("");
+        stateDescriptionLabel.setText("");
+        goalActionButton.setText("목표 설정");
+    }
+
+    private void renderGoal(UserGoal goal, BigDecimal latestWeight, Map<String, Object> progressData) {
+        summaryCard.setVisible(true);
+        progressCard.setVisible(true);
+        stateCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 510, CARD_WIDTH, 135);
+
+        setSummaryValue(startWeightValue, formatWeight(goal.getStartWeight()));
+        setSummaryValue(
+                currentWeightValue,
+                latestWeight != null ? formatWeight(latestWeight) : "최근 기록 없음");
+        setSummaryValue(targetWeightValue, formatWeight(goal.getTargetWeight()));
+
+        double timeProgress = safePercentage(valueAsDouble(progressData, "timeProgressRatio"));
+        String durationText = goal.getTargetDuration() > 0
+                ? goal.getTargetDuration() + "일" : "기간 정보 없음";
+        if (goal.getTargetDuration() > 0 && goal.getCreatedAt() != null) {
+            durationText += " · " + formatPercent(timeProgress);
         }
+        setSummaryValue(durationValue, durationText);
 
-        String userId = UserSessionManager.getInstance().getCurrentUser().getUser_id();
+        double startWeight = finiteValue(goal.getStartWeight());
+        double targetWeight = finiteValue(goal.getTargetWeight());
+        double currentWeight = latestWeight != null ? finiteValue(latestWeight) : startWeight;
+        double rawProgress = calculateWeightProgress(startWeight, currentWeight, targetWeight);
+        double visualProgress = safePercentage(rawProgress);
 
-        UserGoal goal = goalDAO.getUserGoal(userId);
+        progressBar.setValue((int) Math.round(visualProgress));
+        progressPercentLabel.setText(formatPercent(visualProgress));
+        progressDetailLabel.setText(createProgressDetail(
+                startWeight, currentWeight, targetWeight, latestWeight != null));
 
-        if (goal != null) {
-            this.startWeight = goal.getStartWeight().intValue();
-            this.targetWeight = goal.getTargetWeight().intValue();
-            this.targetDuration = goal.getTargetDuration();
-            
-            SwingUtilities.invokeLater(this::updateTargetUI);
+        boolean goalReached = rawProgress >= 100.0;
+        boolean sameStartAndTarget = Double.compare(startWeight, targetWeight) == 0;
+        if (goalReached) {
+            stateTitleLabel.setText("목표를 달성했습니다.");
+            stateDescriptionLabel.setText("설정한 목표 체중에 도달한 상태입니다.");
+        } else if (sameStartAndTarget) {
+            stateTitleLabel.setText("목표 체중을 확인해주세요.");
+            stateDescriptionLabel.setText("시작 체중과 목표 체중이 같습니다.");
         } else {
-            System.err.println("❌ 목표 데이터를 불러오지 못했습니다.");
-            SwingUtilities.invokeLater(this::showNoDataMessage);
+            stateTitleLabel.setText("목표를 향해 진행 중입니다.");
+            stateDescriptionLabel.setText("최근 기록을 기준으로 진행 상황을 표시합니다.");
         }
+        goalActionButton.setText("목표 수정");
+        goalActionButton.setBounds(20, 84, 340, 38);
     }
 
-    private void showNoDataMessage() {
-        if (nowWeightLabel != null) {
-            nowWeightLabel.setText("<html><b style='font-size:20px;color:red;'>❌ 목표 데이터 없음</b></html>");
-            weightChangeLabel.setText("");
-            targetChangeLabel.setText("");
-            durationLabel.setText("");
-            graphPanel.setData(0, 0, 0);
-            graphPanel.repaint();
+    private double calculateWeightProgress(double start, double current, double target) {
+        if (!Double.isFinite(start) || !Double.isFinite(current) || !Double.isFinite(target)) {
+            return 0.0;
         }
+
+        if (target < start) {
+            double targetChange = start - target;
+            double progress = targetChange == 0.0
+                    ? 0.0 : ((start - current) / targetChange) * 100.0;
+            return finiteOrZero(progress);
+        }
+        if (target > start) {
+            double targetChange = target - start;
+            double progress = targetChange == 0.0
+                    ? 0.0 : ((current - start) / targetChange) * 100.0;
+            return finiteOrZero(progress);
+        }
+        return 0.0;
     }
 
-    public void updateTargetUI() {
-        if (nowWeightLabel == null || weightChangeLabel == null || targetChangeLabel == null) {
-            System.err.println("❌ [오류] UI 요소가 초기화되지 않음! (updateUI 중단)");
-            return;
+    private String createProgressDetail(
+            double start, double current, double target, boolean hasCurrentWeight) {
+        if (!hasCurrentWeight) {
+            return "최근 체중 기록이 없어 진행률을 0%로 표시합니다.";
+        }
+        if (Double.compare(start, target) == 0) {
+            return "시작 체중과 목표 체중이 같습니다.";
         }
 
-        String userId = UserSessionManager.getInstance().getCurrentUser().getUser_id();
-
-        // 현재 체중 표시
-        BigDecimal latestWeight = goalDAO.getLatestWeight(userId);
-        int currentWeight = latestWeight != null ? latestWeight.intValue() : startWeight;
-        
-        nowWeightLabel.setText("<html>현재 체중은 <b style='font-size:20px;color:#002D62;'>" + currentWeight + "kg</b> 입니다.</html>");
-        
-        // 목표 기간 진행률은 기존 계산 흐름을 유지
-        Map<String, Object> weightChangeData = goalDAO.calculateWeightChangeFromMealLogs(userId);
-        double timeProgressRatio = (double) weightChangeData.get("timeProgressRatio");
-        
-        boolean isWeightLossGoal = targetWeight < startWeight;
-        boolean isWeightGainGoal = targetWeight > startWeight;
-        double weightChange = 0.0;
-        double remainingWeight = 0.0;
-        double progressPercent = 0.0;
-        String changeDirection = isWeightGainGoal ? "증량" : "감량";
-
-        if (isWeightLossGoal) {
-            weightChange = startWeight - currentWeight;
-            remainingWeight = currentWeight - targetWeight;
-            int targetChange = startWeight - targetWeight;
-            if (targetChange != 0) {
-                progressPercent = (weightChange / targetChange) * 100.0;
-            }
-        } else if (isWeightGainGoal) {
-            weightChange = currentWeight - startWeight;
-            remainingWeight = targetWeight - currentWeight;
-            int targetChange = targetWeight - startWeight;
-            if (targetChange != 0) {
-                progressPercent = (weightChange / targetChange) * 100.0;
-            }
-        }
-
-        weightChange = Math.max(0.0, weightChange);
-        remainingWeight = Math.max(0.0, remainingWeight);
-        progressPercent = Math.max(0.0, Math.min(100.0, progressPercent));
-
-        // 체중 변화 표시
-        weightChangeLabel.setText("<html>현재까지 <b style='font-size:20px;color:#002D62;'>" +
-                                 String.format("%.1f", weightChange) +
-                                 "kg</b>의 " + changeDirection + "이 있습니다.</html>");
-        
-        // 목표까지 남은 체중 표시
-        targetChangeLabel.setText("<html>목표 체중까지 <b style='font-size:20px; color:red;'>" + 
-                                 String.format("%.1f", remainingWeight) + "kg</b> 남았습니다.</html>");
-        
-        // 목표 기간 표시
-        durationLabel.setText("<html>목표 기간: <b style='font-size:20px;color:#002D62;'>" + 
-                             targetDuration + "일</b> (진행률: " + 
-                             String.format("%.1f", timeProgressRatio) + "%)</html>");
-        
-        // 그래프 데이터 갱신
-        graphPanel.setData(startWeight, targetWeight, progressPercent);
-        graphPanel.repaint();
+        boolean gainGoal = target > start;
+        double changedWeight = gainGoal ? current - start : start - current;
+        double remainingWeight = gainGoal ? target - current : current - target;
+        changedWeight = Math.max(0.0, finiteOrZero(changedWeight));
+        remainingWeight = Math.max(0.0, finiteOrZero(remainingWeight));
+        String direction = gainGoal ? "증량" : "감량";
+        return String.format(
+                Locale.ROOT,
+                "현재까지 %.1f kg %s · 목표까지 %.1f kg",
+                changedWeight,
+                direction,
+                remainingWeight);
     }
 
-    class GraphPanel extends JPanel {
-        private int startWeight, targetWeight;
-        private double progressPercent;
+    private void showNoGoalState() {
+        summaryCard.setVisible(false);
+        progressCard.setVisible(false);
+        stateCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 100, CARD_WIDTH, 170);
+        stateTitleLabel.setText("아직 설정된 목표가 없습니다.");
+        stateDescriptionLabel.setText(
+                "<html>목표를 설정하면 진행 상황을<br>확인할 수 있습니다.</html>");
+        goalActionButton.setText("목표 설정");
+        goalActionButton.setBounds(20, 112, 340, 40);
+    }
 
-        public GraphPanel() {
-            setOpaque(false);
+    private void showUnavailableState() {
+        showNoGoalState();
+        stateTitleLabel.setText("목표 정보를 표시할 수 없습니다.");
+        stateDescriptionLabel.setText("로그인 상태를 확인한 뒤 다시 시도해주세요.");
+    }
+
+    private void setSummaryValue(JLabel label, String value) {
+        label.setText(value);
+        label.setToolTipText(value.isEmpty() ? null : value);
+        label.setFont(new Font(
+                Font.SANS_SERIF,
+                Font.BOLD,
+                value.length() > 18 ? 14 : 18));
+    }
+
+    private String formatWeight(BigDecimal weight) {
+        BigDecimal displayValue = weight.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros();
+        return displayValue.toPlainString() + " kg";
+    }
+
+    private String formatPercent(double percentage) {
+        return String.format(Locale.ROOT, "%.1f%%", safePercentage(percentage));
+    }
+
+    private double valueAsDouble(Map<String, Object> values, String key) {
+        if (values == null) {
+            return 0.0;
         }
+        Object value = values.get(key);
+        return value instanceof Number ? ((Number) value).doubleValue() : 0.0;
+    }
 
-        public void setData(int start, int target, double progress) {
-            this.startWeight = start;
-            this.targetWeight = target;
-            this.progressPercent = progress;
+    private double finiteValue(BigDecimal value) {
+        return value == null ? 0.0 : finiteOrZero(value.doubleValue());
+    }
+
+    private double finiteOrZero(double value) {
+        return Double.isFinite(value) ? value : 0.0;
+    }
+
+    private double safePercentage(double value) {
+        if (!Double.isFinite(value)) {
+            return 0.0;
         }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            g2.setColor(new Color(192, 233, 147));
-            g2.fillRect(0, 0, getWidth(), getHeight());
-
-            int width = getWidth();
-            int height = getHeight();
-            int barHeight = 30;
-            int arc = 30;
-
-            // 배경 바
-            g2.setColor(new Color(0xD9D9D9));
-            g2.fillRoundRect(0, (height - barHeight) / 2, width, barHeight, arc, arc);
-
-            // 진행 바 (진행률에 따라 너비 조정)
-            int progressWidth = (int) (width * (progressPercent / 100.0));
-            if (progressWidth > 0) {
-                g2.setColor(new Color(0x609056));
-                g2.fillRoundRect(0, (height - barHeight) / 2, progressWidth, barHeight, arc, arc);
-            }
-            
-            // 시작 체중과 목표 체중 표시
-            g2.setColor(Color.BLACK);
-            g2.setFont(new Font("Inter", Font.BOLD, 14));
-            g2.drawString(startWeight + "kg", 10, (height - barHeight) / 2 - 5);
-            g2.drawString(targetWeight + "kg", width - 50, (height - barHeight) / 2 - 5);
-            
-            // 진행률 표시
-            g2.setColor(Color.WHITE);
-            g2.setFont(new Font("Inter", Font.BOLD, 16));
-            String progressText = String.format("%.1f%%", progressPercent);
-            FontMetrics fm = g2.getFontMetrics();
-            int textWidth = fm.stringWidth(progressText);
-            g2.drawString(progressText, (width - textWidth) / 2, (height + barHeight) / 2 + 5);
-        }
+        return Math.max(0.0, Math.min(100.0, value));
     }
 }
