@@ -162,14 +162,6 @@ public class HomeTargetPanel extends JPanel {
         renderGoal(goal, latestWeight, weightChangeData);
     }
 
-    public void refreshData() {
-        refreshTargetData();
-    }
-
-    public void loadUserTargetData() {
-        refreshTargetData();
-    }
-
     private void resetDisplayedData() {
         setSummaryValue(startWeightValue, "");
         setSummaryValue(currentWeightValue, "");

@@ -161,6 +161,11 @@ public class MainUserPanel extends JPanel {
         
         // 현재 패널 업데이트
         currentPanel = panelName;
+
+        // 목표 화면은 표시하기 전에 모든 요약 값과 진행률을 최신 데이터로 갱신
+        if (panelName.equals("HomeTarget")) {
+            homeTargetPanel.refreshTargetData();
+        }
         
         // HomeDaily 패널로 이동할 경우 네비게이션 바의 홈 버튼도 선택
         if (panelName.equals("HomeDaily")) {
@@ -223,7 +228,7 @@ public class MainUserPanel extends JPanel {
         switch (panelName) {
             case "HomeDaily": homeDailyPanel.setVisible(true); break;
             case "HomeMeal":  /* 이미 위에서 처리됨 */ break;
-            case "HomeTarget": homeTargetPanel.refreshData(); homeTargetPanel.setVisible(true); break;
+            case "HomeTarget": homeTargetPanel.setVisible(true); break;
            }
     }
     // 📌 탭 클릭 시 패널 전환
