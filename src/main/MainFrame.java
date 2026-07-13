@@ -12,6 +12,7 @@ public class MainFrame extends JFrame {
 
     private CardLayout cardLayout;
     private JPanel mainPanel;
+    private LoginPanel loginPanel;
     private String initialPanel = "HomeDaily"; // 로그인 후 초기 패널 (기본값: 일일현황)
 
     public MainFrame() {
@@ -25,7 +26,7 @@ public class MainFrame extends JFrame {
         mainPanel.setBackground(Color.WHITE);
 
         // 패널 추가
-        LoginPanel loginPanel = new LoginPanel(this);
+        loginPanel = new LoginPanel(this);
         JoinPanel joinPanel = new JoinPanel(this);
         FindIdPwPhone findIdPwPhone = new FindIdPwPhone(this); // 🔹 추가
         BodyInfoSetPanel bodyInfoSetPanel = new BodyInfoSetPanel(this); // 🔹 BodyInfoSetPanel 추가
@@ -51,6 +52,11 @@ public class MainFrame extends JFrame {
     	    } else {
             cardLayout.show(mainPanel, name);
         }
+    }
+
+    public void showLoginAfterLogout() {
+        loginPanel.resetForLogout();
+        showPanel("login");
     }
     
   //🔹 BodyInfoSetPanel로 이동할 때 userId 전달
