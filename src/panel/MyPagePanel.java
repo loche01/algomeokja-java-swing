@@ -32,28 +32,32 @@ public class MyPagePanel extends JPanel {
 
         JPanel mainCard = new JPanel(null);
         AppTheme.styleCard(mainCard);
-        mainCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, 380, 650);
+        mainCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, AppTheme.CARD_WIDTH, 650);
         add(mainCard);
 
         JLabel pageTitle = new JLabel("내 정보");
-        pageTitle.setFont(AppTheme.TITLE_FONT);
-        pageTitle.setForeground(AppTheme.TEXT);
+        AppTheme.styleScreenTitle(pageTitle);
         pageTitle.setBounds(24, 18, 180, 34);
         mainCard.add(pageTitle);
 
-        JLabel memberInfoTitle = createSectionTitle("회원정보", 24, 67);
+        JLabel pageDescription = new JLabel("회원정보와 신체정보를 한눈에 확인합니다.");
+        AppTheme.styleScreenDescription(pageDescription);
+        pageDescription.setBounds(24, 52, 326, 24);
+        mainCard.add(pageDescription);
+
+        JLabel memberInfoTitle = createSectionTitle("회원정보", 24, 84);
         mainCard.add(memberInfoTitle);
 
         editMemberButton = new JButton("회원정보 수정");
         AppTheme.styleSecondaryButton(editMemberButton);
-        editMemberButton.setBounds(218, 62, 132, 34);
+        editMemberButton.setBounds(218, 79, 132, 34);
         editMemberButton.addActionListener(e -> mainUserPanel.showPanel("MyMember"));
         mainCard.add(editMemberButton);
 
         String[] memberInfo = {"이름", "이메일", "전화번호", "ID"};
         userInfoLabels = new JLabel[memberInfo.length];
         for (int i = 0; i < memberInfo.length; i++) {
-            int rowY = 112 + (i * 37);
+            int rowY = 129 + (i * 37);
             mainCard.add(createRowLabel(memberInfo[i], rowY));
             userInfoLabels[i] = createValueLabel(rowY);
             mainCard.add(userInfoLabels[i]);
@@ -62,27 +66,27 @@ public class MyPagePanel extends JPanel {
         JLabel passwordGuide = new JLabel("비밀번호 변경은 회원정보 수정에서 할 수 있습니다.");
         passwordGuide.setFont(AppTheme.CAPTION_FONT);
         passwordGuide.setForeground(AppTheme.TEXT_SECONDARY);
-        passwordGuide.setBounds(122, 260, 228, 20);
+        passwordGuide.setBounds(122, 277, 228, 20);
         mainCard.add(passwordGuide);
 
         JSeparator divider = new JSeparator();
         divider.setForeground(AppTheme.BORDER);
-        divider.setBounds(24, 294, 326, 1);
+        divider.setBounds(24, 311, 326, 1);
         mainCard.add(divider);
 
-        JLabel bodyInfoTitle = createSectionTitle("신체정보", 24, 317);
+        JLabel bodyInfoTitle = createSectionTitle("신체정보", 24, 334);
         mainCard.add(bodyInfoTitle);
 
         editBodyButton = new JButton("신체정보 수정");
         AppTheme.styleSecondaryButton(editBodyButton);
-        editBodyButton.setBounds(218, 312, 132, 34);
+        editBodyButton.setBounds(218, 329, 132, 34);
         editBodyButton.addActionListener(e -> mainUserPanel.showPanel("MyBody"));
         mainCard.add(editBodyButton);
 
         String[] bodyInfo = {"키", "몸무게", "골격근량", "체지방량", "체지방률"};
         bodyInfoLabels = new JLabel[bodyInfo.length];
         for (int i = 0; i < bodyInfo.length; i++) {
-            int rowY = 365 + (i * 37);
+            int rowY = 382 + (i * 37);
             mainCard.add(createRowLabel(bodyInfo[i], rowY));
             bodyInfoLabels[i] = createValueLabel(rowY);
             mainCard.add(bodyInfoLabels[i]);
@@ -90,7 +94,7 @@ public class MyPagePanel extends JPanel {
 
         logoutButton = new JButton("로그아웃");
         AppTheme.styleDangerButton(logoutButton);
-        logoutButton.setBounds(24, 580, 326, 40);
+        logoutButton.setBounds(24, 596, 326, 40);
         logoutButton.addActionListener(e -> confirmLogout());
         mainCard.add(logoutButton);
 
@@ -99,8 +103,7 @@ public class MyPagePanel extends JPanel {
 
     private JLabel createSectionTitle(String text, int x, int y) {
         JLabel label = new JLabel(text);
-        label.setFont(AppTheme.SECTION_TITLE_FONT);
-        label.setForeground(AppTheme.PRIMARY_DARK);
+        AppTheme.styleSectionTitle(label);
         label.setBounds(x, y, 130, 28);
         return label;
     }

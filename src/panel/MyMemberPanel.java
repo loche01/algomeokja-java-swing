@@ -39,12 +39,11 @@ public class MyMemberPanel extends JPanel implements ActionListener {
 
         JPanel mainCard = new JPanel(null);
         AppTheme.styleCard(mainCard);
-        mainCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, 380, 660);
+        mainCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, AppTheme.CARD_WIDTH, 660);
         add(mainCard);
 
         JLabel titleLabel = new JLabel("회원정보 수정");
-        titleLabel.setFont(AppTheme.TITLE_FONT);
-        titleLabel.setForeground(AppTheme.TEXT);
+        AppTheme.styleScreenTitle(titleLabel);
         titleLabel.setBounds(24, 18, 200, 36);
         mainCard.add(titleLabel);
 
@@ -54,9 +53,14 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         backButton.addActionListener(e -> mainUserPanel.showPanel("MyPage"));
         mainCard.add(backButton);
 
+        JLabel descriptionLabel = new JLabel("연락처와 로그인 비밀번호를 관리합니다.");
+        AppTheme.styleScreenDescription(descriptionLabel);
+        descriptionLabel.setBounds(24, 54, 205, 24);
+        mainCard.add(descriptionLabel);
+
         JSeparator headerDivider = new JSeparator();
         headerDivider.setForeground(AppTheme.BORDER);
-        headerDivider.setBounds(24, 70, 326, 1);
+        headerDivider.setBounds(24, 84, 326, 1);
         mainCard.add(headerDivider);
 
         String[] memberInfo = {
@@ -66,7 +70,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         fields = new RoundedComponent[memberInfo.length];
         passwordVisibilityToggles = new PasswordVisibilityToggle[3];
 
-        int fieldStartY = 88;
+        int fieldStartY = 98;
         int spacing = 55;
         for (int i = 0; i < memberInfo.length; i++) {
             int rowY = fieldStartY + (i * spacing);
@@ -116,12 +120,12 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                 "<html>새 비밀번호는 6~20자이며,<br>영문과 특수문자를 포함합니다.</html>");
         passwordRuleLabel.setFont(AppTheme.CAPTION_FONT);
         passwordRuleLabel.setForeground(AppTheme.TEXT_SECONDARY);
-        passwordRuleLabel.setBounds(145, 468, 205, 36);
+        passwordRuleLabel.setBounds(145, 478, 205, 36);
         mainCard.add(passwordRuleLabel);
 
         finishButton = new JButton("변경사항 저장");
         AppTheme.stylePrimaryButton(finishButton);
-        finishButton.setBounds(145, 530, 205, 44);
+        finishButton.setBounds(145, 540, 205, 44);
         finishButton.addActionListener(this);
         mainCard.add(finishButton);
     }
