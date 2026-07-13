@@ -9,6 +9,7 @@ import java.util.Arrays;
 import main.MainFrame;
 import ui_n_utils.CustomDialog;
 import ui_n_utils.PasswordDocumentFilter;
+import ui_n_utils.PasswordVisibilityToggle;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.SmartTextField;
 import ui_n_utils.ValidationUtils;
@@ -258,11 +259,27 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
             JPasswordField confirmPasswordField = new JPasswordField(20);
             PasswordDocumentFilter.install(newPasswordField);
             PasswordDocumentFilter.install(confirmPasswordField);
+            PasswordVisibilityToggle newPasswordVisibility =
+                    PasswordVisibilityToggle.attach(newPasswordField);
+            PasswordVisibilityToggle confirmPasswordVisibility =
+                    PasswordVisibilityToggle.attach(confirmPasswordField);
+
+            JPanel newPasswordRow = new JPanel(new BorderLayout(6, 0));
+            newPasswordRow.add(newPasswordField, BorderLayout.CENTER);
+            JButton newPasswordVisibilityButton = newPasswordVisibility.getButton();
+            newPasswordVisibilityButton.setPreferredSize(new Dimension(54, 30));
+            newPasswordRow.add(newPasswordVisibilityButton, BorderLayout.EAST);
+
+            JPanel confirmPasswordRow = new JPanel(new BorderLayout(6, 0));
+            confirmPasswordRow.add(confirmPasswordField, BorderLayout.CENTER);
+            JButton confirmPasswordVisibilityButton = confirmPasswordVisibility.getButton();
+            confirmPasswordVisibilityButton.setPreferredSize(new Dimension(54, 30));
+            confirmPasswordRow.add(confirmPasswordVisibilityButton, BorderLayout.EAST);
             JPanel resetPanel = new JPanel(new GridLayout(0, 1, 0, 6));
             resetPanel.add(new JLabel("새 비밀번호"));
-            resetPanel.add(newPasswordField);
+            resetPanel.add(newPasswordRow);
             resetPanel.add(new JLabel("새 비밀번호 확인"));
-            resetPanel.add(confirmPasswordField);
+            resetPanel.add(confirmPasswordRow);
             resetPanel.add(new JLabel("6~20자, 영문과 특수문자를 함께 사용하세요."));
 
             int result = JOptionPane.showConfirmDialog(mainFrame, resetPanel,

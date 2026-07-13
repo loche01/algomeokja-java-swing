@@ -13,6 +13,7 @@ import main.MainFrame;
 import model.UserBean;
 import ui_n_utils.CustomDialog;
 import ui_n_utils.PasswordDocumentFilter;
+import ui_n_utils.PasswordVisibilityToggle;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.UIUtils;
 import ui_n_utils.ValidationUtils;
@@ -29,6 +30,7 @@ public class JoinPanel extends JPanel implements ActionListener {
 	private JButton backButton;
 	private MainFrame mainFrame;
 	private JLabel idErrLbl, PwErrLbl, PwCkErrLbl;
+	private PasswordVisibilityToggle passwordVisibilityToggle, confirmPasswordVisibilityToggle;
 	private boolean isIdChecked = false;
 	
 	public JoinPanel(MainFrame mainFrame) {
@@ -94,11 +96,16 @@ public class JoinPanel extends JPanel implements ActionListener {
 		// 🔹 비밀번호
 		// 비밀번호 필드
 		add(UIUtils.createRequiredLabel("비밀번호",Color.black, 32, 250, "Inter",Font.BOLD,15)); // 라벨
-		passwordField = new RoundedComponent(358, 41, 15, "password", "", Color.BLACK, Color.WHITE, Color.BLACK,
+		passwordField = new RoundedComponent(298, 41, 15, "password", "", Color.BLACK, Color.WHITE, Color.BLACK,
 				"Inter", Font.PLAIN, 15);
-		passwordField.setBounds(32, 271, 358, 41);
+		passwordField.setBounds(32, 271, 298, 41);
 		add(passwordField);
 		PasswordDocumentFilter.install((JPasswordField) passwordField.getComponent());
+		passwordVisibilityToggle = PasswordVisibilityToggle.attach(
+				(JPasswordField) passwordField.getComponent());
+		JButton passwordVisibilityButton = passwordVisibilityToggle.getButton();
+		passwordVisibilityButton.setBounds(338, 271, 52, 41);
+		add(passwordVisibilityButton);
 		// 형식 오류 메시지 (초기에는 보이지 않도록 설정)
 		PwErrLbl = UIUtils.createErrorLabel(32, 316, 11);
 		add(PwErrLbl);
@@ -124,11 +131,16 @@ public class JoinPanel extends JPanel implements ActionListener {
 		// 🔹비밀번호 확인
 		// 확인 필드
 		add(UIUtils.createRequiredLabel("비밀번호 확인", Color.black, 32, 336, "Inter",Font.BOLD,15));
-		confirmPasswordField = new RoundedComponent(358, 41, 15, "password", "", Color.BLACK, Color.WHITE, Color.BLACK,
+		confirmPasswordField = new RoundedComponent(298, 41, 15, "password", "", Color.BLACK, Color.WHITE, Color.BLACK,
 				"Inter", Font.PLAIN, 15);
-		confirmPasswordField.setBounds(32, 357, 358, 41);
+		confirmPasswordField.setBounds(32, 357, 298, 41);
 		add(confirmPasswordField);
 		PasswordDocumentFilter.install((JPasswordField) confirmPasswordField.getComponent());
+		confirmPasswordVisibilityToggle = PasswordVisibilityToggle.attach(
+				(JPasswordField) confirmPasswordField.getComponent());
+		JButton confirmPasswordVisibilityButton = confirmPasswordVisibilityToggle.getButton();
+		confirmPasswordVisibilityButton.setBounds(338, 357, 52, 41);
+		add(confirmPasswordVisibilityButton);
 		// 형식 오류 메시지 (초기에는 보이지 않도록 설정)
 		PwCkErrLbl = UIUtils.createErrorLabel(32, 402, 11);
 		add(PwCkErrLbl);
@@ -249,8 +261,21 @@ public class JoinPanel extends JPanel implements ActionListener {
 		joinButton.getButton().addActionListener(this);
 		add(joinButton);
 	}
-		
-	
+
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+			if (passwordVisibilityToggle != null) {
+				passwordVisibilityToggle.reset();
+			}
+			if (confirmPasswordVisibilityToggle != null) {
+				confirmPasswordVisibilityToggle.reset();
+			}
+		}
+	}
+
+
 	@Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == joinButton.getButton()) {
