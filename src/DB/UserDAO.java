@@ -26,12 +26,7 @@ public class UserDAO {
         }
     }
     
-    public UpdateUserResult updateUserWithOptionalRawPassword(UserBean user,
-            char[] currentRawPassword, char[] newRawPassword) {
-        boolean passwordChangeRequested = newRawPassword != null && newRawPassword.length > 0;
-        if (!passwordChangeRequested) {
-            return updateBasicUserInfo(user);
-        }
+    public UpdateUserResult validateCurrentPassword(String userId, char[] currentRawPassword) {
         if (currentRawPassword == null || currentRawPassword.length == 0) {
             return UpdateUserResult.CURRENT_PASSWORD_REQUIRED;
         }
@@ -39,18 +34,36 @@ public class UserDAO {
         Connection con = null;
         try {
             con = pool.getConnection();
-            String storedPassword;
-            String selectSql = "SELECT user_pwd FROM user WHERE user_id=?";
-            try (PreparedStatement selectStatement = con.prepareStatement(selectSql)) {
-                selectStatement.setString(1, user.getUser_id());
-                try (ResultSet rs = selectStatement.executeQuery()) {
-                    if (!rs.next()) {
-                        return UpdateUserResult.ERROR;
-                    }
-                    storedPassword = rs.getString("user_pwd");
-                }
+            String storedPassword = findStoredPassword(con, userId);
+            if (storedPassword == null) {
+                return UpdateUserResult.ERROR;
             }
+            return matchesStoredPassword(currentRawPassword, storedPassword)
+                    ? UpdateUserResult.SUCCESS : UpdateUserResult.CURRENT_PASSWORD_MISMATCH;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return UpdateUserResult.ERROR;
+        } finally {
+            pool.freeConnection(con);
+        }
+    }
 
+    public UpdateUserResult updateUserInfoAndPassword(UserBean user,
+            char[] currentRawPassword, char[] newRawPassword) {
+        if (currentRawPassword == null || currentRawPassword.length == 0) {
+            return UpdateUserResult.CURRENT_PASSWORD_REQUIRED;
+        }
+        if (newRawPassword == null || newRawPassword.length == 0) {
+            return UpdateUserResult.ERROR;
+        }
+
+        Connection con = null;
+        try {
+            con = pool.getConnection();
+            String storedPassword = findStoredPassword(con, user.getUser_id());
+            if (storedPassword == null) {
+                return UpdateUserResult.ERROR;
+            }
             if (!matchesStoredPassword(currentRawPassword, storedPassword)) {
                 return UpdateUserResult.CURRENT_PASSWORD_MISMATCH;
             }
@@ -83,7 +96,7 @@ public class UserDAO {
         }
     }
 
-    private UpdateUserResult updateBasicUserInfo(UserBean user) {
+    public UpdateUserResult updateBasicUserInfo(UserBean user) {
         Connection con = null;
         try {
             con = pool.getConnection();
@@ -100,6 +113,16 @@ public class UserDAO {
             return UpdateUserResult.ERROR;
         } finally {
             pool.freeConnection(con);
+        }
+    }
+
+    private String findStoredPassword(Connection con, String userId) throws SQLException {
+        String selectSql = "SELECT user_pwd FROM user WHERE user_id=?";
+        try (PreparedStatement selectStatement = con.prepareStatement(selectSql)) {
+            selectStatement.setString(1, userId);
+            try (ResultSet rs = selectStatement.executeQuery()) {
+                return rs.next() ? rs.getString("user_pwd") : null;
+            }
         }
     }
 

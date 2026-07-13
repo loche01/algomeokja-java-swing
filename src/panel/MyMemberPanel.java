@@ -156,9 +156,10 @@ public class MyMemberPanel extends JPanel implements ActionListener {
     }
 
     private void updateUserInfo() {
-        if (fields[0].getTextField().getText().trim().isEmpty()
-                || fields[1].getTextField().getText().trim().isEmpty()
-                || fields[2].getTextField().getText().trim().isEmpty()) {
+        String userName = fields[0].getTextField().getText().trim();
+        String userEmail = fields[1].getTextField().getText().trim();
+        String userPhone = fields[2].getTextField().getText().trim();
+        if (userName.isEmpty() || userEmail.isEmpty() || userPhone.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
                     "이름, 이메일, 전화번호는 필수 입력 항목입니다.",
@@ -168,14 +169,24 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         }
 
         UserBean user = LoginManager.getInstance().getCurrentUser();
-        if (user != null) {
-            char[] currentPassword = ((JPasswordField) fields[4].getComponent()).getPassword();
-            char[] newPassword = ((JPasswordField) fields[5].getComponent()).getPassword();
-            char[] confirmPassword = ((JPasswordField) fields[6].getComponent()).getPassword();
+        if (user == null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "로그인 정보를 확인할 수 없습니다.",
+                    "업데이트 실패",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-            try {
-                boolean passwordChangeRequested = newPassword.length > 0 || confirmPassword.length > 0;
-                if (passwordChangeRequested && currentPassword.length == 0) {
+        char[] currentPassword = ((JPasswordField) fields[4].getComponent()).getPassword();
+        char[] newPassword = ((JPasswordField) fields[5].getComponent()).getPassword();
+        char[] confirmPassword = ((JPasswordField) fields[6].getComponent()).getPassword();
+
+        try {
+            boolean passwordChangeRequested = newPassword.length > 0 || confirmPassword.length > 0;
+            if (passwordChangeRequested) {
+                if (currentPassword.length == 0) {
+                    restoreGeneralFields(user);
                     JOptionPane.showMessageDialog(
                             this,
                             "새 비밀번호 변경 시 현재 비밀번호를 입력해주세요.",
@@ -183,34 +194,11 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if (passwordChangeRequested && !Arrays.equals(newPassword, confirmPassword)) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "새 비밀번호와 확인값이 일치하지 않습니다.",
-                            "입력 오류",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                if (passwordChangeRequested && !ValidationUtils.isCreateUserPw(newPassword)) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "새 비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.",
-                            "입력 오류",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
 
-                UserBean updatedUser = new UserBean();
-                updatedUser.setUser_id(user.getUser_id());
-                updatedUser.setUser_name(fields[0].getTextField().getText().trim());
-                updatedUser.setUser_email(fields[1].getTextField().getText().trim());
-                updatedUser.setUser_phone(fields[2].getTextField().getText().trim());
-
-                UpdateUserResult result = userDAO.updateUserWithOptionalRawPassword(
-                        updatedUser,
-                        currentPassword,
-                        passwordChangeRequested ? newPassword : null);
-                if (result == UpdateUserResult.CURRENT_PASSWORD_MISMATCH) {
+                UpdateUserResult validationResult = userDAO.validateCurrentPassword(
+                        user.getUser_id(), currentPassword);
+                if (validationResult == UpdateUserResult.CURRENT_PASSWORD_MISMATCH) {
+                    restoreGeneralFields(user);
                     JOptionPane.showMessageDialog(
                             this,
                             "현재 비밀번호가 올바르지 않습니다.",
@@ -218,32 +206,85 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if (result != UpdateUserResult.SUCCESS) {
+                if (validationResult != UpdateUserResult.SUCCESS) {
+                    restoreGeneralFields(user);
                     JOptionPane.showMessageDialog(
                             this,
-                            "회원 정보 업데이트에 실패했습니다.",
+                            "현재 비밀번호 확인 중 오류가 발생했습니다.",
                             "업데이트 실패",
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
+                if (!Arrays.equals(newPassword, confirmPassword)) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "새 비밀번호와 확인값이 일치하지 않습니다.",
+                            "입력 오류",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!ValidationUtils.isCreateUserPw(newPassword)) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "새 비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.",
+                            "입력 오류",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
 
-                user.setUser_name(updatedUser.getUser_name());
-                user.setUser_email(updatedUser.getUser_email());
-                user.setUser_phone(updatedUser.getUser_phone());
+            UserBean updatedUser = new UserBean();
+            updatedUser.setUser_id(user.getUser_id());
+            updatedUser.setUser_name(userName);
+            updatedUser.setUser_email(userEmail);
+            updatedUser.setUser_phone(userPhone);
+
+            UpdateUserResult result = passwordChangeRequested
+                    ? userDAO.updateUserInfoAndPassword(updatedUser, currentPassword, newPassword)
+                    : userDAO.updateBasicUserInfo(updatedUser);
+            if (result == UpdateUserResult.CURRENT_PASSWORD_REQUIRED
+                    || result == UpdateUserResult.CURRENT_PASSWORD_MISMATCH) {
+                restoreGeneralFields(user);
                 JOptionPane.showMessageDialog(
                         this,
-                        "회원 정보가 성공적으로 업데이트되었습니다.",
-                        "업데이트 성공",
-                        JOptionPane.INFORMATION_MESSAGE);
-                mainUserPanel.showPanel("MyPage");
-            } finally {
-                Arrays.fill(currentPassword, '\0');
-                Arrays.fill(newPassword, '\0');
-                Arrays.fill(confirmPassword, '\0');
-                clearPasswordFields();
-                resetPasswordVisibility();
+                        "현재 비밀번호가 올바르지 않습니다.",
+                        "업데이트 실패",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
             }
+            if (result != UpdateUserResult.SUCCESS) {
+                restoreGeneralFields(user);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "회원 정보 업데이트에 실패했습니다.",
+                        "업데이트 실패",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            user.setUser_name(updatedUser.getUser_name());
+            user.setUser_email(updatedUser.getUser_email());
+            user.setUser_phone(updatedUser.getUser_phone());
+            JOptionPane.showMessageDialog(
+                    this,
+                    "회원 정보가 성공적으로 업데이트되었습니다.",
+                    "업데이트 성공",
+                    JOptionPane.INFORMATION_MESSAGE);
+            mainUserPanel.showPanel("MyPage");
+        } finally {
+            Arrays.fill(currentPassword, '\0');
+            Arrays.fill(newPassword, '\0');
+            Arrays.fill(confirmPassword, '\0');
+            clearPasswordFields();
+            resetPasswordVisibility();
         }
+    }
+
+    private void restoreGeneralFields(UserBean user) {
+        fields[0].getTextField().setText(user.getUser_name());
+        fields[1].getTextField().setText(user.getUser_email());
+        fields[2].getTextField().setText(user.getUser_phone());
+        fields[3].getTextField().setText(user.getUser_id());
     }
 
     private void resetPasswordVisibility() {
