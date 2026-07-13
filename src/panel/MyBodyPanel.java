@@ -9,12 +9,12 @@ import javax.swing.*;
 import main.MainUserPanel;
 import model.LoginManager;
 import model.UserBean;
+import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 
 public class MyBodyPanel extends JPanel implements ActionListener {
     private MainUserPanel mainUserPanel;
-    private RoundedComponent mainPanel, finishButton, backButton, a;
-    private RoundedComponent[] buttons;
+    private RoundedComponent mainPanel, finishButton, backButton;
     private JTextField[] fields;
     private String[] units = {"cm", "kg", "kg", "kg", "%"};
     private BodyInfoDAO bodyInfoDAO;
@@ -23,75 +23,65 @@ public class MyBodyPanel extends JPanel implements ActionListener {
         this.mainUserPanel = mainUserPanel;
         this.bodyInfoDAO = new BodyInfoDAO();
         setLayout(null);
-        setBackground(new Color(192, 233, 147)); // 배경색 설정
+        setBackground(AppTheme.BACKGROUND);
         setBounds(0,40,440,736);
 
         // 메인 패널 생성
-        mainPanel = new RoundedComponent(380, 670, 30, "panel", " ",
-                new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
-        mainPanel.setBounds(21, 40, 380, 670);
+        mainPanel = new RoundedComponent(AppTheme.CARD_WIDTH, 620, 20, "panel", " ",
+                AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, " ", 0, 0);
+        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, AppTheme.CARD_WIDTH, 620);
         add(mainPanel); // 패널 추가
 
         // 회원 정보 레이블
-        JLabel memberInfoLabel = new JLabel("신체정보");
-        memberInfoLabel.setFont(new Font("맑은 고딕", Font.BOLD, 30));
-        memberInfoLabel.setForeground(Color.black);
-        memberInfoLabel.setBounds(135, 80, 150, 30);
+        JLabel memberInfoLabel = new JLabel("신체정보 수정");
+        AppTheme.styleScreenTitle(memberInfoLabel);
+        memberInfoLabel.setBounds(24, 18, 200, 34);
         mainPanel.add(memberInfoLabel);
 
         // 📌 뒤로가기 버튼
-        backButton = new RoundedComponent(60, 60, 10, "Button", "X",
-                                          Color.white, Color.white, Color.black, "맑은 고딕", Font.BOLD, 24);
-        backButton.setBounds(310, 10, 60, 60);
+        backButton = new RoundedComponent(110, 36, 10, "Button", "내 정보로",
+                AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 13);
+        backButton.setBounds(240, 20, 110, 36);
         backButton.getButton().addActionListener(e -> mainUserPanel.showPanel("MyPage")); // 📌 MyPagePanel로 전환
         mainPanel.add(backButton);
+
+        JLabel descriptionLabel = new JLabel("현재 신체 측정값을 입력해주세요.");
+        AppTheme.styleScreenDescription(descriptionLabel);
+        descriptionLabel.setBounds(24, 54, 210, 24);
+        mainPanel.add(descriptionLabel);
 
         // 📌 신체정보 필드 라벨 및 입력 필드 배치
         String[] bodyInfo = {"키", "몸무게", "골격근량", "체지방량", "체지방률"};
         fields = new JTextField[5];
-        buttons = new RoundedComponent[5];
-        
-        int labelStartY = 180;
-        int fieldStartY = 180;
-        int spacing = 65;
+
+        int fieldStartY = 104;
+        int spacing = 60;
 
         for (int i = 0; i < bodyInfo.length; i++) {
             JLabel label = new JLabel(bodyInfo[i]);
-            label.setFont(new Font("맑은 고딕", Font.BOLD, 17));
-            label.setBounds(65, labelStartY + (i * spacing), 100, 25);
+            label.setFont(AppTheme.BODY_BOLD_FONT);
+            label.setForeground(AppTheme.TEXT_SECONDARY);
+            label.setBounds(24, fieldStartY + (i * spacing) + 7, 110, 24);
             mainPanel.add(label);
 
             fields[i] = new JTextField();
-            fields[i].setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-            fields[i].setBackground(new Color(0xD9D9D9));
+            AppTheme.styleInputField(fields[i]);
             fields[i].setHorizontalAlignment(JTextField.RIGHT);
-            fields[i].setBorder(BorderFactory.createLineBorder(new Color(0xD9D9D9), 2));
-            fields[i].setBounds(203, fieldStartY + (i * spacing), 80, 25);
+            fields[i].setBounds(145, fieldStartY + (i * spacing), 175, AppTheme.INPUT_HEIGHT);
             mainPanel.add(fields[i]);
 
             JLabel unitLabel = new JLabel(units[i]);
-            unitLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-            unitLabel.setBounds(290, fieldStartY + (i * spacing) + 2, 30, 20);
+            unitLabel.setFont(AppTheme.BODY_FONT);
+            unitLabel.setForeground(AppTheme.TEXT_SECONDARY);
+            unitLabel.setBounds(326, fieldStartY + (i * spacing) + 9, 30, 20);
             mainPanel.add(unitLabel);
-
-            buttons[i] = new RoundedComponent(140, 35, 7, "button", " ",
-                    Color.lightGray, new Color(0xD9D9D9), Color.black, "맑은 고딕", Font.BOLD, 12);
-            buttons[i].setBounds(180, fieldStartY + (i * spacing), 140, 35);
-            mainPanel.add(buttons[i]);
         }
 
-        // 완료 버튼 생성 - 검은색 배경으로 설정
-        finishButton = new RoundedComponent(100, 40, 10, "button", "완료",
-                Color.BLACK, Color.BLACK, Color.WHITE, "맑은 고딕", Font.BOLD, 14);
-        finishButton.setBounds(140, 530, 100, 40);
+        finishButton = new RoundedComponent(205, 44, 10, "button", "변경사항 저장",
+                AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
+        finishButton.setBounds(145, 432, 205, 44);
         mainPanel.add(finishButton);
         finishButton.getButton().addActionListener(this);
-        
-        a = new RoundedComponent(0, 0, 10, "button", "", 
-        Color.BLACK, Color.BLACK, Color.WHITE, "맑은고딕", Font.BOLD, 14);
-        a.setBounds(140, 530, 100, 40);
-        a.getButton().addActionListener(this);
-        mainPanel.add(a);
 
         // 패널이 표시될 때 신체 정보 로드
         loadBodyInfo();

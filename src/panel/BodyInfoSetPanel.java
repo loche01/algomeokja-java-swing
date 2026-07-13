@@ -13,6 +13,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import main.MainFrame;
+import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 
 public class BodyInfoSetPanel extends JPanel implements ActionListener {
@@ -20,46 +21,55 @@ public class BodyInfoSetPanel extends JPanel implements ActionListener {
     private JTextField aField, bField, passaField, cField, dField;
     private MainFrame mainFrame; // MainFrame과 연결
     private String userId; //  로그인한 사용자의 ID 저장
+    private JPanel formCard;
 
     public BodyInfoSetPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         setLayout(null);
-        setBackground(Color.WHITE);
+        setBackground(AppTheme.BACKGROUND);
         setBounds(0, 0, 440, 956); //  크기 설정
 
-        int formWidth = 308;
-        int centerX = (getWidth() - formWidth) / 3;
-        int startY = 100; // 시작 Y 위치
+        formCard = new JPanel(null);
+        AppTheme.styleCard(formCard);
+        formCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 70, AppTheme.CARD_WIDTH, 700);
+        add(formCard);
 
         JLabel titleLabel = new JLabel("신체정보", SwingConstants.LEFT);
-        titleLabel.setFont(new Font("맑은 고딕", Font.BOLD, 32)); // 폰트 설정
-        titleLabel.setBounds(centerX - 20, startY - 95, 181, 58); // 위치 설정
-        add(titleLabel);
+        AppTheme.styleScreenTitle(titleLabel);
+        titleLabel.setBounds(24, 20, 181, 34);
+        formCard.add(titleLabel);
+
+        JLabel descriptionLabel = new JLabel("신체정보를 입력하거나 나중에 등록할 수 있습니다.");
+        AppTheme.styleScreenDescription(descriptionLabel);
+        descriptionLabel.setBounds(24, 54, 326, 24);
+        formCard.add(descriptionLabel);
 
         // 구분선
         JSeparator divider1 = new JSeparator();
-        divider1.setBounds(centerX - 60, startY - 30, 440, 2);
-        divider1.setForeground(Color.black);
-        add(divider1);
+        divider1.setBounds(24, 86, 326, 1);
+        divider1.setForeground(AppTheme.BORDER);
+        formCard.add(divider1);
 
         // 🔹 입력 필드 추가
-        addInputField("키", "cm", centerX, startY + 75, aField = new JTextField());
-        addInputField("몸무게", "kg", centerX, startY + 145, bField = new JTextField());
-        addInputField("체지방률", "%", centerX, startY + 215, passaField = new JTextField());
-        addInputField("체지방량", "kg", centerX, startY + 285, cField = new JTextField());
-        addInputField("골격근량", "kg", centerX, startY + 355, dField = new JTextField());
+        addInputField("키", "cm", 112, aField = new JTextField());
+        addInputField("몸무게", "kg", 172, bField = new JTextField());
+        addInputField("체지방률", "%", 232, passaField = new JTextField());
+        addInputField("체지방량", "kg", 292, cField = new JTextField());
+        addInputField("골격근량", "kg", 352, dField = new JTextField());
 
         // 🔹 확인 버튼
-        registerButton = new RoundedComponent(135, 46, 10, "button", "확인", Color.BLACK, Color.BLACK, Color.WHITE, "Jua", Font.BOLD, 24);
-        registerButton.setBounds(centerX + 105, startY + 455, 135, 46);
+        registerButton = new RoundedComponent(205, 44, 10, "button", "신체정보 저장",
+                AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
+        registerButton.setBounds(145, 438, 205, 44);
         registerButton.getButton().addActionListener(this);
-        add(registerButton);
+        formCard.add(registerButton);
 
         // 🔹 Skip 버튼
-        skipButton = new RoundedComponent(135, 46, 10, "button", "Skip", Color.GRAY, Color.GRAY, Color.WHITE, "Jua", Font.BOLD, 24);
-        skipButton.setBounds(centerX + 105, startY + 515, 135, 46);
+        skipButton = new RoundedComponent(205, 40, 10, "button", "나중에 입력",
+                AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 13);
+        skipButton.setBounds(145, 496, 205, 40);
         skipButton.getButton().addActionListener(this);
-        add(skipButton);
+        formCard.add(skipButton);
     }
 
     // 🔹 사용자 ID 설정 메서드 (MainFrame에서 전달)
@@ -68,26 +78,23 @@ public class BodyInfoSetPanel extends JPanel implements ActionListener {
     }
 
     // 🔹 입력 필드와 단위를 추가하는 메서드
-    private void addInputField(String label, String unit, int centerX, int y, JTextField textField) {
+    private void addInputField(String label, String unit, int y, JTextField textField) {
         JLabel fieldLabel = new JLabel(label);
-        fieldLabel.setBounds(centerX + 15, y, 100, 20);
-        add(fieldLabel);
+        fieldLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        fieldLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        fieldLabel.setBounds(24, y + 7, 110, 24);
+        formCard.add(fieldLabel);
 
-        textField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        textField.setBackground(Color.white);
+        AppTheme.styleInputField(textField);
         textField.setHorizontalAlignment(SwingConstants.RIGHT);
-        textField.setBorder(BorderFactory.createLineBorder(Color.white, 2));
-        textField.setBounds(centerX + 205, y + 28, 80, 25);
-        add(textField);
+        textField.setBounds(145, y, 175, AppTheme.INPUT_HEIGHT);
+        formCard.add(textField);
 
         JLabel unitLabel = new JLabel(unit);
-        unitLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        unitLabel.setBounds(centerX + 290, y + 30, 30, 20);
-        add(unitLabel);
-
-        RoundedComponent inputButton = new RoundedComponent(308, 41, 10, "button", "", Color.black, Color.white, Color.black, "Malgun Gothic", Font.PLAIN, 15);
-        inputButton.setBounds(centerX + 15, y + 20, 308, 41);
-        add(inputButton);
+        unitLabel.setFont(AppTheme.BODY_FONT);
+        unitLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        unitLabel.setBounds(326, y + 9, 30, 20);
+        formCard.add(unitLabel);
 
     }
 
