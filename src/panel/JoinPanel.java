@@ -11,6 +11,7 @@ import java.util.Arrays;
 import javax.swing.*;
 import main.MainFrame;
 import model.UserBean;
+import ui_n_utils.AppTheme;
 import ui_n_utils.CustomDialog;
 import ui_n_utils.PasswordDocumentFilter;
 import ui_n_utils.PasswordVisibilityToggle;
@@ -35,48 +36,56 @@ public class JoinPanel extends JPanel implements ActionListener {
 	
 	public JoinPanel(MainFrame mainFrame) {
 		this.mainFrame = mainFrame;
-		setBackground(Color.WHITE);
+		setBackground(AppTheme.BACKGROUND);
 		setLayout(null);
 
 		// 🔹 상단 제목
 		JLabel titleLabel = new JLabel("회원가입");
-		titleLabel.setFont(new Font("Inter", Font.BOLD, 32));
-		titleLabel.setBounds(21, 8, 181, 58);
+		AppTheme.styleScreenTitle(titleLabel);
+		titleLabel.setBounds(30, 16, 190, 36);
 		add(titleLabel);
+
+		JLabel descriptionLabel = new JLabel("기본 정보를 입력해 계정을 만들어주세요.");
+		AppTheme.styleScreenDescription(descriptionLabel);
+		descriptionLabel.setBounds(30, 52, 260, 24);
+		add(descriptionLabel);
 
 		// 🔹 구분선 (얇은 검은 테두리)
 		JSeparator separator = new JSeparator();
-		separator.setBounds(-18, 70, 458, 1);
-		separator.setForeground(Color.BLACK);
+		separator.setBounds(30, 88, AppTheme.CARD_WIDTH, 1);
+		separator.setForeground(AppTheme.BORDER);
 		add(separator);
 
 		// 뒤로가기 버튼
-		backButton = new JButton("<");
-		backButton.setBounds(360, 20, 60, 60);
+		backButton = new JButton("로그인으로");
+		backButton.setBounds(300, 22, 110, AppTheme.SECONDARY_BUTTON_HEIGHT);
 		backButton.addActionListener(this);
-		backButton.setBorderPainted(false);
-		backButton.setContentAreaFilled(false);
-		backButton.setFocusPainted(false);
+		AppTheme.styleSecondaryButton(backButton);
 		add(backButton);
-		backButton.setBounds(360, 20, 60, 60);
+		backButton.setBounds(300, 22, 110, AppTheme.SECONDARY_BUTTON_HEIGHT);
 		backButton.addActionListener(this);
 		add(backButton);
 
 		// 🔹 아이디
-		add(UIUtils.createRequiredLabel("아이디", Color.black, 32, 164, "Inter",Font.BOLD,15)); // 라벨
+		add(UIUtils.createRequiredLabel("아이디", AppTheme.TEXT, 32, 112,
+				Font.SANS_SERIF, Font.BOLD, 14));
 		// 아이디 필드
-		userIdField = new RoundedComponent(245, 41, 15, "textfield", ""
-				, Color.black, Color.WHITE, Color.black, "Inter",Font.PLAIN, 15);
-		userIdField.setBounds(32, 185, 245, 41);
+		userIdField = new RoundedComponent(245, AppTheme.INPUT_HEIGHT, 14, "textfield", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		userIdField.setBounds(32, 134, 245, AppTheme.INPUT_HEIGHT);
 		add(userIdField);
 		// 중복확인 버튼
-		checkIdButton = new RoundedComponent(100, 41, 15, "button", "ID 중복확인", 
-				Color.BLACK, Color.BLACK, Color.WHITE,"Inter", Font.BOLD, 14);
-		checkIdButton.setBounds(290, 185, 100, 41);
+		checkIdButton = new RoundedComponent(100, AppTheme.INPUT_HEIGHT, 14,
+				"button", "중복 확인", AppTheme.PRIMARY, AppTheme.CARD,
+				AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 13);
+		checkIdButton.setBounds(290, 134, 100, AppTheme.INPUT_HEIGHT);
 		checkIdButton.getButton().addActionListener(this);
 		add(checkIdButton);
 		// 형식 오류 메시지 (초기에는 보이지 않도록 설정)
-		idErrLbl = UIUtils.createErrorLabel(32, 230, 10);
+		idErrLbl = UIUtils.createErrorLabel(32, 176, 11);
+		idErrLbl.setFont(AppTheme.CAPTION_FONT);
+		idErrLbl.setForeground(AppTheme.ERROR);
 		add(idErrLbl);
 		// 실시간으로 형식 검사 (KeyListener 적용)
 		userIdField.getComponent().addKeyListener(new KeyAdapter() {
@@ -95,19 +104,24 @@ public class JoinPanel extends JPanel implements ActionListener {
 
 		// 🔹 비밀번호
 		// 비밀번호 필드
-		add(UIUtils.createRequiredLabel("비밀번호",Color.black, 32, 250, "Inter",Font.BOLD,15)); // 라벨
-		passwordField = new RoundedComponent(298, 41, 15, "password", "", Color.BLACK, Color.WHITE, Color.BLACK,
-				"Inter", Font.PLAIN, 15);
-		passwordField.setBounds(32, 271, 298, 41);
+		add(UIUtils.createRequiredLabel("비밀번호", AppTheme.TEXT, 32, 196,
+				Font.SANS_SERIF, Font.BOLD, 14));
+		passwordField = new RoundedComponent(298, AppTheme.INPUT_HEIGHT, 14, "password", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		passwordField.setBounds(32, 218, 298, AppTheme.INPUT_HEIGHT);
 		add(passwordField);
 		PasswordDocumentFilter.install((JPasswordField) passwordField.getComponent());
 		passwordVisibilityToggle = PasswordVisibilityToggle.attach(
 				(JPasswordField) passwordField.getComponent());
 		JButton passwordVisibilityButton = passwordVisibilityToggle.getButton();
-		passwordVisibilityButton.setBounds(338, 271, 52, 41);
+		AppTheme.styleSecondaryButton(passwordVisibilityButton);
+		passwordVisibilityButton.setBounds(338, 218, 52, AppTheme.INPUT_HEIGHT);
 		add(passwordVisibilityButton);
 		// 형식 오류 메시지 (초기에는 보이지 않도록 설정)
-		PwErrLbl = UIUtils.createErrorLabel(32, 316, 11);
+		PwErrLbl = UIUtils.createErrorLabel(32, 260, 11);
+		PwErrLbl.setFont(AppTheme.CAPTION_FONT);
+		PwErrLbl.setForeground(AppTheme.ERROR);
 		add(PwErrLbl);
 		// 실시간으로 형식 검사 (KeyListener 적용)
 		passwordField.getComponent().addKeyListener(new KeyAdapter() {
@@ -130,19 +144,24 @@ public class JoinPanel extends JPanel implements ActionListener {
 
 		// 🔹비밀번호 확인
 		// 확인 필드
-		add(UIUtils.createRequiredLabel("비밀번호 확인", Color.black, 32, 336, "Inter",Font.BOLD,15));
-		confirmPasswordField = new RoundedComponent(298, 41, 15, "password", "", Color.BLACK, Color.WHITE, Color.BLACK,
-				"Inter", Font.PLAIN, 15);
-		confirmPasswordField.setBounds(32, 357, 298, 41);
+		add(UIUtils.createRequiredLabel("비밀번호 확인", AppTheme.TEXT, 32, 280,
+				Font.SANS_SERIF, Font.BOLD, 14));
+		confirmPasswordField = new RoundedComponent(298, AppTheme.INPUT_HEIGHT, 14, "password", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		confirmPasswordField.setBounds(32, 302, 298, AppTheme.INPUT_HEIGHT);
 		add(confirmPasswordField);
 		PasswordDocumentFilter.install((JPasswordField) confirmPasswordField.getComponent());
 		confirmPasswordVisibilityToggle = PasswordVisibilityToggle.attach(
 				(JPasswordField) confirmPasswordField.getComponent());
 		JButton confirmPasswordVisibilityButton = confirmPasswordVisibilityToggle.getButton();
-		confirmPasswordVisibilityButton.setBounds(338, 357, 52, 41);
+		AppTheme.styleSecondaryButton(confirmPasswordVisibilityButton);
+		confirmPasswordVisibilityButton.setBounds(338, 302, 52, AppTheme.INPUT_HEIGHT);
 		add(confirmPasswordVisibilityButton);
 		// 형식 오류 메시지 (초기에는 보이지 않도록 설정)
-		PwCkErrLbl = UIUtils.createErrorLabel(32, 402, 11);
+		PwCkErrLbl = UIUtils.createErrorLabel(32, 344, 11);
+		PwCkErrLbl.setFont(AppTheme.CAPTION_FONT);
+		PwCkErrLbl.setForeground(AppTheme.ERROR);
 		add(PwCkErrLbl);
 		confirmPasswordField.getComponent().addKeyListener(new KeyAdapter() {
 			@Override
@@ -165,34 +184,40 @@ public class JoinPanel extends JPanel implements ActionListener {
 		}); // -- confirmPasswordField.addKeyListener
 
 		// 이름 필드
-		add(UIUtils.createRequiredLabel("이름", Color.black,32, 422, "Inter",Font.BOLD,15));
-		userNameField = new RoundedComponent(358, 41, 15, "textfield", "", Color.BLACK, Color.WHITE, Color.BLACK,
-				"Inter", Font.PLAIN, 15);
-		userNameField.setBounds(32, 443, 358, 41);
+		add(UIUtils.createRequiredLabel("이름", AppTheme.TEXT, 32, 364,
+				Font.SANS_SERIF, Font.BOLD, 14));
+		userNameField = new RoundedComponent(358, AppTheme.INPUT_HEIGHT, 14, "textfield", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		userNameField.setBounds(32, 386, 358, AppTheme.INPUT_HEIGHT);
 		add(userNameField);
 
 		// 이메일 필드
-		add(UIUtils.createRequiredLabel("이메일", Color.black, 32, 508,"Inter",Font.BOLD,15));
-		userEmailField = new RoundedComponent(358, 41, 15, "textfield", "", Color.BLACK, Color.WHITE, Color.BLACK,
-				"Inter", Font.PLAIN, 15);
-		userEmailField.setBounds(32, 529, 358, 41);
+		add(UIUtils.createRequiredLabel("이메일", AppTheme.TEXT, 32, 444,
+				Font.SANS_SERIF, Font.BOLD, 14));
+		userEmailField = new RoundedComponent(358, AppTheme.INPUT_HEIGHT, 14, "textfield", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		userEmailField.setBounds(32, 466, 358, AppTheme.INPUT_HEIGHT);
 		add(userEmailField);
 
 		// 휴대폰 필드
-		add(UIUtils.createRequiredLabel("휴대폰 번호", Color.black, 32, 594, "Inter",Font.BOLD,15));
-		userPhoneField = new RoundedComponent(270, 40, 15, "textfield", "", Color.BLACK, Color.WHITE, Color.BLACK,
-				"Inter", Font.PLAIN, 15);
-		userPhoneField.setBounds(32, 615, 270, 40);
+		add(UIUtils.createRequiredLabel("휴대폰 번호", AppTheme.TEXT, 32, 524,
+				Font.SANS_SERIF, Font.BOLD, 14));
+		userPhoneField = new RoundedComponent(358, AppTheme.INPUT_HEIGHT, 14, "textfield", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		userPhoneField.setBounds(32, 546, 358, AppTheme.INPUT_HEIGHT);
 		add(userPhoneField);
 		JTextField phoneField = (JTextField) userPhoneField.getComponent();
         phoneField.setText("-을 포함하여 작성해주세요");
-        phoneField.setForeground(Color.GRAY);
+        phoneField.setForeground(AppTheme.TEXT_SECONDARY);
         phoneField.addFocusListener(new java.awt.event.FocusAdapter() {
             @Override
             public void focusGained(java.awt.event.FocusEvent evt) {
                 if (phoneField.getText().equals("-을 포함하여 작성해주세요")) {
                     phoneField.setText("");
-                    phoneField.setForeground(Color.BLACK);
+                    phoneField.setForeground(AppTheme.TEXT);
                 }
             }
 
@@ -200,26 +225,28 @@ public class JoinPanel extends JPanel implements ActionListener {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (phoneField.getText().isEmpty()) {
                     phoneField.setText("-을 포함하여 작성해주세요");
-                    phoneField.setForeground(Color.GRAY);
+                    phoneField.setForeground(AppTheme.TEXT_SECONDARY);
                 }
             }
         });
 		
         // 생년월일 필드 추가
-        add(UIUtils.createRequiredLabel("생년월일", Color.black, 32, 665, "Inter", Font.BOLD, 15));
-        userBirthdateField = new RoundedComponent(270, 40, 15, "textfield", "", Color.BLACK, Color.WHITE, Color.BLACK,
-                "Inter", Font.PLAIN, 15);
-        userBirthdateField.setBounds(32, 686, 270, 40);
+        add(UIUtils.createRequiredLabel("생년월일", AppTheme.TEXT, 32, 600,
+                Font.SANS_SERIF, Font.BOLD, 14));
+        userBirthdateField = new RoundedComponent(358, AppTheme.INPUT_HEIGHT, 14, "textfield", "",
+                AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+                Font.SANS_SERIF, Font.PLAIN, 14);
+        userBirthdateField.setBounds(32, 622, 358, AppTheme.INPUT_HEIGHT);
         add(userBirthdateField);
         JTextField birthdateField = (JTextField) userBirthdateField.getComponent();
         birthdateField.setText("YYYY-MM-DD 형식으로 입력하세요");
-        birthdateField.setForeground(Color.GRAY);
+        birthdateField.setForeground(AppTheme.TEXT_SECONDARY);
         birthdateField.addFocusListener(new java.awt.event.FocusAdapter() {
             @Override
             public void focusGained(java.awt.event.FocusEvent evt) {
                 if (birthdateField.getText().equals("YYYY-MM-DD 형식으로 입력하세요")) {
                     birthdateField.setText("");
-                    birthdateField.setForeground(Color.BLACK);
+                    birthdateField.setForeground(AppTheme.TEXT);
                 }
             }
 
@@ -227,37 +254,41 @@ public class JoinPanel extends JPanel implements ActionListener {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 if (birthdateField.getText().isEmpty()) {
                     birthdateField.setText("YYYY-MM-DD 형식으로 입력하세요");
-                    birthdateField.setForeground(Color.GRAY);
+                    birthdateField.setForeground(AppTheme.TEXT_SECONDARY);
                 }
             }
         });
         
         // 성별 선택 라디오 버튼 추가
-        add(UIUtils.createRequiredLabel("성별", Color.black, 32, 736, "Inter", Font.BOLD, 15));
+        add(UIUtils.createRequiredLabel("성별", AppTheme.TEXT, 32, 676,
+                Font.SANS_SERIF, Font.BOLD, 14));
         
         // 라디오 버튼 그룹 생성
         genderGroup = new ButtonGroup();
         
         // 남성 라디오 버튼
         maleRadioButton = new JRadioButton("남성");
-        maleRadioButton.setFont(new Font("Inter", Font.PLAIN, 14));
-        maleRadioButton.setBounds(32, 757, 80, 30);
-        maleRadioButton.setBackground(Color.WHITE);
+        maleRadioButton.setFont(AppTheme.BODY_FONT);
+        maleRadioButton.setForeground(AppTheme.TEXT);
+        maleRadioButton.setBounds(32, 698, 80, 30);
+        maleRadioButton.setBackground(AppTheme.BACKGROUND);
         genderGroup.add(maleRadioButton);
         add(maleRadioButton);
         
         // 여성 라디오 버튼
         femaleRadioButton = new JRadioButton("여성");
-        femaleRadioButton.setFont(new Font("Inter", Font.PLAIN, 14));
-        femaleRadioButton.setBounds(120, 757, 80, 30);
-        femaleRadioButton.setBackground(Color.WHITE);
+        femaleRadioButton.setFont(AppTheme.BODY_FONT);
+        femaleRadioButton.setForeground(AppTheme.TEXT);
+        femaleRadioButton.setBounds(120, 698, 80, 30);
+        femaleRadioButton.setBackground(AppTheme.BACKGROUND);
         genderGroup.add(femaleRadioButton);
         add(femaleRadioButton);
 
 		// 회원가입 버튼
-		joinButton = new RoundedComponent(187, 52, 20, "button", "회원가입", Color.BLACK, Color.BLACK, Color.WHITE, "Inter",
-				Font.BOLD, 20);
-		joinButton.setBounds(127, 810, 187, 52);
+		joinButton = new RoundedComponent(358, AppTheme.PRIMARY_BUTTON_HEIGHT, 14,
+				"button", "회원가입", AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK,
+				Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
+		joinButton.setBounds(32, 750, 358, AppTheme.PRIMARY_BUTTON_HEIGHT);
 		joinButton.getButton().addActionListener(this);
 		add(joinButton);
 	}
