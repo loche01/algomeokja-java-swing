@@ -1,204 +1,204 @@
 package panel;
 
 import DB.NoticeDAO;
-import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Rectangle;
+import java.awt.Window;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import main.MainUserPanel;
 import model.NoticeBean;
-import ui_n_utils.RoundedComponent;
-
+import ui_n_utils.AppTheme;
 
 public class NoticePanel extends JPanel {
-    private RoundedComponent noticePanel;
-    private NoticeDAO noticeDAO;
+    private static final int CARD_WIDTH = 380;
+    private static final int NOTICE_CARD_HEIGHT = 112;
 
-    private JPanel headerPanel; // ✅ 헤더 패널을 따로 관리
-    private JPanel noticeListPanel;
-    private JScrollPane noticeScrollPane;
+    private final MainUserPanel mainUserPanel;
+    private final NoticeDAO noticeDAO;
+    private final NoticeListPanel noticeListPanel;
+    private final JScrollPane noticeScrollPane;
 
     public NoticePanel(MainUserPanel mainUserPanel) {
-        this.noticeDAO = new NoticeDAO(); // NoticeDAO 객체 생성
-
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(ComponentEvent e) {
-                loadNotices(mainUserPanel); // 자동 갱신
-            }
-        });
+        this.mainUserPanel = mainUserPanel;
+        this.noticeDAO = new NoticeDAO();
 
         setLayout(null);
-        setBackground(new Color(0xC0E993));
-        setBounds(0, 0, 440, 956);
-
-        // 🔹 배경 패널
-        JPanel backgroundPanel = new JPanel();
-        backgroundPanel.setBounds(0, 0, 440, 956);
-        backgroundPanel.setBackground(new Color(0xC0E993));
-        backgroundPanel.setLayout(null);
-        add(backgroundPanel);
-
-        // 🔹 공지사항 패널
-        noticePanel = new RoundedComponent(400, 670, 30, "panel", "",
-                new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
-        noticePanel.setBounds(12, 40, 400, 670);
-        noticePanel.setBackground(Color.WHITE);
-        noticePanel.setLayout(null);
-        backgroundPanel.add(noticePanel);
-
-        // ✅ 헤더 패널 생성 (removeAll 방지)
-        headerPanel = new JPanel();
-        headerPanel.setLayout(null);
-        headerPanel.setBounds(0, 0, 400, 90);
-        headerPanel.setBackground(Color.WHITE);
-        noticePanel.add(headerPanel);
+        setBackground(AppTheme.BACKGROUND);
+        setBounds(0, 0, 440, 736);
 
         JLabel titleLabel = new JLabel("공지사항");
-        titleLabel.setFont(new Font("Inter", Font.BOLD, 30));
-        titleLabel.setBounds(20, 10, 200, 40);
-        headerPanel.add(titleLabel);
-        
-        // 뒤로가기 버튼 추가
-        JButton backButton = new JButton("X");
-        backButton.setBounds(350, 10, 50, 50);
-        backButton.setFont(new Font("Inter", Font.BOLD, 24));
-        backButton.setForeground(Color.BLACK);
-        backButton.setFocusPainted(false);
-        backButton.setBorderPainted(false);
-        backButton.setContentAreaFilled(false);
-        backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        headerPanel.add(backButton);
-        
-        // 뒤로가기 버튼 클릭 시 이전 패널로 돌아가기
-        backButton.addActionListener(e -> {
-            if (mainUserPanel != null) {
-                // 이전 패널로 돌아가기
-                mainUserPanel.goToPreviousPanel();
-            } else {
-                System.out.println("❌ mainUserPanel이 null입니다!");
-            }
-        });
+        titleLabel.setFont(AppTheme.TITLE_FONT);
+        titleLabel.setForeground(AppTheme.TEXT);
+        titleLabel.setBounds(30, 22, 220, 32);
+        add(titleLabel);
 
-        JSeparator separator = new JSeparator();
-        separator.setBounds(10, 70, 380, 1);
-        separator.setForeground(Color.BLACK);
-        headerPanel.add(separator);
+        JLabel descriptionLabel = new JLabel("새로운 소식과 안내를 확인합니다.");
+        descriptionLabel.setFont(AppTheme.CAPTION_FONT);
+        descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        descriptionLabel.setBounds(30, 55, 260, 22);
+        add(descriptionLabel);
+
+        JButton backButton = new JButton("이전 화면");
+        AppTheme.styleSecondaryButton(backButton);
+        backButton.setBounds(300, 25, 110, 36);
+        backButton.addActionListener(e -> mainUserPanel.goToPreviousPanel());
+        add(backButton);
 
         noticeListPanel = new NoticeListPanel();
-        noticeListPanel.setBackground(Color.WHITE);
+        noticeListPanel.setBackground(AppTheme.BACKGROUND);
+        noticeListPanel.setBorder(BorderFactory.createEmptyBorder(1, 1, 12, 1));
 
         noticeScrollPane = new JScrollPane(noticeListPanel);
-        noticeScrollPane.setBounds(10, 90, 380, 550);
+        noticeScrollPane.setBounds(30, 94, CARD_WIDTH, 610);
         noticeScrollPane.setBorder(BorderFactory.createEmptyBorder());
         noticeScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         noticeScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         noticeScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        noticePanel.add(noticeScrollPane);
-
-        // 🔹 공지사항 목록 불러오기 (DB 연동)
-        loadNotices(mainUserPanel);
+        noticeScrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
+        add(noticeScrollPane);
     }
 
-    // 🔹 공지사항 목록 불러오기 (DB 연동)
-    private void loadNotices(MainUserPanel mainUserPanel) {
-        int scrollPosition = noticeScrollPane.getVerticalScrollBar().getValue();
+    public void reloadNotices() {
         List<NoticeBean> notices = noticeDAO.getAllNotices();
         noticeListPanel.removeAll();
 
         if (notices.isEmpty()) {
-            JLabel noDataLabel = new JLabel("📢 등록된 공지사항이 없습니다.");
-            noDataLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-            noDataLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            noDataLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            noDataLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
-            noDataLabel.setPreferredSize(new Dimension(0, 100));
-            noticeListPanel.add(noDataLabel);
+            JPanel emptyCard = new JPanel(new BorderLayout());
+            AppTheme.styleCard(emptyCard);
+            emptyCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+            emptyCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+            emptyCard.setPreferredSize(new Dimension(CARD_WIDTH, 120));
+
+            JLabel emptyLabel = new JLabel("등록된 공지사항이 없습니다.", SwingConstants.CENTER);
+            emptyLabel.setFont(AppTheme.BODY_FONT);
+            emptyLabel.setForeground(AppTheme.TEXT_SECONDARY);
+            emptyCard.add(emptyLabel, BorderLayout.CENTER);
+            noticeListPanel.add(emptyCard);
         } else {
             for (NoticeBean notice : notices) {
-                noticeListPanel.add(createNoticeCard(notice, mainUserPanel));
-                noticeListPanel.add(Box.createVerticalStrut(10));
+                noticeListPanel.add(createNoticeCard(notice));
+                noticeListPanel.add(Box.createVerticalStrut(14));
             }
         }
 
         noticeListPanel.revalidate();
         noticeListPanel.repaint();
-        SwingUtilities.invokeLater(() -> noticeScrollPane.getVerticalScrollBar().setValue(scrollPosition));
+        SwingUtilities.invokeLater(() -> noticeScrollPane.getVerticalScrollBar().setValue(0));
     }
 
-    private JPanel createNoticeCard(NoticeBean notice, MainUserPanel mainUserPanel) {
+    private JPanel createNoticeCard(NoticeBean notice) {
         JPanel card = new JPanel(new BorderLayout(0, 8));
+        AppTheme.styleCard(card);
         card.setAlignmentX(Component.LEFT_ALIGNMENT);
-        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 104));
-        card.setPreferredSize(new Dimension(0, 104));
-        card.setMinimumSize(new Dimension(0, 104));
-        card.setBackground(new Color(0xF8FAF6));
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, NOTICE_CARD_HEIGHT));
+        card.setPreferredSize(new Dimension(CARD_WIDTH, NOTICE_CARD_HEIGHT));
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0xD7E2D0)),
-                BorderFactory.createEmptyBorder(10, 12, 10, 12)));
+                BorderFactory.createLineBorder(AppTheme.BORDER),
+                BorderFactory.createEmptyBorder(12, 14, 12, 14)));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        card.setToolTipText("클릭하여 공지사항 상세 보기");
 
-        JPanel titleRow = new JPanel(new BorderLayout(8, 0));
-        titleRow.setOpaque(false);
-        titleRow.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        String fullTitle = safeText(notice.getNotice_title(), "제목 없음");
+        JLabel titleLabel = new JLabel();
+        titleLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        titleLabel.setForeground(AppTheme.TEXT);
+        titleLabel.setText(ellipsize(fullTitle, titleLabel.getFontMetrics(titleLabel.getFont()), 332));
+        titleLabel.setToolTipText(fullTitle);
 
-        JLabel numberLabel = new JLabel("#" + notice.getNotice_num());
-        numberLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 12));
-        numberLabel.setForeground(new Color(0x609056));
-        numberLabel.setPreferredSize(new Dimension(42, 24));
+        JPanel metadataPanel = new JPanel();
+        metadataPanel.setOpaque(false);
+        metadataPanel.setLayout(new BoxLayout(metadataPanel, BoxLayout.Y_AXIS));
 
-        JLabel titleLabel = new JLabel(notice.getNotice_title());
-        titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        titleLabel.setToolTipText(notice.getNotice_title());
+        JLabel authorLabel = new JLabel("작성자  " + safeText(notice.getAdmin_id(), "정보 없음"));
+        authorLabel.setFont(AppTheme.CAPTION_FONT);
+        authorLabel.setForeground(AppTheme.TEXT_SECONDARY);
 
-        titleRow.add(numberLabel, BorderLayout.WEST);
-        titleRow.add(titleLabel, BorderLayout.CENTER);
+        JLabel dateLabel = new JLabel("작성일  " + formatDate(notice));
+        dateLabel.setFont(AppTheme.CAPTION_FONT);
+        dateLabel.setForeground(AppTheme.TEXT_SECONDARY);
 
-        JPanel infoRow = new JPanel(new BorderLayout(10, 0));
-        infoRow.setOpaque(false);
-        infoRow.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        metadataPanel.add(authorLabel);
+        metadataPanel.add(Box.createVerticalStrut(3));
+        metadataPanel.add(dateLabel);
 
-        JLabel authorLabel = new JLabel("작성자: " + notice.getAdmin_id());
-        authorLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
-        authorLabel.setForeground(Color.DARK_GRAY);
-
-        JLabel dateLabel = new JLabel("작성일: " + new SimpleDateFormat("yyyy-MM-dd HH:mm")
-                .format(new Date(notice.getNotice_time().getTime())));
-        dateLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
-        dateLabel.setForeground(Color.GRAY);
-        dateLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-
-        infoRow.add(authorLabel, BorderLayout.WEST);
-        infoRow.add(dateLabel, BorderLayout.EAST);
-
-        java.awt.event.MouseAdapter openListener = new java.awt.event.MouseAdapter() {
+        MouseAdapter openListener = new MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                NoticeBean selectedNotice = noticeDAO.getNoticeById(notice.getNotice_num());
-                if (selectedNotice == null) {
-                    JOptionPane.showMessageDialog(NoticePanel.this,
-                            "공지사항을 불러오지 못했습니다.", "공지사항", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                mainUserPanel.getNoticeDetailPanel().updateNoticeDetail(selectedNotice);
-                mainUserPanel.showPanel("noticeDetailPanel");
+            public void mouseClicked(MouseEvent e) {
+                openNotice(notice.getNotice_num());
             }
         };
 
-        card.addMouseListener(openListener);
-        titleRow.addMouseListener(openListener);
-        infoRow.addMouseListener(openListener);
-        numberLabel.addMouseListener(openListener);
-        titleLabel.addMouseListener(openListener);
-        authorLabel.addMouseListener(openListener);
-        dateLabel.addMouseListener(openListener);
-        card.add(titleRow, BorderLayout.CENTER);
-        card.add(infoRow, BorderLayout.SOUTH);
+        card.add(titleLabel, BorderLayout.NORTH);
+        card.add(metadataPanel, BorderLayout.CENTER);
+        addOpenListener(card, openListener);
+        card.setToolTipText("공지사항 상세 보기");
         return card;
+    }
+
+    private void openNotice(int noticeId) {
+        NoticeBean selectedNotice = noticeDAO.getNoticeById(noticeId);
+        if (selectedNotice == null) {
+            JOptionPane.showMessageDialog(getDialogParent(),
+                    "공지사항을 불러오지 못했습니다.", "공지사항", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        mainUserPanel.getNoticeDetailPanel().updateNoticeDetail(selectedNotice);
+        mainUserPanel.showPanel("noticeDetailPanel");
+    }
+
+    private void addOpenListener(Component component, MouseAdapter listener) {
+        component.addMouseListener(listener);
+        component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        if (component instanceof java.awt.Container) {
+            for (Component child : ((java.awt.Container) component).getComponents()) {
+                addOpenListener(child, listener);
+            }
+        }
+    }
+
+    private String formatDate(NoticeBean notice) {
+        if (notice.getNotice_time() == null) {
+            return "정보 없음";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(notice.getNotice_time());
+    }
+
+    private String safeText(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
+
+    private String ellipsize(String text, FontMetrics metrics, int maxWidth) {
+        if (metrics.stringWidth(text) <= maxWidth) {
+            return text;
+        }
+        String ellipsis = "…";
+        int end = text.length();
+        while (end > 0 && metrics.stringWidth(text.substring(0, end) + ellipsis) > maxWidth) {
+            end--;
+        }
+        return text.substring(0, end) + ellipsis;
+    }
+
+    private Component getDialogParent() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        return window != null ? window : this;
     }
 
     private static class NoticeListPanel extends JPanel implements Scrollable {
