@@ -212,7 +212,6 @@ public class MymeGoalPanel extends JPanel implements ActionListener {
                     "목표가 성공적으로 저장되었습니다.",
                     "저장 완료",
                     JOptionPane.INFORMATION_MESSAGE);
-            mainUserPanel.getHomeTargetPanel().loadUserTargetData();
             mainUserPanel.showPanel("HomeTarget");
             clearFields();
         } else {
