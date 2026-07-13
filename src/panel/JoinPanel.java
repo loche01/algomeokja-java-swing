@@ -12,6 +12,7 @@ import javax.swing.*;
 import main.MainFrame;
 import model.UserBean;
 import ui_n_utils.CustomDialog;
+import ui_n_utils.PasswordDocumentFilter;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.UIUtils;
 import ui_n_utils.ValidationUtils;
@@ -97,6 +98,7 @@ public class JoinPanel extends JPanel implements ActionListener {
 				"Inter", Font.PLAIN, 15);
 		passwordField.setBounds(32, 271, 358, 41);
 		add(passwordField);
+		PasswordDocumentFilter.install((JPasswordField) passwordField.getComponent());
 		// 형식 오류 메시지 (초기에는 보이지 않도록 설정)
 		PwErrLbl = UIUtils.createErrorLabel(32, 316, 11);
 		add(PwErrLbl);
@@ -126,6 +128,7 @@ public class JoinPanel extends JPanel implements ActionListener {
 				"Inter", Font.PLAIN, 15);
 		confirmPasswordField.setBounds(32, 357, 358, 41);
 		add(confirmPasswordField);
+		PasswordDocumentFilter.install((JPasswordField) confirmPasswordField.getComponent());
 		// 형식 오류 메시지 (초기에는 보이지 않도록 설정)
 		PwCkErrLbl = UIUtils.createErrorLabel(32, 402, 11);
 		add(PwCkErrLbl);

@@ -9,6 +9,7 @@ import javax.swing.*;
 import main.MainUserPanel;
 import model.LoginManager;
 import model.UserBean;
+import ui_n_utils.PasswordDocumentFilter;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.ValidationUtils;
 
@@ -67,7 +68,10 @@ public class MyMemberPanel extends JPanel implements ActionListener {
             fields[i].setBounds(170, fieldStartY + (i * spacing), 180, 36);
             mainPanel.add(fields[i]);
         }
-        
+
+        PasswordDocumentFilter.install((JPasswordField) fields[5].getComponent());
+        PasswordDocumentFilter.install((JPasswordField) fields[6].getComponent());
+
         // ID 필드는 수정 불가능하게 설정
         fields[3].getTextField().setEditable(false);
         fields[3].getTextField().setBackground(new Color(0xCCCCCC));
