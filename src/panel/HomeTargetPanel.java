@@ -216,12 +216,17 @@ public class HomeTargetPanel extends JPanel {
 
         boolean goalReached = rawProgress >= 100.0;
         boolean sameStartAndTarget = Double.compare(startWeight, targetWeight) == 0;
+        boolean oppositeDirection = isOppositeDirection(
+                startWeight, currentWeight, targetWeight, latestWeight != null);
         if (goalReached) {
             stateTitleLabel.setText("목표를 달성했습니다.");
             stateDescriptionLabel.setText("설정한 목표 체중에 도달한 상태입니다.");
         } else if (sameStartAndTarget) {
             stateTitleLabel.setText("목표 체중을 확인해주세요.");
             stateDescriptionLabel.setText("시작 체중과 목표 체중이 같습니다.");
+        } else if (oppositeDirection) {
+            stateTitleLabel.setText("목표 반대 방향으로 체중이 변했습니다.");
+            stateDescriptionLabel.setText("현재 체중 변화를 기준으로 진행률은 0%로 표시합니다.");
         } else {
             stateTitleLabel.setText("목표를 향해 진행 중입니다.");
             stateDescriptionLabel.setText("최근 기록을 기준으로 진행 상황을 표시합니다.");
@@ -260,6 +265,25 @@ public class HomeTargetPanel extends JPanel {
         }
 
         boolean gainGoal = target > start;
+        double actualChange = current - start;
+        boolean oppositeDirection = gainGoal ? actualChange < 0.0 : actualChange > 0.0;
+        if (oppositeDirection) {
+            double changedWeight = Math.abs(finiteOrZero(actualChange));
+            double remainingWeight = Math.abs(finiteOrZero(target - current));
+            String actualDirection = actualChange > 0.0 ? "증가" : "감소";
+            String goalDirection = gainGoal ? "증량" : "감량";
+            return String.format(
+                    Locale.ROOT,
+                    "<html><div style='text-align:center;'>"
+                            + "시작 체중보다 %.1fkg %s했습니다.<br>"
+                            + "%s 목표까지 %.1fkg 남았습니다."
+                            + "</div></html>",
+                    changedWeight,
+                    actualDirection,
+                    goalDirection,
+                    remainingWeight);
+        }
+
         double changedWeight = gainGoal ? current - start : start - current;
         double remainingWeight = gainGoal ? target - current : current - target;
         changedWeight = Math.max(0.0, finiteOrZero(changedWeight));
@@ -271,6 +295,14 @@ public class HomeTargetPanel extends JPanel {
                 changedWeight,
                 direction,
                 remainingWeight);
+    }
+
+    private boolean isOppositeDirection(
+            double start, double current, double target, boolean hasCurrentWeight) {
+        if (!hasCurrentWeight || Double.compare(start, target) == 0) {
+            return false;
+        }
+        return target < start ? current > start : current < start;
     }
 
     private void showNoGoalState() {
