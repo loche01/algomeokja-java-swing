@@ -57,7 +57,8 @@ public class HeaderUtil {
 	        // 실제 공지사항 화면으로 전환하는 코드 추가 가능
 	    }
 	
-		public static JPanel createAdminHeader(String titleText, ActionListener noticeListener) {
+		public static JPanel createAdminHeader(String titleText, ActionListener noticeListener,
+				ActionListener logoutListener) {
 			JPanel headerPanel = new JPanel(null);
 			headerPanel.setBackground(Color.white);
 		
@@ -76,12 +77,18 @@ public class HeaderUtil {
 			noticeButton.setBorderPainted(false);
 			noticeButton.setContentAreaFilled(false);
 			noticeButton.setFocusPainted(false);
-			noticeButton.setBounds(320, 20, 100, 80);
+			noticeButton.setBounds(232, 20, 82, 70);
 			noticeButton.addActionListener(noticeListener);
-		
-			titleButton.setBounds(10, 20, 250, 80);
+
+			JButton logoutButton = new JButton("로그아웃");
+			AppTheme.styleDangerButton(logoutButton);
+			logoutButton.setBounds(320, 32, 100, 38);
+			logoutButton.addActionListener(logoutListener);
+
+			titleButton.setBounds(10, 20, 220, 80);
 			headerPanel.add(titleButton);
 			headerPanel.add(noticeButton);
+			headerPanel.add(logoutButton);
 			headerPanel.setBounds(0, 0, 440, 110);
 		
 			return headerPanel;

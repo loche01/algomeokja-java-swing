@@ -2,6 +2,7 @@ package main;
 
 import java.awt.*;
 import javax.swing.*;
+import model.LoginManager;
 import panel.*;
 import ui_n_utils.HeaderUtil;
 
@@ -16,7 +17,10 @@ public class MainAdminPanel extends JPanel {
         setBackground(Color.WHITE);
         setBounds(0, 0, 440, 956); // ✅ 프레임 크기에 맞춤
 
-        JPanel header = HeaderUtil.createAdminHeader("알고먹자", e -> showPanel("NoticeAdmin"));
+        JPanel header = HeaderUtil.createAdminHeader(
+                "알고먹자",
+                e -> showPanel("NoticeAdmin"),
+                e -> confirmLogout());
         header.setBounds(0, 0, 440, 100);
         add(header);
         
@@ -38,6 +42,37 @@ public class MainAdminPanel extends JPanel {
         add(noticeEditPanel);
         // 🔹 기본 화면 설정
         showPanel("NoticeAdmin");
+    }
+
+    private void confirmLogout() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        Component dialogParent = window != null ? window : this;
+        int option = JOptionPane.showConfirmDialog(
+                dialogParent,
+                "로그아웃 하시겠습니까?",
+                "로그아웃 확인",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+        if (option != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (!(window instanceof MainFrame)) {
+            JOptionPane.showMessageDialog(
+                    dialogParent,
+                    "로그인 화면으로 이동할 수 없습니다.",
+                    "로그아웃 오류",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        LoginManager.getInstance().logout();
+        ((MainFrame) window).showLoginAfterLogout();
+        JOptionPane.showMessageDialog(
+                window,
+                "로그아웃 되었습니다.",
+                "로그아웃 성공",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     // 📌 패널 전환 메서드 (공지사항 관리/작성 화면 전환)
