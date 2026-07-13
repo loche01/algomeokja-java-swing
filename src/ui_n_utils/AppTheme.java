@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -14,17 +15,29 @@ import javax.swing.JTextField;
  */
 public final class AppTheme {
     public static final int HORIZONTAL_MARGIN = 30;
+    public static final int CARD_WIDTH = 380;
+    public static final int CARD_PADDING = 20;
+    public static final int SECTION_GAP = 18;
+    public static final int ROW_GAP = 14;
+    public static final int SMALL_GAP = 8;
     public static final int INPUT_HEIGHT = 38;
+    public static final int PRIMARY_BUTTON_HEIGHT = 44;
+    public static final int SECONDARY_BUTTON_HEIGHT = 38;
 
-    public static final Color BACKGROUND = new Color(0xEEF6E9);
+    public static final Color BACKGROUND = new Color(0xF3F7F1);
+    public static final Color CONTENT_BACKGROUND = new Color(0xF7F9F6);
     public static final Color CARD = Color.WHITE;
-    public static final Color PRIMARY = new Color(0x609056);
-    public static final Color PRIMARY_DARK = new Color(0x3F6538);
-    public static final Color TEXT = new Color(0x253024);
-    public static final Color TEXT_SECONDARY = new Color(0x6B7469);
-    public static final Color BORDER = new Color(0xD7E1D3);
-    public static final Color INPUT_BACKGROUND = new Color(0xF5F7F4);
-    public static final Color ERROR = new Color(0xB84A4A);
+    public static final Color PRIMARY = new Color(0x557F4D);
+    public static final Color PRIMARY_LIGHT = new Color(0xDCECD5);
+    public static final Color ACCENT = new Color(0xB9DE9F);
+    public static final Color PRIMARY_DARK = new Color(0x365B3B);
+    public static final Color TEXT = new Color(0x26332A);
+    public static final Color TEXT_SECONDARY = new Color(0x6A756C);
+    public static final Color BORDER = new Color(0xD8E2D5);
+    public static final Color INPUT_BACKGROUND = new Color(0xF7F9F6);
+    public static final Color DISABLED = new Color(0xA8B0A9);
+    public static final Color ERROR = new Color(0xB45353);
+    public static final Color DANGER_BACKGROUND = new Color(0xFFF7F7);
 
     public static final Font TITLE_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 24);
     public static final Font SECTION_TITLE_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 18);
@@ -34,6 +47,32 @@ public final class AppTheme {
     public static final Font BUTTON_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 13);
 
     private AppTheme() {
+    }
+
+    public static void styleScreenTitle(JLabel label) {
+        label.setFont(TITLE_FONT);
+        label.setForeground(TEXT);
+    }
+
+    public static void styleScreenDescription(JLabel label) {
+        label.setFont(BODY_FONT);
+        label.setForeground(TEXT_SECONDARY);
+    }
+
+    public static void styleSectionTitle(JLabel label) {
+        label.setFont(SECTION_TITLE_FONT);
+        label.setForeground(PRIMARY_DARK);
+    }
+
+    public static void styleCaption(JLabel label) {
+        label.setFont(CAPTION_FONT);
+        label.setForeground(TEXT_SECONDARY);
+    }
+
+    public static void styleEmptyState(JLabel label) {
+        label.setFont(BODY_FONT);
+        label.setForeground(TEXT_SECONDARY);
+        label.setHorizontalAlignment(JLabel.CENTER);
     }
 
     public static void styleCard(JPanel panel) {
@@ -58,7 +97,7 @@ public final class AppTheme {
 
     public static void styleDangerButton(AbstractButton button) {
         styleButtonBase(button);
-        button.setBackground(CARD);
+        button.setBackground(DANGER_BACKGROUND);
         button.setForeground(ERROR);
         button.setBorder(BorderFactory.createLineBorder(ERROR));
     }
