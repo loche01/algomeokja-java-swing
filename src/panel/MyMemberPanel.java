@@ -2,7 +2,9 @@ package panel;
 
 import DB.UserDAO;
 import DB.UserDAO.UpdateUserResult;
+import java.awt.Component;
 import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -161,7 +163,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         String userPhone = fields[2].getTextField().getText().trim();
         if (userName.isEmpty() || userEmail.isEmpty() || userPhone.isEmpty()) {
             JOptionPane.showMessageDialog(
-                    this,
+                    getDialogParent(),
                     "이름, 이메일, 전화번호는 필수 입력 항목입니다.",
                     "입력 오류",
                     JOptionPane.ERROR_MESSAGE);
@@ -171,7 +173,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         UserBean user = LoginManager.getInstance().getCurrentUser();
         if (user == null) {
             JOptionPane.showMessageDialog(
-                    this,
+                    getDialogParent(),
                     "로그인 정보를 확인할 수 없습니다.",
                     "업데이트 실패",
                     JOptionPane.ERROR_MESSAGE);
@@ -188,7 +190,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                 if (currentPassword.length == 0) {
                     restoreGeneralFields(user);
                     JOptionPane.showMessageDialog(
-                            this,
+                            getDialogParent(),
                             "새 비밀번호 변경 시 현재 비밀번호를 입력해주세요.",
                             "입력 오류",
                             JOptionPane.ERROR_MESSAGE);
@@ -200,7 +202,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                 if (validationResult == UpdateUserResult.CURRENT_PASSWORD_MISMATCH) {
                     restoreGeneralFields(user);
                     JOptionPane.showMessageDialog(
-                            this,
+                            getDialogParent(),
                             "현재 비밀번호가 올바르지 않습니다.",
                             "업데이트 실패",
                             JOptionPane.ERROR_MESSAGE);
@@ -209,7 +211,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                 if (validationResult != UpdateUserResult.SUCCESS) {
                     restoreGeneralFields(user);
                     JOptionPane.showMessageDialog(
-                            this,
+                            getDialogParent(),
                             "현재 비밀번호 확인 중 오류가 발생했습니다.",
                             "업데이트 실패",
                             JOptionPane.ERROR_MESSAGE);
@@ -217,7 +219,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                 }
                 if (!Arrays.equals(newPassword, confirmPassword)) {
                     JOptionPane.showMessageDialog(
-                            this,
+                            getDialogParent(),
                             "새 비밀번호와 확인값이 일치하지 않습니다.",
                             "입력 오류",
                             JOptionPane.ERROR_MESSAGE);
@@ -225,7 +227,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                 }
                 if (!ValidationUtils.isCreateUserPw(newPassword)) {
                     JOptionPane.showMessageDialog(
-                            this,
+                            getDialogParent(),
                             "새 비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.",
                             "입력 오류",
                             JOptionPane.ERROR_MESSAGE);
@@ -246,7 +248,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                     || result == UpdateUserResult.CURRENT_PASSWORD_MISMATCH) {
                 restoreGeneralFields(user);
                 JOptionPane.showMessageDialog(
-                        this,
+                        getDialogParent(),
                         "현재 비밀번호가 올바르지 않습니다.",
                         "업데이트 실패",
                         JOptionPane.ERROR_MESSAGE);
@@ -255,7 +257,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
             if (result != UpdateUserResult.SUCCESS) {
                 restoreGeneralFields(user);
                 JOptionPane.showMessageDialog(
-                        this,
+                        getDialogParent(),
                         "회원 정보 업데이트에 실패했습니다.",
                         "업데이트 실패",
                         JOptionPane.ERROR_MESSAGE);
@@ -266,7 +268,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
             user.setUser_email(updatedUser.getUser_email());
             user.setUser_phone(updatedUser.getUser_phone());
             JOptionPane.showMessageDialog(
-                    this,
+                    getDialogParent(),
                     "회원 정보가 성공적으로 업데이트되었습니다.",
                     "업데이트 성공",
                     JOptionPane.INFORMATION_MESSAGE);
@@ -285,6 +287,11 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         fields[1].getTextField().setText(user.getUser_email());
         fields[2].getTextField().setText(user.getUser_phone());
         fields[3].getTextField().setText(user.getUser_id());
+    }
+
+    private Component getDialogParent() {
+        Window window = javax.swing.SwingUtilities.getWindowAncestor(this);
+        return window != null ? window : this;
     }
 
     private void resetPasswordVisibility() {
