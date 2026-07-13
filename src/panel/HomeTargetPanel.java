@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
+import javax.swing.plaf.basic.BasicProgressBarUI;
 import main.MainUserPanel;
 import model.UserBean;
 import model.UserGoal;
@@ -29,6 +30,7 @@ public class HomeTargetPanel extends JPanel {
     private final JLabel currentWeightValue;
     private final JLabel targetWeightValue;
     private final JLabel durationValue;
+    private final JLabel elapsedDurationValue;
     private final JLabel progressPercentLabel;
     private final JLabel progressDetailLabel;
     private final JLabel stateTitleLabel;
@@ -56,20 +58,22 @@ public class HomeTargetPanel extends JPanel {
         pageDescription.setBounds(AppTheme.HORIZONTAL_MARGIN, 54, CARD_WIDTH, 24);
         add(pageDescription);
 
-        summaryCard = createCard(90, 210);
+        summaryCard = createCard(90, 246);
         summaryCard.add(createSectionTitle("목표 요약"));
         startWeightValue = addSummaryRow(summaryCard, "시작 체중", 53);
         currentWeightValue = addSummaryRow(summaryCard, "현재 체중", 89);
         targetWeightValue = addSummaryRow(summaryCard, "목표 체중", 125);
         durationValue = addSummaryRow(summaryCard, "목표 기간", 161);
+        elapsedDurationValue = addSummaryRow(summaryCard, "기간 경과", 197);
 
-        progressCard = createCard(315, 180);
+        progressCard = createCard(351, 180);
         progressCard.add(createSectionTitle("진행률"));
 
         progressBar = new JProgressBar(0, 100);
+        progressBar.setUI(new BasicProgressBarUI());
         progressBar.setValue(0);
         progressBar.setForeground(AppTheme.PRIMARY);
-        progressBar.setBackground(AppTheme.INPUT_BACKGROUND);
+        progressBar.setBackground(AppTheme.BORDER);
         progressBar.setBorderPainted(false);
         progressBar.setStringPainted(false);
         progressBar.setBounds(20, 55, 340, 22);
@@ -87,22 +91,22 @@ public class HomeTargetPanel extends JPanel {
         progressDetailLabel.setBounds(20, 118, 340, 42);
         progressCard.add(progressDetailLabel);
 
-        stateCard = createCard(510, 135);
+        stateCard = createCard(546, 120);
         stateTitleLabel = new JLabel("");
         stateTitleLabel.setFont(AppTheme.SECTION_TITLE_FONT);
         stateTitleLabel.setForeground(AppTheme.PRIMARY_DARK);
-        stateTitleLabel.setBounds(20, 14, 340, 28);
+        stateTitleLabel.setBounds(20, 10, 340, 28);
         stateCard.add(stateTitleLabel);
 
         stateDescriptionLabel = new JLabel("");
         stateDescriptionLabel.setFont(AppTheme.CAPTION_FONT);
         stateDescriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
-        stateDescriptionLabel.setBounds(20, 42, 340, 36);
+        stateDescriptionLabel.setBounds(20, 36, 340, 30);
         stateCard.add(stateDescriptionLabel);
 
         goalActionButton = new JButton("목표 설정");
         AppTheme.stylePrimaryButton(goalActionButton);
-        goalActionButton.setBounds(20, 84, 340, 38);
+        goalActionButton.setBounds(20, 70, 340, 38);
         goalActionButton.addActionListener(e -> mainUserPanel.showPanel("MymeGoal"));
         stateCard.add(goalActionButton);
 
@@ -167,6 +171,7 @@ public class HomeTargetPanel extends JPanel {
         setSummaryValue(currentWeightValue, "");
         setSummaryValue(targetWeightValue, "");
         setSummaryValue(durationValue, "");
+        setSummaryValue(elapsedDurationValue, "");
         progressBar.setValue(0);
         progressPercentLabel.setText("0.0%");
         progressDetailLabel.setText("");
@@ -178,7 +183,7 @@ public class HomeTargetPanel extends JPanel {
     private void renderGoal(UserGoal goal, BigDecimal latestWeight, Map<String, Object> progressData) {
         summaryCard.setVisible(true);
         progressCard.setVisible(true);
-        stateCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 510, CARD_WIDTH, 135);
+        stateCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 546, CARD_WIDTH, 120);
 
         setSummaryValue(startWeightValue, formatWeight(goal.getStartWeight()));
         setSummaryValue(
@@ -186,13 +191,17 @@ public class HomeTargetPanel extends JPanel {
                 latestWeight != null ? formatWeight(latestWeight) : "최근 기록 없음");
         setSummaryValue(targetWeightValue, formatWeight(goal.getTargetWeight()));
 
-        double timeProgress = safePercentage(valueAsDouble(progressData, "timeProgressRatio"));
         String durationText = goal.getTargetDuration() > 0
                 ? goal.getTargetDuration() + "일" : "기간 정보 없음";
-        if (goal.getTargetDuration() > 0 && goal.getCreatedAt() != null) {
-            durationText += " · " + formatPercent(timeProgress);
-        }
         setSummaryValue(durationValue, durationText);
+
+        boolean hasElapsedDuration = goal.getTargetDuration() > 0
+                && goal.getCreatedAt() != null
+                && hasFiniteNumber(progressData, "timeProgressRatio");
+        String elapsedDurationText = hasElapsedDuration
+                ? formatPercent(valueAsDouble(progressData, "timeProgressRatio"))
+                : "기간 정보 없음";
+        setSummaryValue(elapsedDurationValue, elapsedDurationText);
 
         double startWeight = finiteValue(goal.getStartWeight());
         double targetWeight = finiteValue(goal.getTargetWeight());
@@ -218,7 +227,7 @@ public class HomeTargetPanel extends JPanel {
             stateDescriptionLabel.setText("최근 기록을 기준으로 진행 상황을 표시합니다.");
         }
         goalActionButton.setText("목표 수정");
-        goalActionButton.setBounds(20, 84, 340, 38);
+        goalActionButton.setBounds(20, 70, 340, 38);
     }
 
     private double calculateWeightProgress(double start, double current, double target) {
@@ -305,6 +314,14 @@ public class HomeTargetPanel extends JPanel {
         }
         Object value = values.get(key);
         return value instanceof Number ? ((Number) value).doubleValue() : 0.0;
+    }
+
+    private boolean hasFiniteNumber(Map<String, Object> values, String key) {
+        if (values == null) {
+            return false;
+        }
+        Object value = values.get(key);
+        return value instanceof Number && Double.isFinite(((Number) value).doubleValue());
     }
 
     private double finiteValue(BigDecimal value) {
