@@ -1,132 +1,160 @@
 package panel;
 
-import DB.BodyInfoDAO;
 import DB.GoalDAO;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import main.MainUserPanel;
+import model.UserBean;
 import model.UserGoal;
-import ui_n_utils.UserSessionManager; 
+import ui_n_utils.AppTheme;
+import ui_n_utils.UserSessionManager;
 
 public class MymeGoalPanel extends JPanel implements ActionListener {
-    private JPanel mainPanel;
-    private JButton finishButton;
-    private JTextField startWeightField, targetWeightField, durationField;
-    private MainUserPanel mainUserPanel;
-    private GoalDAO goalDAO;
-    private BodyInfoDAO bodyInfoDAO;
+    private final MainUserPanel mainUserPanel;
+    private final GoalDAO goalDAO;
+    private final JLabel titleLabel;
+    private final JButton saveButton;
+    private final JTextField startWeightField;
+    private final JTextField targetWeightField;
+    private final JTextField durationField;
 
     public MymeGoalPanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
         this.goalDAO = new GoalDAO();
-        this.bodyInfoDAO = new BodyInfoDAO();
 
         setLayout(null);
-        setBackground(new Color(192, 233, 147));
-        setBounds(0, 40, 440, 736);
+        setBounds(0, 0, 440, 736);
+        setBackground(AppTheme.BACKGROUND);
 
-        mainPanel = new JPanel();
-        mainPanel.setLayout(null);
-        mainPanel.setBackground(Color.WHITE);
-        mainPanel.setBounds(21, 40, 380, 670);
-        add(mainPanel);
+        JPanel formCard = new JPanel(null);
+        AppTheme.styleCard(formCard);
+        formCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, 380, 500);
+        add(formCard);
 
-        JLabel memberInfoLabel = new JLabel("목표관리");
-        memberInfoLabel.setFont(new Font("맑은 고딕", Font.BOLD, 30));
-        memberInfoLabel.setBounds(135, 40, 200, 30);
-        mainPanel.add(memberInfoLabel);
+        titleLabel = new JLabel("목표 설정");
+        titleLabel.setFont(AppTheme.TITLE_FONT);
+        titleLabel.setForeground(AppTheme.TEXT);
+        titleLabel.setBounds(24, 18, 195, 36);
+        formCard.add(titleLabel);
 
-        // 시작 체중 필드
-        mainPanel.add(createLabel("시작 체중(kg): ", 60, 100));
-        startWeightField = createTextField(160, 100);
-        mainPanel.add(startWeightField);
+        JButton backButton = new JButton("목표 화면으로");
+        AppTheme.styleSecondaryButton(backButton);
+        backButton.setBounds(235, 20, 120, 36);
+        backButton.addActionListener(e -> mainUserPanel.showPanel("HomeTarget"));
+        formCard.add(backButton);
 
-        // 목표 체중 필드
-        mainPanel.add(createLabel("목표 체중(kg): ", 60, 150));
-        targetWeightField = createTextField(160, 150);
-        mainPanel.add(targetWeightField);
+        JSeparator headerDivider = new JSeparator();
+        headerDivider.setForeground(AppTheme.BORDER);
+        headerDivider.setBounds(24, 70, 331, 1);
+        formCard.add(headerDivider);
 
-        // 기간 설정 필드 (일수)
-        mainPanel.add(createLabel("목표 기간(일): ", 60, 200));
-        durationField = createTextField(160, 200);
-        mainPanel.add(durationField);
+        JLabel sectionTitle = new JLabel("목표 정보");
+        sectionTitle.setFont(AppTheme.SECTION_TITLE_FONT);
+        sectionTitle.setForeground(AppTheme.PRIMARY_DARK);
+        sectionTitle.setBounds(24, 91, 160, 28);
+        formCard.add(sectionTitle);
 
-        // 완료 버튼
-        finishButton = new JButton("완료");
-        finishButton.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-        finishButton.setBackground(Color.BLACK);
-        finishButton.setForeground(Color.WHITE);
-        finishButton.setBounds(140, 260, 100, 40);
-        mainPanel.add(finishButton);
-        finishButton.addActionListener(this);
-        
-        // 패널이 표시될 때마다 최신 체중 정보 로드
-        loadLatestWeight();
+        startWeightField = addInputRow(formCard, "시작 체중", "kg", 132);
+        targetWeightField = addInputRow(formCard, "목표 체중", "kg", 194);
+        durationField = addInputRow(formCard, "목표 기간", "일", 256);
+
+        JLabel inputGuide = new JLabel(
+                "<html>체중은 숫자로 입력해주세요.<br>목표 기간은 1일 이상입니다.</html>");
+        inputGuide.setFont(AppTheme.CAPTION_FONT);
+        inputGuide.setForeground(AppTheme.TEXT_SECONDARY);
+        inputGuide.setBounds(145, 313, 205, 40);
+        formCard.add(inputGuide);
+
+        saveButton = new JButton("목표 저장");
+        AppTheme.stylePrimaryButton(saveButton);
+        saveButton.setBounds(145, 382, 205, 44);
+        saveButton.addActionListener(this);
+        formCard.add(saveButton);
     }
 
-    private JTextField createTextField(int x, int y) {
+    private JTextField addInputRow(JPanel card, String labelText, String unit, int y) {
+        JLabel label = new JLabel(labelText);
+        label.setFont(AppTheme.BODY_BOLD_FONT);
+        label.setForeground(AppTheme.TEXT_SECONDARY);
+        label.setBounds(24, y + 7, 110, 24);
+        card.add(label);
+
         JTextField field = new JTextField();
-        field.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        field.setBackground(new Color(0xD9D9D9));
-        field.setHorizontalAlignment(JTextField.RIGHT);
-        field.setBorder(BorderFactory.createLineBorder(new Color(0xD9D9D9), 2));
-        field.setBounds(200, y, 120, 30);
+        AppTheme.styleInputField(field);
+        field.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
+        field.setHorizontalAlignment(SwingConstants.RIGHT);
+        field.setBounds(145, y, 170, AppTheme.INPUT_HEIGHT);
+        card.add(field);
+
+        JLabel unitLabel = new JLabel(unit, SwingConstants.CENTER);
+        unitLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        unitLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        unitLabel.setBounds(320, y + 7, 30, 24);
+        card.add(unitLabel);
         return field;
     }
 
-    private JLabel createLabel(String text, int x, int y) {
-        JLabel label = new JLabel(text);
-        label.setFont(new Font("맑은 고딕", Font.BOLD, 16));
-        label.setBounds(x, y, 180, 30);
-        return label;
-    }
-    
-    // 최신 체중 정보 로드
-    public void loadLatestWeight() {
-        if (UserSessionManager.getInstance().getCurrentUser() == null) {
+    private void loadGoalForm() {
+        clearFields();
+        setFormMode(false);
+
+        UserBean currentUser = UserSessionManager.getInstance().getCurrentUser();
+        if (currentUser == null) {
             return;
         }
-        
-        String userId = UserSessionManager.getInstance().getCurrentUser().getUser_id();
-        
-        // 기존 목표 정보 로드
-        UserGoal existingGoal = goalDAO.getUserGoal(userId);
+
+        UserGoal existingGoal = goalDAO.getUserGoal(currentUser.getUser_id());
         if (existingGoal != null) {
             startWeightField.setText(existingGoal.getStartWeight().toString());
             targetWeightField.setText(existingGoal.getTargetWeight().toString());
             durationField.setText(String.valueOf(existingGoal.getTargetDuration()));
+            setFormMode(true);
             return;
         }
-        
-        // 기존 목표가 없는 경우 bodyinfo에서 최신 체중 가져오기
-        BigDecimal latestWeight = goalDAO.getLatestWeight(userId);
+
+        BigDecimal latestWeight = goalDAO.getLatestWeight(currentUser.getUser_id());
         if (latestWeight != null) {
             startWeightField.setText(latestWeight.toString());
-        } else {
-            startWeightField.setText("");
         }
-        
-        targetWeightField.setText("");
-        durationField.setText("");
+    }
+
+    private void setFormMode(boolean editingExistingGoal) {
+        titleLabel.setText(editingExistingGoal ? "목표 수정" : "목표 설정");
+        saveButton.setText(editingExistingGoal ? "목표 수정" : "목표 저장");
     }
 
     private UserGoal getUserInput() {
         try {
-            if (UserSessionManager.getInstance().getCurrentUser() == null) {
-                JOptionPane.showMessageDialog(this, "로그인이 필요합니다!", "오류", JOptionPane.ERROR_MESSAGE);
+            UserBean currentUser = UserSessionManager.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                JOptionPane.showMessageDialog(
+                        getDialogParent(),
+                        "로그인이 필요합니다!",
+                        "오류",
+                        JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
-            String userId = UserSessionManager.getInstance().getCurrentUser().getUser_id();
-            
-            // 필수 입력 필드 검증
-            if (startWeightField.getText().trim().isEmpty() || 
-                targetWeightField.getText().trim().isEmpty() || 
-                durationField.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "모든 필드를 입력해주세요!", "입력 오류", JOptionPane.ERROR_MESSAGE);
+            if (startWeightField.getText().trim().isEmpty()
+                    || targetWeightField.getText().trim().isEmpty()
+                    || durationField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        getDialogParent(),
+                        "모든 필드를 입력해주세요!",
+                        "입력 오류",
+                        JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
@@ -135,13 +163,22 @@ public class MymeGoalPanel extends JPanel implements ActionListener {
             int targetDuration = Integer.parseInt(durationField.getText().trim());
 
             if (targetDuration <= 0) {
-                JOptionPane.showMessageDialog(this, "목표 기간은 1일 이상이어야 합니다!", "입력 오류", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        getDialogParent(),
+                        "목표 기간은 1일 이상이어야 합니다!",
+                        "입력 오류",
+                        JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
-            return new UserGoal(userId, startWeight, targetWeight, targetDuration);
+            return new UserGoal(
+                    currentUser.getUser_id(), startWeight, targetWeight, targetDuration);
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "숫자 입력을 확인하세요!", "입력 오류", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    getDialogParent(),
+                    "숫자 입력을 확인하세요!",
+                    "입력 오류",
+                    JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
@@ -152,32 +189,46 @@ public class MymeGoalPanel extends JPanel implements ActionListener {
         durationField.setText("");
     }
 
+    private Component getDialogParent() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        return window != null ? window : this;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == finishButton) {
-            UserGoal goal = getUserInput();
-            if (goal != null) {
-                boolean success = goalDAO.saveOrUpdateGoal(goal);
-                
-                if (success) {
-                    JOptionPane.showMessageDialog(this, "목표가 성공적으로 저장되었습니다.", "저장 완료", JOptionPane.INFORMATION_MESSAGE);
-                    mainUserPanel.getHomeTargetPanel().loadUserTargetData();
-                    mainUserPanel.showPanel("HomeTarget");
-                    clearFields();
-                } else {
-                    System.err.println("❌ 목표 데이터 저장 실패!");
-                    JOptionPane.showMessageDialog(this, "목표 저장에 실패했습니다. 다시 시도해주세요.", "저장 실패", JOptionPane.ERROR_MESSAGE);
-                }
-            }
+        if (e.getSource() != saveButton) {
+            return;
+        }
+
+        UserGoal goal = getUserInput();
+        if (goal == null) {
+            return;
+        }
+
+        boolean success = goalDAO.saveOrUpdateGoal(goal);
+        if (success) {
+            JOptionPane.showMessageDialog(
+                    getDialogParent(),
+                    "목표가 성공적으로 저장되었습니다.",
+                    "저장 완료",
+                    JOptionPane.INFORMATION_MESSAGE);
+            mainUserPanel.getHomeTargetPanel().loadUserTargetData();
+            mainUserPanel.showPanel("HomeTarget");
+            clearFields();
+        } else {
+            JOptionPane.showMessageDialog(
+                    getDialogParent(),
+                    "목표 저장에 실패했습니다. 다시 시도해주세요.",
+                    "저장 실패",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    // 패널이 표시될 때마다 호출되도록 설정
+
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (visible) {
-            loadLatestWeight();
+            loadGoalForm();
         }
     }
 }
