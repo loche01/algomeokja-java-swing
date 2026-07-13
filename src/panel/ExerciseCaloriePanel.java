@@ -8,6 +8,7 @@ import javax.swing.event.DocumentListener;
 import main.MainUserPanel;
 import model.ExerciseBean;
 import model.LoginManager;
+import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 
 public class ExerciseCaloriePanel extends JPanel {
@@ -27,7 +28,7 @@ public class ExerciseCaloriePanel extends JPanel {
 
     public ExerciseCaloriePanel(MainUserPanel mainUserPanel) {
         setLayout(null);
-        setBackground(new Color(192, 233, 147));
+        setBackground(AppTheme.BACKGROUND);
         setPreferredSize(new Dimension(440, 856)); // 네비게이션 바 제외 크기
         this.mainUserPanel = mainUserPanel;
         // 현재 로그인된 사용자 ID 가져오기
@@ -37,49 +38,49 @@ public class ExerciseCaloriePanel extends JPanel {
         exerciseLogDAO = new ExerciseLogDAO();
 
         // ── 메인 패널 구성 ──
-        mainPanel = new RoundedComponent(380, 600, 30, "panel", " ",
-                new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
-        mainPanel.setBounds(20, 110, 380, 600);
+        mainPanel = new RoundedComponent(380, 570, 20, "panel", " ",
+                AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, " ", 0, 0);
+        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, AppTheme.CARD_WIDTH, 570);
         mainPanel.setLayout(null);
         mainPanel.setEnabled(false);
 
         // 뒤로가기 버튼
-        BackButton = new RoundedComponent(40, 40, 10, "button", "<",
-                Color.white, Color.white, Color.black, "Inter", Font.BOLD, 25);
-        BackButton.setBounds(10, 10, 40, 40);
+        BackButton = new RoundedComponent(104, 38, 10, "button", "운동 목록",
+                AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 13);
+        BackButton.setBounds(20, 18, 104, 38);
         BackButton.getButton().addActionListener(e -> mainUserPanel.goToPreviousPanel());
         mainPanel.add(BackButton);
 
         // 운동 제목과 타입
         workoutTitle = new JLabel("");
-        workoutTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
-        workoutTitle.setBounds(30, 60, 300, 30);
+        workoutTitle.setFont(AppTheme.TITLE_FONT);
+        workoutTitle.setForeground(AppTheme.TEXT);
+        workoutTitle.setBounds(24, 74, 332, 34);
         mainPanel.add(workoutTitle);
 
         workoutType = new JLabel("");
-        workoutType.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        workoutType.setForeground(Color.gray);
-        workoutType.setBounds(30, 90, 200, 20);
+        workoutType.setFont(AppTheme.BODY_FONT);
+        workoutType.setForeground(AppTheme.TEXT_SECONDARY);
+        workoutType.setBounds(24, 108, 332, 24);
         mainPanel.add(workoutType);
 
         // ── 운동 시간 입력 패널 ──
         timePanel = new RoundedComponent(330, 50, 20, "panel", " ",
-                Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.black, " ", 0, 0);
+                AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT, " ", 0, 0);
         timePanel.setBounds(25, 150, 330, 50);
         timePanel.setLayout(null);
         timePanel.setEnabled(false);
 
         JLabel timeLabel = new JLabel("운동 시간");
-        timeLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        timeLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        timeLabel.setForeground(AppTheme.TEXT);
         timeLabel.setBounds(10, 15, 80, 20);
         timePanel.add(timeLabel);
 
         timeField = new JTextField();
-        timeField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        timeField.setBackground(Color.LIGHT_GRAY);
+        AppTheme.styleInputField(timeField);
         timeField.setHorizontalAlignment(JTextField.RIGHT);
-        timeField.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
-        timeField.setBounds(215, 12, 80, 25);
+        timeField.setBounds(205, 6, 90, 38);
         timeField.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { calculateCalories(); }
             public void removeUpdate(DocumentEvent e) { calculateCalories(); }
@@ -88,29 +89,29 @@ public class ExerciseCaloriePanel extends JPanel {
         timePanel.add(timeField);
 
         JLabel minLabel = new JLabel("분");
-        minLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        minLabel.setFont(AppTheme.BODY_FONT);
+        minLabel.setForeground(AppTheme.TEXT_SECONDARY);
         minLabel.setBounds(300, 15, 20, 20);
         timePanel.add(minLabel);
         mainPanel.add(timePanel);
 
         // ── 현재 체중 입력 패널 ──
         weightPanel = new RoundedComponent(330, 50, 20, "panel", " ",
-                Color.LIGHT_GRAY, Color.LIGHT_GRAY, Color.black, " ", 0, 0);
+                AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT, " ", 0, 0);
         weightPanel.setBounds(25, 220, 330, 50);
         weightPanel.setLayout(null);
         weightPanel.setEnabled(false);
 
         JLabel weightLabel = new JLabel("현재 체중");
-        weightLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        weightLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        weightLabel.setForeground(AppTheme.TEXT);
         weightLabel.setBounds(10, 15, 80, 20);
         weightPanel.add(weightLabel);
 
         weightField = new JTextField();
-        weightField.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        weightField.setBackground(Color.LIGHT_GRAY);
+        AppTheme.styleInputField(weightField);
         weightField.setHorizontalAlignment(JTextField.RIGHT);
-        weightField.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 2));
-        weightField.setBounds(215, 12, 80, 25);
+        weightField.setBounds(205, 6, 90, 38);
         weightField.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { calculateCalories(); }
             public void removeUpdate(DocumentEvent e) { calculateCalories(); }
@@ -119,26 +120,30 @@ public class ExerciseCaloriePanel extends JPanel {
         weightPanel.add(weightField);
 
         JLabel kgLabel = new JLabel("kg");
-        kgLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        kgLabel.setFont(AppTheme.BODY_FONT);
+        kgLabel.setForeground(AppTheme.TEXT_SECONDARY);
         kgLabel.setBounds(300, 15, 20, 20);
         weightPanel.add(kgLabel);
         mainPanel.add(weightPanel);
 
         // ── 예상 소모 칼로리 표시 ──
         JLabel calorieLabel = new JLabel("예상 소모 칼로리");
-        calorieLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 17));
-        calorieLabel.setBounds(50, 320, 200, 30);
+        calorieLabel.setFont(AppTheme.SECTION_TITLE_FONT);
+        calorieLabel.setForeground(AppTheme.TEXT);
+        calorieLabel.setBounds(25, 314, 200, 30);
         mainPanel.add(calorieLabel);
 
         calorieValue = new JLabel("0 Kcal");
-        calorieValue.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
-        calorieValue.setBounds(250, 320, 100, 30);
+        calorieValue.setFont(AppTheme.SECTION_TITLE_FONT);
+        calorieValue.setForeground(AppTheme.PRIMARY_DARK);
+        calorieValue.setHorizontalAlignment(SwingConstants.RIGHT);
+        calorieValue.setBounds(230, 314, 125, 30);
         mainPanel.add(calorieValue);
 
         // ── 저장 버튼 ──
-        finishButton = new RoundedComponent(100, 40, 10, "button", "저장",
-                Color.BLACK, Color.BLACK, Color.WHITE, "Inter", Font.BOLD, 14);
-        finishButton.setBounds(140, 420, 100, 40);
+        finishButton = new RoundedComponent(330, 44, 10, "button", "운동 기록 저장",
+                AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
+        finishButton.setBounds(25, 390, 330, 44);
         JButton finishBtn = finishButton.getButton();
         if (finishBtn != null) {
             finishBtn.addActionListener(e -> {

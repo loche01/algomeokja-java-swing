@@ -9,6 +9,7 @@ import java.util.List;
 import main.MainUserPanel;
 import DB.ExerciseDAO;
 import model.ExerciseBean;
+import ui_n_utils.AppTheme;
 import ui_n_utils.ClasspathIconLoader;
 import ui_n_utils.RoundedComponent;
 
@@ -28,20 +29,33 @@ public class ExerciseListPanel extends JPanel {
     // 1. 기본 생성자 추가
     public ExerciseListPanel() {
         setLayout(null);
-        setBackground(new Color(0xD9D9D9));
+        setBackground(AppTheme.BACKGROUND);
        
         // 데이터베이스 연결을 위한 DAO 초기화
         exerciseDAO = new ExerciseDAO();
         
+        JLabel titleLabel = new JLabel("운동 목록");
+        titleLabel.setBounds(AppTheme.HORIZONTAL_MARGIN, 18, AppTheme.CARD_WIDTH, 34);
+        AppTheme.styleScreenTitle(titleLabel);
+        add(titleLabel);
+
+        JLabel descriptionLabel = new JLabel("선택한 부위의 운동을 확인하고 기록할 수 있습니다.");
+        descriptionLabel.setBounds(AppTheme.HORIZONTAL_MARGIN, 54, AppTheme.CARD_WIDTH, 24);
+        AppTheme.styleScreenDescription(descriptionLabel);
+        add(descriptionLabel);
+
         // 검색바 패널 생성
         JPanel searchPanel = new JPanel(null);
-        searchPanel.setBounds(15, 50, 410, 40);
-        searchPanel.setBackground(new Color(217, 217, 217));
+        searchPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 136, AppTheme.CARD_WIDTH, AppTheme.INPUT_HEIGHT);
+        searchPanel.setBackground(AppTheme.CARD);
+        searchPanel.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
 
         // 검색 필드 생성
         searchField = new JTextField(" 검색어를 입력하세요...");
-        searchField.setBounds(40, 5, 300, 30);
-        searchField.setForeground(Color.GRAY);
+        searchField.setBounds(42, 1, 328, 36);
+        searchField.setFont(AppTheme.BODY_FONT);
+        searchField.setForeground(AppTheme.TEXT_SECONDARY);
+        searchField.setBackground(AppTheme.CARD);
         searchField.setBorder(null);
 
         // 검색 필드 클릭 시 플레이스홀더 효과 제거
@@ -50,7 +64,7 @@ public class ExerciseListPanel extends JPanel {
             public void focusGained(java.awt.event.FocusEvent e) {
                 if (searchField.getText().equals(" 검색어를 입력하세요...")) {
                     searchField.setText("");
-                    searchField.setForeground(Color.BLACK);
+                    searchField.setForeground(AppTheme.TEXT);
                 }
             }
 
@@ -58,7 +72,7 @@ public class ExerciseListPanel extends JPanel {
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (searchField.getText().isEmpty()) {
                     searchField.setText(" 검색어를 입력하세요...");
-                    searchField.setForeground(Color.GRAY);
+                    searchField.setForeground(AppTheme.TEXT_SECONDARY);
                 }
             }
         });
@@ -74,7 +88,7 @@ public class ExerciseListPanel extends JPanel {
         searchButton.setToolTipText("운동 검색");
 
         // 속성 설정 및 이벤트 리스너 추가
-        searchButton.setBounds(5, 5, 30, 30);
+        searchButton.setBounds(6, 4, 30, 30);
         searchButton.setContentAreaFilled(false);
         searchButton.setBorderPainted(false);
         searchButton.addActionListener(new ActionListener() {
@@ -98,12 +112,6 @@ public class ExerciseListPanel extends JPanel {
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
 
-        // 패널에 둥근 테두리 효과 적용
-        RoundedComponent roundedSearchPanel = new RoundedComponent(390, 40, 40, "panel", "",
-                Color.LIGHT_GRAY, Color.WHITE, Color.black, "", Font.PLAIN, 0);
-        roundedSearchPanel.setBounds(0, 0, 390, 40);
-        searchPanel.add(roundedSearchPanel);
-
         // 검색 패널을 ExerciseSearchPanel에 추가
         add(searchPanel);
         
@@ -113,11 +121,11 @@ public class ExerciseListPanel extends JPanel {
         // 운동 콘텐츠 패널 생성 (BoxLayout으로 변경)
         exerciseContentPanel = new JPanel();
         exerciseContentPanel.setLayout(new BoxLayout(exerciseContentPanel, BoxLayout.Y_AXIS));
-        exerciseContentPanel.setBackground(new Color(0xD9D9D9));
+        exerciseContentPanel.setBackground(AppTheme.BACKGROUND);
         
         // 스크롤 패널에 콘텐츠 패널 추가
         exerciseScrollPane = new JScrollPane(exerciseContentPanel);
-        exerciseScrollPane.setBounds(10, 175, 420, 566);
+        exerciseScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 190, AppTheme.CARD_WIDTH, 500);
         exerciseScrollPane.setBorder(null);
         exerciseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         exerciseScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -125,6 +133,7 @@ public class ExerciseListPanel extends JPanel {
         // 스크롤바 숨기기 위한 스타일 설정
         exerciseScrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
         exerciseScrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 0));
+        exerciseScrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
         
         add(exerciseScrollPane);
         
@@ -150,7 +159,7 @@ public class ExerciseListPanel extends JPanel {
         
         // 검색 필드 초기화
         searchField.setText(" 검색어를 입력하세요...");
-        searchField.setForeground(Color.GRAY);
+        searchField.setForeground(AppTheme.TEXT_SECONDARY);
         
         // 해당 카테고리에 맞는 운동 불러오기
         loadExercisesForCategory(category);
@@ -159,9 +168,9 @@ public class ExerciseListPanel extends JPanel {
     // Helper method to set up all the components
     private void setupComponents() {
         // Category title button
-        categoryButton = new RoundedComponent(110, 35, 35, "button", currentCategory, 
-                Color.white, Color.white, Color.black, "Malgun Gothic", Font.BOLD, 14);
-        categoryButton.setBounds(160, 110, 110, 35);
+        categoryButton = new RoundedComponent(130, 38, 14, "button", currentCategory,
+                AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 14);
+        categoryButton.setBounds(AppTheme.HORIZONTAL_MARGIN, 90, 130, 38);
         categoryButton.getButton().addActionListener(e -> {
             if (mainUserPanel != null) {
                 mainUserPanel.showPanel("ExerciseSearch");
@@ -258,8 +267,9 @@ public class ExerciseListPanel extends JPanel {
         
         if (searchResults.isEmpty()) {
             JLabel noResultsLabel = new JLabel("검색 결과가 없습니다.", SwingConstants.CENTER);
-            noResultsLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+            AppTheme.styleEmptyState(noResultsLabel);
             noResultsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            noResultsLabel.setMaximumSize(new Dimension(360, 80));
             exerciseContentPanel.add(noResultsLabel);
         } else {
             // 검색 결과를 임시로 exerciseList에 저장
@@ -288,30 +298,19 @@ public class ExerciseListPanel extends JPanel {
     private void addExerciseButtons() {
         if (exerciseList == null || exerciseList.isEmpty()) {
             JLabel noDataLabel = new JLabel(currentCategory + " 운동 데이터가 없습니다.", SwingConstants.CENTER);
-            noDataLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+            AppTheme.styleEmptyState(noDataLabel);
             noDataLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            noDataLabel.setMaximumSize(new Dimension(360, 80));
             exerciseContentPanel.add(noDataLabel);
             return;
         }
-        
-        int minItems = 6; // 최소 6개 아이템이 보이도록 설정
         
         // 운동 목록 추가
         for (ExerciseBean ex : exerciseList) {
             // 운동 아이템 생성하여 추가
             exerciseContentPanel.add(createExerciseItem(ex));
-            exerciseContentPanel.add(Box.createVerticalStrut(2)); // 아이템 간 간격
+            exerciseContentPanel.add(Box.createVerticalStrut(AppTheme.SMALL_GAP));
         }
-        
-        // 아이템이 충분하지 않을 경우 빈 패널 추가
-        for (int i = exerciseList.size(); i < minItems; i++) {
-            JPanel emptyPanel = new JPanel();
-            emptyPanel.setPreferredSize(new Dimension(420, 72));
-            emptyPanel.setBackground(new Color(0xD9D9D9));
-            exerciseContentPanel.add(emptyPanel);
-            exerciseContentPanel.add(Box.createVerticalStrut(10));
-        }
-        exerciseContentPanel.add(Box.createVerticalStrut(90));
         
         exerciseContentPanel.revalidate();
         exerciseContentPanel.repaint();
@@ -321,15 +320,17 @@ public class ExerciseListPanel extends JPanel {
     private JPanel createExerciseItem(ExerciseBean ex) {
         // 감싸는 패널 생성
         JPanel wrapper = new JPanel();
-        wrapper.setLayout(new FlowLayout(FlowLayout.LEFT));
-        wrapper.setPreferredSize(new Dimension(420, 90));  
-        wrapper.setBackground(new Color(0xD9D9D9));
+        wrapper.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 7));
+        wrapper.setMaximumSize(new Dimension(380, 86));
+        wrapper.setPreferredSize(new Dimension(380, 86));
+        wrapper.setBackground(AppTheme.BACKGROUND);
         
         // 둥근 네모 박스 패널 (운동 아이템)
-        RoundedComponent itemPanel = new RoundedComponent(390, 72, 20, "panel", "", 
-                Color.WHITE, Color.WHITE, Color.BLACK, "Malgun Gothic", Font.BOLD, 16);
+        RoundedComponent itemPanel = new RoundedComponent(360, 72, 16, "panel", "",
+                AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, Font.SANS_SERIF, Font.BOLD, 16);
         itemPanel.setLayout(null);
-        itemPanel.setBounds(0, 0, 390, 72);
+        itemPanel.setBounds(0, 0, 360, 72);
+        itemPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         
         // 운동 아이템 클릭 이벤트
         itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -345,14 +346,15 @@ public class ExerciseListPanel extends JPanel {
         
         // 운동명 레이블
         JLabel nameLabel = new JLabel(ex.getExerciseName());
-        nameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        nameLabel.setBounds(20, 10, 300, 25);
+        nameLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        nameLabel.setForeground(AppTheme.TEXT);
+        nameLabel.setBounds(18, 10, 324, 25);
         
         // 운동 타입 레이블
         JLabel typeLabel = new JLabel(ex.getExerciseType());
-        typeLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-        typeLabel.setForeground(Color.GRAY);
-        typeLabel.setBounds(20, 40, 350, 25);
+        typeLabel.setFont(AppTheme.CAPTION_FONT);
+        typeLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        typeLabel.setBounds(18, 40, 324, 25);
         
         // 패널에 레이블 추가
         itemPanel.add(nameLabel);
