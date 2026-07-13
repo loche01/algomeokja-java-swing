@@ -27,10 +27,14 @@ public class NavUtil {
         navPanel.setBackground(Color.WHITE);
 
         // 네비게이션 버튼 생성
-        BottonNav btnHome = new BottonNav("홈", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\home1.png", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\home.png");
-        BottonNav btnCalendar = new BottonNav("캘린더", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\calender1.png", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\calender.png");
-        BottonNav btnWorkout = new BottonNav("운동", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\gym1.png", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\gym.png");
-        BottonNav btnProfile = new BottonNav("내 정보", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\profile1.png", "C:\\Users\\dita_806\\Desktop\\project8\\src\\images\\profile.png");
+        BottonNav btnHome = new BottonNav(
+                "홈", "/images/home1.png", "/images/home.png");
+        BottonNav btnCalendar = new BottonNav(
+                "캘린더", "/images/calender1.png", "/images/calender.png");
+        BottonNav btnWorkout = new BottonNav(
+                "운동", "/images/gym1.png", "/images/gym.png");
+        BottonNav btnProfile = new BottonNav(
+                "내 정보", "/images/profile1.png", "/images/profile.png");
 
         // 위치 설정
         btnHome.setBounds(0, 0, 100, 100);
@@ -103,23 +107,26 @@ public class NavUtil {
             setBorderPainted(false);
 
             // 아이콘 로드
-            defaultIcon = loadImage(defaultIconPath, 50, 50);//검정 이미지
-            selectedIcon = loadImage(selectedIconPath, 50, 50);//회색이미지
+            defaultIcon = ClasspathIconLoader.loadScaled(
+                    NavUtil.class, defaultIconPath, 50, 50);
+            selectedIcon = ClasspathIconLoader.loadScaled(
+                    NavUtil.class, selectedIconPath, 50, 50);
             
             // 텍스트 스타일 적용
             setText(text);
             setFont(new Font("맑은 고딕", Font.BOLD, 11));
             
             setHorizontalTextPosition(SwingConstants.CENTER);
-            setVerticalTextPosition(SwingConstants.BOTTOM);
-        }
-        
-        private ImageIcon loadImage(String path, int width, int height) {
-            return new ImageIcon(new ImageIcon(path).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+            setVerticalTextPosition(
+                    defaultIcon == null && selectedIcon == null
+                            ? SwingConstants.CENTER : SwingConstants.BOTTOM);
+            setToolTipText(text);
         }
 
         public void setSelected(boolean isSelected) {
-            setIcon(isSelected ? selectedIcon : defaultIcon);
+            ImageIcon requestedIcon = isSelected ? selectedIcon : defaultIcon;
+            ImageIcon fallbackIcon = isSelected ? defaultIcon : selectedIcon;
+            setIcon(requestedIcon != null ? requestedIcon : fallbackIcon);
             setForeground(isSelected ? Color.BLACK : Color.GRAY);
         }
         

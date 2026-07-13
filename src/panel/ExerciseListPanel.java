@@ -9,6 +9,7 @@ import java.util.List;
 import main.MainUserPanel;
 import DB.ExerciseDAO;
 import model.ExerciseBean;
+import ui_n_utils.ClasspathIconLoader;
 import ui_n_utils.RoundedComponent;
 
 public class ExerciseListPanel extends JPanel {
@@ -63,9 +64,14 @@ public class ExerciseListPanel extends JPanel {
         });
 
         // 검색 버튼 생성 및 초기화
-        ImageIcon searchIcon = new ImageIcon("C:/Users/dita_810/Desktop/project9/src/images/search.png");
-        Image img = searchIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-        searchButton = new JButton(new ImageIcon(img));
+        ImageIcon searchIcon = ClasspathIconLoader.loadScaled(
+                ExerciseListPanel.class, "/images/search.png", 20, 20);
+        searchButton = searchIcon != null ? new JButton(searchIcon) : new JButton("검색");
+        if (searchIcon == null) {
+            searchButton.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
+            searchButton.setMargin(new Insets(0, 0, 0, 0));
+        }
+        searchButton.setToolTipText("운동 검색");
 
         // 속성 설정 및 이벤트 리스너 추가
         searchButton.setBounds(5, 5, 30, 30);
