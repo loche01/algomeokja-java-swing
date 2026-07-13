@@ -144,6 +144,59 @@ public class NoticeFileDAO {
         return getFilesByNoticeId(noticeNum);
     }
 
+    /**
+     * 공지 삭제 전에 앱 저장 첨부파일 이름을 준비합니다. 준비 결과에는 실제 경로가
+     * 노출되지 않으며, 공지 삭제가 성공한 뒤 cleanupDeletedNoticeFiles()에 전달합니다.
+     */
+    public NoticeFileCleanup prepareNoticeFileCleanup(int noticeId) {
+        if (noticeId <= 0 || pool == null) {
+            return NoticeFileCleanup.unavailable(noticeId);
+        }
+
+        Connection conn = null;
+        List<String> storedFileNames = new ArrayList<>();
+        String sql = "SELECT file_path FROM notice_files WHERE notice_id = ?";
+        try {
+            conn = pool.getConnection();
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, noticeId);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String storedFileName = rs.getString("file_path");
+                        if (storedFileName != null && !storedFileName.isBlank()) {
+                            storedFileNames.add(storedFileName);
+                        }
+                    }
+                }
+            }
+            return NoticeFileCleanup.available(noticeId, storedFileNames);
+        } catch (Exception e) {
+            System.err.println("공지 첨부파일 삭제 정보를 준비하지 못했습니다.");
+            return NoticeFileCleanup.unavailable(noticeId);
+        } finally {
+            freeConnection(conn);
+        }
+    }
+
+    /**
+     * 공지 DB 삭제가 성공한 뒤 첨부 DB 레코드와 앱 저장 복사본을 정리합니다.
+     * 물리 파일 삭제 실패는 공지 삭제 결과를 되돌리지 않고 false로 알립니다.
+     */
+    public boolean cleanupDeletedNoticeFiles(NoticeFileCleanup preparedCleanup) {
+        if (preparedCleanup == null || preparedCleanup.noticeId <= 0 || pool == null) {
+            return false;
+        }
+
+        NoticeFileCleanup cleanup = preparedCleanup;
+        if (!cleanup.available) {
+            cleanup = prepareNoticeFileCleanup(cleanup.noticeId);
+        }
+        if (!cleanup.available || !deleteFileRecords(cleanup.noticeId)) {
+            return false;
+        }
+        return deleteManagedStoredFiles(cleanup.storedFileNames);
+    }
+
     private boolean insertFileRecord(int noticeId, String displayFileName, String storedFileName) {
         Connection conn = null;
         boolean originalAutoCommit = true;
@@ -203,14 +256,99 @@ public class NoticeFileDAO {
         return null;
     }
 
+    private boolean deleteFileRecords(int noticeId) {
+        Connection conn = null;
+        boolean originalAutoCommit = true;
+        boolean transactionStarted = false;
+        String sql = "DELETE FROM notice_files WHERE notice_id = ?";
+        try {
+            conn = pool.getConnection();
+            originalAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            transactionStarted = true;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, noticeId);
+                pstmt.executeUpdate();
+            }
+            conn.commit();
+            return true;
+        } catch (Exception e) {
+            rollbackQuietly(conn, transactionStarted);
+            System.err.println("삭제된 공지의 첨부파일 정보를 정리하지 못했습니다.");
+            return false;
+        } finally {
+            restoreAutoCommit(conn, originalAutoCommit, transactionStarted);
+            freeConnection(conn);
+        }
+    }
+
+    private boolean deleteManagedStoredFiles(List<String> storedFileNames) {
+        Path attachmentDirectory;
+        try {
+            attachmentDirectory = getAttachmentDirectoryPath();
+            if (!Files.exists(attachmentDirectory)) {
+                return true;
+            }
+        } catch (IOException | InvalidPathException | SecurityException e) {
+            System.err.println("공지 첨부파일 저장소를 확인하지 못했습니다.");
+            return false;
+        }
+
+        boolean allDeleted = true;
+        for (String storedFileName : storedFileNames) {
+            if (!isManagedStoredFileName(storedFileName)) {
+                continue;
+            }
+
+            try {
+                Path storedPath = attachmentDirectory.resolve(storedFileName)
+                        .toAbsolutePath().normalize();
+                if (!storedPath.startsWith(attachmentDirectory)
+                        || !attachmentDirectory.equals(storedPath.getParent())) {
+                    continue;
+                }
+                Files.deleteIfExists(storedPath);
+            } catch (IOException | InvalidPathException | SecurityException e) {
+                allDeleted = false;
+            }
+        }
+        if (!allDeleted) {
+            System.err.println("일부 공지 첨부파일을 정리하지 못했습니다.");
+        }
+        return allDeleted;
+    }
+
+    private boolean isManagedStoredFileName(String storedFileName) {
+        try {
+            Path relativePath = Path.of(storedFileName);
+            if (relativePath.isAbsolute() || relativePath.getNameCount() != 1) {
+                return false;
+            }
+
+            String fileName = relativePath.getFileName().toString();
+            int dotIndex = fileName.lastIndexOf('.');
+            String uuidPart = dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
+            String extension = dotIndex > 0 ? fileName.substring(dotIndex) : "";
+            UUID.fromString(uuidPart);
+            return extension.equals(safeExtension(fileName));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     private Path getAttachmentDirectory() throws IOException {
-        Path directory = getUserHomeDirectory()
+        Path directory = getAttachmentDirectoryPath();
+        Files.createDirectories(directory);
+        return directory;
+    }
+
+    private Path getAttachmentDirectoryPath() throws IOException {
+        return getUserHomeDirectory()
                 .resolve(APP_DIRECTORY_NAME)
                 .resolve(ATTACHMENT_DIRECTORY_NAME)
                 .toAbsolutePath()
                 .normalize();
-        Files.createDirectories(directory);
-        return directory;
     }
 
     private Path getDownloadDirectory() throws IOException {
@@ -365,6 +503,28 @@ public class NoticeFileDAO {
         private StoredFile(String displayFileName, String storedFileName) {
             this.displayFileName = displayFileName;
             this.storedFileName = storedFileName;
+        }
+    }
+
+    public static final class NoticeFileCleanup {
+        private final int noticeId;
+        private final List<String> storedFileNames;
+        private final boolean available;
+
+        private NoticeFileCleanup(int noticeId, List<String> storedFileNames,
+                boolean available) {
+            this.noticeId = noticeId;
+            this.storedFileNames = List.copyOf(storedFileNames);
+            this.available = available;
+        }
+
+        private static NoticeFileCleanup available(int noticeId,
+                List<String> storedFileNames) {
+            return new NoticeFileCleanup(noticeId, storedFileNames, true);
+        }
+
+        private static NoticeFileCleanup unavailable(int noticeId) {
+            return new NoticeFileCleanup(noticeId, List.of(), false);
         }
     }
 }

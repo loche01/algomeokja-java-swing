@@ -1,6 +1,7 @@
 package panel;
 
 import DB.NoticeDAO;
+import DB.NoticeFileDAO;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -36,6 +37,7 @@ public class NoticeAdminPanel extends JPanel {
     private static final int NOTICE_CARD_HEIGHT = 118;
 
     private final NoticeDAO noticeDAO;
+    private final NoticeFileDAO noticeFileDAO;
     private final MainAdminPanel mainAdminPanel;
     private final NoticeListPanel noticeListPanel;
     private final JScrollPane scrollPane;
@@ -46,6 +48,7 @@ public class NoticeAdminPanel extends JPanel {
     public NoticeAdminPanel(MainAdminPanel mainAdminPanel) {
         this.mainAdminPanel = mainAdminPanel;
         this.noticeDAO = new NoticeDAO();
+        this.noticeFileDAO = new NoticeFileDAO();
 
         setLayout(null);
         setBackground(AppTheme.BACKGROUND);
@@ -226,27 +229,38 @@ public class NoticeAdminPanel extends JPanel {
         }
 
         deleteButton.setEnabled(false);
-        new SwingWorker<Boolean, Void>() {
+        new SwingWorker<DeletionResult, Void>() {
             @Override
-            protected Boolean doInBackground() {
+            protected DeletionResult doInBackground() {
                 boolean allDeleted = true;
+                boolean allFilesCleaned = true;
                 for (int noticeId : selectedIds) {
-                    if (!noticeDAO.deleteNotice(noticeId)) {
+                    NoticeFileDAO.NoticeFileCleanup cleanup =
+                            noticeFileDAO.prepareNoticeFileCleanup(noticeId);
+                    if (noticeDAO.deleteNotice(noticeId)) {
+                        if (!noticeFileDAO.cleanupDeletedNoticeFiles(cleanup)) {
+                            allFilesCleaned = false;
+                        }
+                    } else {
                         allDeleted = false;
                     }
                 }
-                return allDeleted;
+                return new DeletionResult(allDeleted, allFilesCleaned);
             }
 
             @Override
             protected void done() {
                 try {
-                    boolean allDeleted = get();
+                    DeletionResult result = get();
                     loadNotices();
-                    if (allDeleted) {
+                    if (result.allDeleted && result.allFilesCleaned) {
                         JOptionPane.showMessageDialog(getDialogParent(),
                                 "선택한 공지사항을 삭제했습니다.",
                                 "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
+                    } else if (result.allDeleted) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항은 삭제했지만 일부 저장 첨부파일을 정리하지 못했습니다.",
+                                "첨부파일 정리", JOptionPane.WARNING_MESSAGE);
                     } else {
                         JOptionPane.showMessageDialog(getDialogParent(),
                                 "일부 공지사항을 삭제하지 못했습니다.",
@@ -299,6 +313,16 @@ public class NoticeAdminPanel extends JPanel {
     private Component getDialogParent() {
         Window window = SwingUtilities.getWindowAncestor(this);
         return window != null ? window : this;
+    }
+
+    private static class DeletionResult {
+        private final boolean allDeleted;
+        private final boolean allFilesCleaned;
+
+        private DeletionResult(boolean allDeleted, boolean allFilesCleaned) {
+            this.allDeleted = allDeleted;
+            this.allFilesCleaned = allFilesCleaned;
+        }
     }
 
     private static class NoticeListPanel extends JPanel implements Scrollable {

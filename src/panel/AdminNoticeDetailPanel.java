@@ -248,19 +248,31 @@ public class AdminNoticeDetailPanel extends JPanel {
 
         int noticeToDelete = currentNoticeId;
         setActionButtonsEnabled(false);
-        new SwingWorker<Boolean, Void>() {
+        new SwingWorker<DeletionResult, Void>() {
             @Override
-            protected Boolean doInBackground() {
-                return noticeDAO.deleteNotice(noticeToDelete);
+            protected DeletionResult doInBackground() {
+                NoticeFileDAO.NoticeFileCleanup cleanup =
+                        noticeFileDAO.prepareNoticeFileCleanup(noticeToDelete);
+                boolean noticeDeleted = noticeDAO.deleteNotice(noticeToDelete);
+                boolean filesCleaned = !noticeDeleted
+                        || noticeFileDAO.cleanupDeletedNoticeFiles(cleanup);
+                return new DeletionResult(noticeDeleted, filesCleaned);
             }
 
             @Override
             protected void done() {
                 try {
-                    if (get()) {
-                        JOptionPane.showMessageDialog(getDialogParent(),
-                                "공지사항을 삭제했습니다.",
-                                "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
+                    DeletionResult result = get();
+                    if (result.noticeDeleted) {
+                        if (result.filesCleaned) {
+                            JOptionPane.showMessageDialog(getDialogParent(),
+                                    "공지사항을 삭제했습니다.",
+                                    "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(getDialogParent(),
+                                    "공지사항은 삭제했지만 일부 저장 첨부파일을 정리하지 못했습니다.",
+                                    "첨부파일 정리", JOptionPane.WARNING_MESSAGE);
+                        }
                         currentNoticeId = 0;
                         mainAdminPanel.showPanel("NoticeAdmin");
                     } else {
@@ -404,6 +416,16 @@ public class AdminNoticeDetailPanel extends JPanel {
         private DetailData(NoticeBean notice, List<Map<String, Object>> files) {
             this.notice = notice;
             this.files = files;
+        }
+    }
+
+    private static class DeletionResult {
+        private final boolean noticeDeleted;
+        private final boolean filesCleaned;
+
+        private DeletionResult(boolean noticeDeleted, boolean filesCleaned) {
+            this.noticeDeleted = noticeDeleted;
+            this.filesCleaned = filesCleaned;
         }
     }
 }
