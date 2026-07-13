@@ -166,6 +166,12 @@ public class MainUserPanel extends JPanel {
         if (panelName.equals("HomeTarget")) {
             homeTargetPanel.refreshTargetData();
         }
+
+        if (panelName.equals("Notice")) {
+            noticePanel.reloadNotices();
+        } else if (panelName.equals("noticeDetailPanel")) {
+            noticeDetailPanel.resetScrollPositions();
+        }
         
         // HomeDaily 패널로 이동할 경우 네비게이션 바의 홈 버튼도 선택
         if (panelName.equals("HomeDaily")) {
