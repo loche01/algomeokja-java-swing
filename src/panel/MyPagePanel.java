@@ -1,155 +1,152 @@
 package panel;
 
 import DB.BodyInfoDAO;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingUtilities;
 import main.MainUserPanel;
 import model.LoginManager;
 import model.UserBean;
-import ui_n_utils.RoundedComponent;
+import ui_n_utils.AppTheme;
 
+public class MyPagePanel extends JPanel {
+    private final JButton editBodyButton;
+    private final JButton editMemberButton;
+    private final JButton logoutButton;
+    private final MainUserPanel mainUserPanel;
+    private final JLabel[] userInfoLabels;
+    private final JLabel[] bodyInfoLabels;
+    private final BodyInfoDAO bodyInfoDAO;
 
-public class MyPagePanel extends JPanel implements ActionListener {
-    private RoundedComponent editBodyBtn, editMemberBtn, mainPanel, logoutBtn, a; 
-    private MainUserPanel mainUserPanel;
-    private JLabel[] userInfoLabels;
-    private JLabel[] bodyInfoLabels;
-    private BodyInfoDAO bodyInfoDAO;
-    
     public MyPagePanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
         this.bodyInfoDAO = new BodyInfoDAO();
         setLayout(null);
-        setBackground(new Color(192, 233, 147)); // 기존 배경 유지
-        
-        // 메인 패널
-        mainPanel = new RoundedComponent(380, 670, 30, "panel", " ", 
-                new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
-        mainPanel.setBounds(21, 40, 380, 670);
-        add(mainPanel);
+        setBackground(AppTheme.BACKGROUND);
 
-        // 회원 정보
-        JLabel memberInfoLabel = new JLabel("회원정보");
-        memberInfoLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-        memberInfoLabel.setForeground(Color.RED);
-        memberInfoLabel.setBounds(40, 40, 100, 30);
-        mainPanel.add(memberInfoLabel);
-        
-        // 수정 버튼
-        editMemberBtn = new RoundedComponent(150, 36, 10, "button", "회원정보 수정",
-                new Color(0x609056), Color.WHITE, new Color(0x4F6F46),
-                "맑은 고딕", Font.BOLD, 14);
-        editMemberBtn.setBounds(220, 32, 150, 36);
-        mainPanel.add(editMemberBtn);
-        editMemberBtn.getButton().addActionListener(e -> mainUserPanel.showPanel("MyMember")); // 📌 MyMemberPanel로 전환
-        
-        // 회원 정보 라벨 추가
-        String[] memberInfo = {"이름", "이메일", "전화번호", "ID", "비밀번호"};
+        JPanel mainCard = new JPanel(null);
+        AppTheme.styleCard(mainCard);
+        mainCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, 380, 650);
+        add(mainCard);
+
+        JLabel pageTitle = new JLabel("내 정보");
+        pageTitle.setFont(AppTheme.TITLE_FONT);
+        pageTitle.setForeground(AppTheme.TEXT);
+        pageTitle.setBounds(24, 18, 180, 34);
+        mainCard.add(pageTitle);
+
+        JLabel memberInfoTitle = createSectionTitle("회원정보", 24, 67);
+        mainCard.add(memberInfoTitle);
+
+        editMemberButton = new JButton("회원정보 수정");
+        AppTheme.styleSecondaryButton(editMemberButton);
+        editMemberButton.setBounds(218, 62, 132, 34);
+        editMemberButton.addActionListener(e -> mainUserPanel.showPanel("MyMember"));
+        mainCard.add(editMemberButton);
+
+        String[] memberInfo = {"이름", "이메일", "전화번호", "ID"};
         userInfoLabels = new JLabel[memberInfo.length];
-        
         for (int i = 0; i < memberInfo.length; i++) {
-            JLabel label = new JLabel(memberInfo[i]);
-            label.setFont(new Font("맑은 고딕", Font.BOLD, 15));
-            label.setBounds(40, 80 + (i * 45), 100, 25);
-            mainPanel.add(label);
-            
-            // 사용자 정보를 표시할 라벨 추가 - 초기값은 빈 문자열
-            userInfoLabels[i] = new JLabel("");
-            userInfoLabels[i].setFont(new Font("맑은 고딕", Font.PLAIN, 15));
-            userInfoLabels[i].setBounds(150, 80 + (i * 45), 200, 25);
-            mainPanel.add(userInfoLabels[i]);
+            int rowY = 112 + (i * 37);
+            mainCard.add(createRowLabel(memberInfo[i], rowY));
+            userInfoLabels[i] = createValueLabel(rowY);
+            mainCard.add(userInfoLabels[i]);
         }
 
-        // 구분선
+        JLabel passwordGuide = new JLabel("비밀번호 변경은 회원정보 수정에서 할 수 있습니다.");
+        passwordGuide.setFont(AppTheme.CAPTION_FONT);
+        passwordGuide.setForeground(AppTheme.TEXT_SECONDARY);
+        passwordGuide.setBounds(122, 260, 228, 20);
+        mainCard.add(passwordGuide);
+
         JSeparator divider = new JSeparator();
-        divider.setBounds(0, 320, 380, 2);
-        divider.setBackground(Color.black);
-        mainPanel.add(divider);
+        divider.setForeground(AppTheme.BORDER);
+        divider.setBounds(24, 294, 326, 1);
+        mainCard.add(divider);
 
-        // 신체 정보
-        JLabel bodyInfoLabel = new JLabel("신체정보");
-        bodyInfoLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-        bodyInfoLabel.setForeground(Color.RED);
-        bodyInfoLabel.setBounds(40, 350, 100, 30);
-        mainPanel.add(bodyInfoLabel);
+        JLabel bodyInfoTitle = createSectionTitle("신체정보", 24, 317);
+        mainCard.add(bodyInfoTitle);
 
-        // 수정 버튼
-        editBodyBtn = new RoundedComponent(100, 40, 10, "Button", "수정", 
-                Color.white, Color.white, Color.red, "맑은 고딕", Font.BOLD, 17);
-        editBodyBtn.setBounds(270, 340, 100, 50);
-        editBodyBtn.getButton().addActionListener(e -> mainUserPanel.showPanel("MyBody"));
-        mainPanel.add(editBodyBtn);
+        editBodyButton = new JButton("신체정보 수정");
+        AppTheme.styleSecondaryButton(editBodyButton);
+        editBodyButton.setBounds(218, 312, 132, 34);
+        editBodyButton.addActionListener(e -> mainUserPanel.showPanel("MyBody"));
+        mainCard.add(editBodyButton);
 
-        // 신체 정보 라벨 추가
-        String[] bodyInfo = {"키", "몸무게", "골격근량", "체지방량", "체지방률", ""};
+        String[] bodyInfo = {"키", "몸무게", "골격근량", "체지방량", "체지방률"};
         bodyInfoLabels = new JLabel[bodyInfo.length];
-        
         for (int i = 0; i < bodyInfo.length; i++) {
-            JLabel label = new JLabel(bodyInfo[i]);
-            label.setFont(new Font("맑은 고딕", Font.BOLD, 15));
-            label.setBounds(40, 400 + (i * 45), 100, 30);
-            mainPanel.add(label);
-            
-            // 신체 정보를 표시할 라벨 추가 - 초기값은 빈 문자열
-            bodyInfoLabels[i] = new JLabel("");
-            bodyInfoLabels[i].setFont(new Font("맑은 고딕", Font.PLAIN, 15));
-            bodyInfoLabels[i].setBounds(150, 400 + (i * 45), 200, 30);
-            mainPanel.add(bodyInfoLabels[i]);
+            int rowY = 365 + (i * 37);
+            mainCard.add(createRowLabel(bodyInfo[i], rowY));
+            bodyInfoLabels[i] = createValueLabel(rowY);
+            mainCard.add(bodyInfoLabels[i]);
         }
-        
-        // 로그아웃 버튼 추가
-        logoutBtn = new RoundedComponent(120, 40, 15, "button", "로그아웃", 
-                Color.BLACK, Color.BLACK, Color.WHITE, "맑은 고딕", Font.BOLD, 16);
-        logoutBtn.setBounds(130, 620, 120, 40); // 패널 하단 중앙에 위치, 더 아래로 이동
-        mainPanel.add(logoutBtn);
 
-        // 로그아웃 버튼 클릭 이벤트 처리
-        logoutBtn.getButton().addActionListener(e -> {
-            // 확인 대화상자 표시
-            int option = JOptionPane.showConfirmDialog(
+        logoutButton = new JButton("로그아웃");
+        AppTheme.styleDangerButton(logoutButton);
+        logoutButton.setBounds(24, 580, 326, 40);
+        logoutButton.addActionListener(e -> confirmLogout());
+        mainCard.add(logoutButton);
+
+        updateUserInfo();
+    }
+
+    private JLabel createSectionTitle(String text, int x, int y) {
+        JLabel label = new JLabel(text);
+        label.setFont(AppTheme.SECTION_TITLE_FONT);
+        label.setForeground(AppTheme.PRIMARY_DARK);
+        label.setBounds(x, y, 130, 28);
+        return label;
+    }
+
+    private JLabel createRowLabel(String text, int y) {
+        JLabel label = new JLabel(text);
+        label.setFont(AppTheme.BODY_BOLD_FONT);
+        label.setForeground(AppTheme.TEXT_SECONDARY);
+        label.setBounds(24, y, 90, 24);
+        return label;
+    }
+
+    private JLabel createValueLabel(int y) {
+        JLabel label = new JLabel("");
+        label.setFont(AppTheme.BODY_FONT);
+        label.setForeground(AppTheme.TEXT);
+        label.setBounds(122, y, 228, 24);
+        return label;
+    }
+
+    private void confirmLogout() {
+        int option = JOptionPane.showConfirmDialog(
                 this,
                 "로그아웃 하시겠습니까?",
                 "로그아웃 확인",
                 JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-            );
-            
-            // 사용자가 '예'를 선택한 경우
-            if (option == JOptionPane.YES_OPTION) {
-                // 로그아웃 처리
-                LoginManager.getInstance().logout();
-                
-                // 로그인 화면으로 이동
-                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                if (frame instanceof main.MainFrame) {
-                    main.MainFrame mainFrame = (main.MainFrame) frame;
-                    mainFrame.showLoginAfterLogout();
-                }
-                
-                // 로그아웃 성공 메시지
-                JOptionPane.showMessageDialog(
-                    this,
-                    "로그아웃 되었습니다.",
-                    "로그아웃 성공",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-            }
-        });
-        
-        a = new RoundedComponent(0, 0, 10, "button", "", 
-                Color.BLACK, Color.BLACK, Color.WHITE, "맑은고딕", Font.BOLD, 14);
-        a.setBounds(140, 530, 100, 40);
-        a.getButton().addActionListener(this);
-        mainPanel.add(a);
-        // 패널이 표시될 때 사용자 정보 업데이트
-        updateUserInfo();
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (option != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        LoginManager.getInstance().logout();
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame instanceof main.MainFrame) {
+            main.MainFrame mainFrame = (main.MainFrame) frame;
+            mainFrame.showLoginAfterLogout();
+        }
+
+        JOptionPane.showMessageDialog(
+                this,
+                "로그아웃 되었습니다.",
+                "로그아웃 성공",
+                JOptionPane.INFORMATION_MESSAGE);
     }
-    
-    // 패널이 표시될 때 사용자 정보 업데이트
+
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -157,60 +154,50 @@ public class MyPagePanel extends JPanel implements ActionListener {
             updateUserInfo();
         }
     }
-    
-    // 사용자 정보 업데이트
+
     private void updateUserInfo() {
         UserBean user = LoginManager.getInstance().getCurrentUser();
-        if (user != null) {
-            // 회원 정보 업데이트
-            userInfoLabels[0].setText(user.getUser_name());
-            userInfoLabels[1].setText(user.getUser_email());
-            userInfoLabels[2].setText(user.getUser_phone());
-            userInfoLabels[3].setText(user.getUser_id());
-            userInfoLabels[4].setText("*****"); // 비밀번호는 보안상 표시하지 않음
-            
-            // 신체 정보 업데이트
-            ResultSet rs = bodyInfoDAO.getLatestBodyInfo(user.getUser_id());
-            try {
-                if (rs != null && rs.next()) {
-                    bodyInfoLabels[0].setText(rs.getFloat("height") + " cm");
-                    bodyInfoLabels[1].setText(rs.getFloat("weight") + " kg");
-                    bodyInfoLabels[2].setText(rs.getFloat("muscle_mass") + " kg");
-                    bodyInfoLabels[3].setText(rs.getFloat("fat_mass") + " kg");
-                    bodyInfoLabels[4].setText(rs.getFloat("fat_rate") + " %");
-                } else {
-                    // 신체 정보가 없는 경우 빈 문자열 표시
-                    bodyInfoLabels[0].setText("");
-                    bodyInfoLabels[1].setText("");
-                    bodyInfoLabels[2].setText("");
-                    bodyInfoLabels[3].setText("");
-                    bodyInfoLabels[4].setText("");
-                }
-                
-                // ResultSet 닫기
-                if (rs != null) rs.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-                for (int i = 0; i < bodyInfoLabels.length; i++) {
-                    bodyInfoLabels[i].setText("");
-                }
+        if (user == null) {
+            clearDisplayedInfo();
+            return;
+        }
+
+        userInfoLabels[0].setText(user.getUser_name());
+        userInfoLabels[1].setText(user.getUser_email());
+        userInfoLabels[2].setText(user.getUser_phone());
+        userInfoLabels[3].setText(user.getUser_id());
+
+        ResultSet resultSet = bodyInfoDAO.getLatestBodyInfo(user.getUser_id());
+        try {
+            if (resultSet != null && resultSet.next()) {
+                bodyInfoLabels[0].setText(resultSet.getFloat("height") + " cm");
+                bodyInfoLabels[1].setText(resultSet.getFloat("weight") + " kg");
+                bodyInfoLabels[2].setText(resultSet.getFloat("muscle_mass") + " kg");
+                bodyInfoLabels[3].setText(resultSet.getFloat("fat_mass") + " kg");
+                bodyInfoLabels[4].setText(resultSet.getFloat("fat_rate") + " %");
+            } else {
+                clearBodyInfo();
             }
-        } else {
-            // 로그인되지 않은 경우
-            for (int i = 0; i < userInfoLabels.length; i++) {
-                userInfoLabels[i].setText("");
+
+            if (resultSet != null) {
+                resultSet.close();
             }
-            
-            for (int i = 0; i < bodyInfoLabels.length; i++) {
-                bodyInfoLabels[i].setText("");
-            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            clearBodyInfo();
         }
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == editBodyBtn.getButton()) {
-            JOptionPane.showMessageDialog(this, "신체 정보 수정 버튼 클릭됨", "알림", JOptionPane.INFORMATION_MESSAGE);
+    private void clearDisplayedInfo() {
+        for (JLabel userInfoLabel : userInfoLabels) {
+            userInfoLabel.setText("");
+        }
+        clearBodyInfo();
+    }
+
+    private void clearBodyInfo() {
+        for (JLabel bodyInfoLabel : bodyInfoLabels) {
+            bodyInfoLabel.setText("");
         }
     }
 }
