@@ -105,7 +105,8 @@ CREATE TABLE IF NOT EXISTS meal_log (
     meal_fat DOUBLE DEFAULT 0
 );
 
--- historical admin seed removed
+-- 관리자 계정은 공개 저장소의 고정 seed로 생성하지 않습니다.
+-- 로컬 환경에서 PBKDF2 인코딩 값을 사용해 별도로 준비하세요.
 
 INSERT INTO food (food_name, food_kcal, carb, protein, fat)
 SELECT '닭가슴살', 165, 0, 31, 3.6
@@ -223,6 +224,4 @@ INSERT INTO exercise (exercise_name, exercise_category, exercise_type, exercise_
 SELECT '트라이셉스익스텐션', '팔&어깨', '근력운동', 3.5
 WHERE NOT EXISTS (SELECT 1 FROM exercise WHERE exercise_name = '트라이셉스익스텐션');
 
-INSERT INTO notice (admin_id, notice_title, notice_coment, notice_time)
-SELECT 'admin', '테스트 공지사항', '프로젝트 실행 확인용 테스트 공지입니다.', NOW()
-WHERE NOT EXISTS (SELECT 1 FROM notice WHERE notice_title = '테스트 공지사항');
+-- 공지 seed는 관리자 계정에 의존하므로 포함하지 않습니다.
