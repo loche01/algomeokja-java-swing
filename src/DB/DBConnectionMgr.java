@@ -175,8 +175,8 @@ public class DBConnectionMgr {
     public synchronized Connection getConnection()
             throws Exception {
         if (!initialized) {
-            Class c = Class.forName(_driver);
-            DriverManager.registerDriver((Driver) c.newInstance());
+            Class<? extends Driver> driverClass = Class.forName(_driver).asSubclass(Driver.class);
+            DriverManager.registerDriver(driverClass.getDeclaredConstructor().newInstance());
 
             initialized = true;
         }
