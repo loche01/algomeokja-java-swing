@@ -9,7 +9,7 @@ public class UIUtils {
     public static JLabel createRequiredLabel(String text, Color setColor, int x, int y, 
     										String fontName, int fontStyle, int fontSize) {
         JLabel label = new JLabel(text); // 자동으로 * 추가
-        label.setFont(new Font(fontName, fontStyle, fontSize));
+        label.setFont(new Font(Font.SANS_SERIF, fontStyle, fontSize));
         label.setBounds(x, y, 120, 21);
         label.setForeground(setColor);
         return label;
@@ -18,8 +18,8 @@ public class UIUtils {
     // ✅ 에러 메시지 라벨 생성
     public static JLabel createErrorLabel(int x, int y, int a) {
         JLabel label = new JLabel();
-        label.setFont(new Font("Inter", Font.PLAIN, a));
-        label.setForeground(Color.RED);
+        label.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, a));
+        label.setForeground(AppTheme.ERROR);
         label.setBounds(x, y, 350, 20);
         label.setVisible(false);
         return label;
