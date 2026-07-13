@@ -6,7 +6,7 @@
 - 기준 브랜치: `codex-audit`
 - 기준 커밋: `4089009`
 - 현재 단계: 체크포인트 5 Eclipse 사용자 검증 완료, 최종 고도화 정리 진행
-- 마지막 기능 커밋: `a0532ef 보안: 공개 관리자 seed 자격 증명 제거`
+- 마지막 기능 커밋: `e25015c 정리: JDBC 드라이버 생성 경고 제거`
 - 다음 작업: 저장소 보안 점검, README 반영과 최종 정적 검증
 - 사용자 Eclipse 검증 대기: 아니요
 
@@ -294,3 +294,12 @@
 - Git 이력 주의: 현재 파일에서는 평문 자격 증명이 제거됐지만 기존 커밋 이력에는 과거 내용이 남을 수 있다. 이번 작업은 rebase·reset 등 이력 재작성 금지 범위를 지켰으며 공개 이력 정리와 해당 자격 증명 폐기는 별도 운영 판단으로 남긴다.
 - 검증 결과: 변경 diff를 민감값 마스킹 상태로 직접 검토했고 `git diff --check`를 통과했다. DB 접속·SQL 실행과 로컬 데이터 변경은 수행하지 않았다.
 - 커밋: `a0532ef 보안: 공개 관리자 seed 자격 증명 제거`
+
+### 2026-07-13 / JDBC 드라이버 생성 경고 정리
+
+- 기존 경고: `DBConnectionMgr.getConnection()`의 최초 초기화에서 `Class.newInstance()`로 JDBC 드라이버를 만들고 있어 JDK 21 `-Xlint:deprecation`에서 제거 예정 API 경고가 발생했다.
+- 변경 방식: 기존 드라이버 클래스명 조회와 `DriverManager.registerDriver()` 흐름은 유지하고, `Class.forName(...).asSubclass(Driver.class).getDeclaredConstructor().newInstance()`로 생성 API만 교체했다.
+- 계약 유지: `getConnection()`은 기존과 같이 `Exception`을 선언하므로 반사 생성 과정의 예외도 기존 호출부 처리 범위에 포함된다. 커넥션 풀 공개 메서드, DB 설정 로드와 DAO 호출 방식은 변경하지 않았다.
+- 검증 결과: DB 접속 없이 JDK 21 전체 `src`를 `-Xlint:deprecation`으로 컴파일해 성공했고 제거 예정 API 경고가 사라졌다. raw `Vector` 사용에 따른 unchecked 안내는 대규모 제네릭화 범위이므로 후속 과제로 유지한다.
+- 제한 준수: `src/db.properties`를 읽지 않았고 DB 접속·SQL 실행 없이 정적 컴파일만 수행했다.
+- 커밋: `e25015c 정리: JDBC 드라이버 생성 경고 제거`
