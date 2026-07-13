@@ -3,12 +3,9 @@ package panel;
 import DB.NoticeFileDAO;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Window;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +27,7 @@ public class NoticeDetailPanel extends JPanel {
     private final MainUserPanel mainUserPanel;
     private final NoticeFileDAO noticeFileDAO;
     private final JTextArea titleArea;
+    private final JScrollPane titleScrollPane;
     private final JLabel authorLabel;
     private final JLabel dateLabel;
     private final JTextArea contentArea;
@@ -71,8 +69,14 @@ public class NoticeDetailPanel extends JPanel {
         titleArea.setLineWrap(true);
         titleArea.setWrapStyleWord(true);
         titleArea.setBorder(BorderFactory.createEmptyBorder());
-        titleArea.setBounds(20, 72, 340, 62);
-        card.add(titleArea);
+
+        titleScrollPane = new JScrollPane(titleArea);
+        titleScrollPane.setBounds(20, 70, 340, 66);
+        titleScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        titleScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        titleScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        titleScrollPane.getViewport().setBackground(AppTheme.CARD);
+        card.add(titleScrollPane);
 
         authorLabel = createMetadataLabel();
         authorLabel.setBounds(20, 143, 340, 20);
@@ -150,6 +154,7 @@ public class NoticeDetailPanel extends JPanel {
     public void resetScrollPositions() {
         contentArea.setCaretPosition(0);
         SwingUtilities.invokeLater(() -> {
+            titleScrollPane.getVerticalScrollBar().setValue(0);
             contentScrollPane.getVerticalScrollBar().setValue(0);
             fileScrollPane.getVerticalScrollBar().setValue(0);
         });

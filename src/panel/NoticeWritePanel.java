@@ -5,6 +5,7 @@ import DB.NoticeFileDAO;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Window;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import main.MainAdminPanel;
 import model.UserBean;
 import ui_n_utils.AppTheme;
@@ -113,7 +115,7 @@ public class NoticeWritePanel extends JPanel {
         removeFileButton.addActionListener(e -> removeSelectedFile());
         card.add(removeFileButton);
 
-        fileList = new JList<>(fileListModel);
+        fileList = new FileNameList(fileListModel);
         styleFileList(fileList);
 
         fileScrollPane = new JScrollPane(fileList);
@@ -263,5 +265,22 @@ public class NoticeWritePanel extends JPanel {
     private Component getDialogParent() {
         Window window = SwingUtilities.getWindowAncestor(this);
         return window != null ? window : this;
+    }
+
+    private static class FileNameList extends JList<String> {
+        FileNameList(DefaultListModel<String> model) {
+            super(model);
+            ToolTipManager.sharedInstance().registerComponent(this);
+        }
+
+        @Override
+        public String getToolTipText(MouseEvent event) {
+            int index = locationToIndex(event.getPoint());
+            java.awt.Rectangle cellBounds = index < 0 ? null : getCellBounds(index, index);
+            if (cellBounds == null || !cellBounds.contains(event.getPoint())) {
+                return null;
+            }
+            return getModel().getElementAt(index);
+        }
     }
 }
