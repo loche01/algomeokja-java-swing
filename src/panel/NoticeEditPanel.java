@@ -24,6 +24,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.ToolTipManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import main.MainAdminPanel;
@@ -42,10 +43,14 @@ public class NoticeEditPanel extends JPanel {
     private final DefaultListModel<String> fileListModel = new DefaultListModel<>();
     private final JList<String> fileList;
     private final JScrollPane fileScrollPane;
+    private final JButton listButton;
+    private final JButton fileButton;
     private final JButton removeFileButton;
+    private final JButton saveButton;
     private final List<File> attachedFiles = new ArrayList<>();
     private final List<String> existingFiles = new ArrayList<>();
     private int noticeId;
+    private int editLoadGeneration;
 
     public NoticeEditPanel(MainAdminPanel mainAdminPanel) {
         this.mainAdminPanel = mainAdminPanel;
@@ -67,7 +72,7 @@ public class NoticeEditPanel extends JPanel {
         screenTitle.setBounds(20, 16, 220, 34);
         card.add(screenTitle);
 
-        JButton listButton = new JButton("목록으로");
+        listButton = new JButton("목록으로");
         AppTheme.styleSecondaryButton(listButton);
         listButton.setBounds(268, 16, 92, 36);
         listButton.addActionListener(e -> returnToList());
@@ -107,7 +112,7 @@ public class NoticeEditPanel extends JPanel {
         fileLabel.setBounds(20, 493, 120, 22);
         card.add(fileLabel);
 
-        JButton fileButton = new JButton("파일 추가");
+        fileButton = new JButton("파일 추가");
         AppTheme.styleSecondaryButton(fileButton);
         fileButton.setBounds(20, 520, 160, 36);
         fileButton.addActionListener(e -> selectFiles());
@@ -137,7 +142,7 @@ public class NoticeEditPanel extends JPanel {
         requiredLabel.setBounds(20, 698, 340, 20);
         card.add(requiredLabel);
 
-        JButton saveButton = new JButton("변경사항 저장");
+        saveButton = new JButton("변경사항 저장");
         AppTheme.stylePrimaryButton(saveButton);
         saveButton.setBounds(20, 730, 340, 44);
         saveButton.addActionListener(e -> updateNotice());
@@ -146,29 +151,59 @@ public class NoticeEditPanel extends JPanel {
 
     public void loadNoticeForEdit(int noticeId) {
         clearFields();
-        this.noticeId = noticeId;
+        setFormBusy(true);
+        int requestedGeneration = ++editLoadGeneration;
+        new SwingWorker<EditData, Void>() {
+            @Override
+            protected EditData doInBackground() {
+                NoticeBean notice = noticeDAO.getNoticeById(noticeId);
+                if (notice == null) {
+                    return null;
+                }
+                List<Map<String, Object>> files = noticeFileDAO.getFilesByNoticeId(noticeId);
+                return new EditData(notice, files);
+            }
 
-        NoticeBean notice = noticeDAO.getNoticeById(noticeId);
-        if (notice == null) {
-            this.noticeId = 0;
-            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 불러오지 못했습니다.",
-                    "공지 수정", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            @Override
+            protected void done() {
+                if (requestedGeneration != editLoadGeneration) {
+                    return;
+                }
+                try {
+                    EditData editData = get();
+                    if (editData == null) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 불러오지 못했습니다.",
+                                "공지 수정", JOptionPane.ERROR_MESSAGE);
+                        mainAdminPanel.showPanel("NoticeAdmin");
+                        return;
+                    }
+                    applyEditData(editData);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항을 불러오지 못했습니다.",
+                            "공지 수정", JOptionPane.ERROR_MESSAGE);
+                    mainAdminPanel.showPanel("NoticeAdmin");
+                } finally {
+                    setFormBusy(false);
+                }
+            }
+        }.execute();
+    }
 
-        titleField.setText(notice.getNotice_title());
-        contentArea.setText(notice.getNotice_content());
+    private void applyEditData(EditData editData) {
+        this.noticeId = editData.notice.getNotice_num();
+        titleField.setText(editData.notice.getNotice_title());
+        contentArea.setText(editData.notice.getNotice_content());
         contentArea.setCaretPosition(0);
 
-        List<Map<String, Object>> files = noticeFileDAO.getFilesByNoticeId(noticeId);
-        for (Map<String, Object> fileData : files) {
+        for (Map<String, Object> fileData : editData.files) {
             String fileName = (String) fileData.get("fileName");
             if (fileName != null) {
                 existingFiles.add(fileName);
                 fileListModel.addElement(fileName);
             }
         }
-        removeFileButton.setEnabled(!fileListModel.isEmpty());
         resetScrollPositions();
     }
 
@@ -205,28 +240,58 @@ public class NoticeEditPanel extends JPanel {
             }
         }
 
-        if (!noticeDAO.updateNotice(noticeId, newTitle, newContent)) {
-            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 수정하지 못했습니다.",
-                    "수정 실패", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        List<File> filesToUpload = List.copyOf(attachedFiles);
+        int noticeToUpdate = noticeId;
+        String uploadAdminId = adminId;
+        setFormBusy(true);
+        new SwingWorker<SaveResult, Void>() {
+            @Override
+            protected SaveResult doInBackground() {
+                if (!noticeDAO.updateNotice(noticeToUpdate, newTitle, newContent)) {
+                    return SaveResult.noticeFailure();
+                }
 
-        boolean allFilesUploaded = true;
-        for (File file : attachedFiles) {
-            if (!noticeFileDAO.uploadFile(noticeId, adminId, file)) {
-                allFilesUploaded = false;
+                int failedFileCount = 0;
+                for (File file : filesToUpload) {
+                    if (!noticeFileDAO.uploadFile(noticeToUpdate, uploadAdminId, file)) {
+                        failedFileCount++;
+                    }
+                }
+                return SaveResult.success(filesToUpload.size(), failedFileCount);
             }
-        }
 
-        if (allFilesUploaded) {
-            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 수정했습니다.",
-                    "수정 완료", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(getDialogParent(),
-                    "공지사항은 수정되었지만 일부 첨부파일을 저장하지 못했습니다.",
-                    "첨부파일 오류", JOptionPane.ERROR_MESSAGE);
-        }
-        mainAdminPanel.showPanel("NoticeAdmin");
+            @Override
+            protected void done() {
+                try {
+                    SaveResult result = get();
+                    if (!result.noticeSaved) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 수정하지 못했습니다.",
+                                "수정 실패", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    if (result.failedFileCount == 0) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 수정했습니다.",
+                                "수정 완료", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항은 수정되었지만 첨부파일 "
+                                        + result.totalFileCount + "개 중 "
+                                        + result.failedFileCount + "개를 저장하지 못했습니다.",
+                                "첨부파일 오류", JOptionPane.ERROR_MESSAGE);
+                    }
+                    mainAdminPanel.showPanel("NoticeAdmin");
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항 수정 중 오류가 발생했습니다.",
+                            "수정 실패", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    setFormBusy(false);
+                }
+            }
+        }.execute();
     }
 
     private void selectFiles() {
@@ -284,6 +349,16 @@ public class NoticeEditPanel extends JPanel {
         removeFileButton.setEnabled(false);
     }
 
+    private void setFormBusy(boolean busy) {
+        listButton.setEnabled(!busy);
+        fileButton.setEnabled(!busy);
+        saveButton.setEnabled(!busy);
+        titleField.setEnabled(!busy);
+        contentArea.setEnabled(!busy);
+        fileList.setEnabled(!busy);
+        removeFileButton.setEnabled(!busy && !fileListModel.isEmpty());
+    }
+
     private JLabel createFieldLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(AppTheme.BODY_BOLD_FONT);
@@ -314,6 +389,36 @@ public class NoticeEditPanel extends JPanel {
     private Component getDialogParent() {
         Window window = SwingUtilities.getWindowAncestor(this);
         return window != null ? window : this;
+    }
+
+    private static class SaveResult {
+        private final boolean noticeSaved;
+        private final int totalFileCount;
+        private final int failedFileCount;
+
+        private SaveResult(boolean noticeSaved, int totalFileCount, int failedFileCount) {
+            this.noticeSaved = noticeSaved;
+            this.totalFileCount = totalFileCount;
+            this.failedFileCount = failedFileCount;
+        }
+
+        private static SaveResult noticeFailure() {
+            return new SaveResult(false, 0, 0);
+        }
+
+        private static SaveResult success(int totalFileCount, int failedFileCount) {
+            return new SaveResult(true, totalFileCount, failedFileCount);
+        }
+    }
+
+    private static class EditData {
+        private final NoticeBean notice;
+        private final List<Map<String, Object>> files;
+
+        private EditData(NoticeBean notice, List<Map<String, Object>> files) {
+            this.notice = notice;
+            this.files = files;
+        }
     }
 
     private static class FileNameList extends JList<String> {

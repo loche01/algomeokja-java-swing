@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import main.MainUserPanel;
 import model.NoticeBean;
 import ui_n_utils.AppTheme;
@@ -34,6 +35,7 @@ public class NoticeDetailPanel extends JPanel {
     private final JScrollPane contentScrollPane;
     private final JPanel fileListPanel;
     private final JScrollPane fileScrollPane;
+    private int fileLoadGeneration;
 
     public NoticeDetailPanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
@@ -146,8 +148,28 @@ public class NoticeDetailPanel extends JPanel {
         contentArea.setText(safeText(notice.getNotice_content(), "내용이 없습니다."));
         contentArea.setCaretPosition(0);
 
-        List<Map<String, Object>> files = noticeFileDAO.getFilesByNoticeId(notice.getNotice_num());
-        showFiles(files);
+        int requestedGeneration = ++fileLoadGeneration;
+        new SwingWorker<List<Map<String, Object>>, Void>() {
+            @Override
+            protected List<Map<String, Object>> doInBackground() {
+                return noticeFileDAO.getFilesByNoticeId(notice.getNotice_num());
+            }
+
+            @Override
+            protected void done() {
+                if (requestedGeneration != fileLoadGeneration) {
+                    return;
+                }
+                try {
+                    showFiles(get());
+                } catch (Exception e) {
+                    showFiles(List.of());
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "첨부파일 목록을 불러오지 못했습니다.",
+                            "첨부파일", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
         resetScrollPositions();
     }
 

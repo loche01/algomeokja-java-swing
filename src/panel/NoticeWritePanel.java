@@ -23,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.ToolTipManager;
 import main.MainAdminPanel;
 import model.UserBean;
@@ -40,7 +41,10 @@ public class NoticeWritePanel extends JPanel {
     private final DefaultListModel<String> fileListModel = new DefaultListModel<>();
     private final JList<String> fileList;
     private final JScrollPane fileScrollPane;
+    private final JButton listButton;
+    private final JButton fileButton;
     private final JButton removeFileButton;
+    private final JButton saveButton;
 
     public NoticeWritePanel(MainAdminPanel mainAdminPanel) {
         this.mainAdminPanel = mainAdminPanel;
@@ -62,7 +66,7 @@ public class NoticeWritePanel extends JPanel {
         screenTitle.setBounds(20, 16, 220, 34);
         card.add(screenTitle);
 
-        JButton listButton = new JButton("목록으로");
+        listButton = new JButton("목록으로");
         AppTheme.styleSecondaryButton(listButton);
         listButton.setBounds(268, 16, 92, 36);
         listButton.addActionListener(e -> returnToList());
@@ -102,7 +106,7 @@ public class NoticeWritePanel extends JPanel {
         fileLabel.setBounds(20, 493, 120, 22);
         card.add(fileLabel);
 
-        JButton fileButton = new JButton("파일 추가");
+        fileButton = new JButton("파일 추가");
         AppTheme.styleSecondaryButton(fileButton);
         fileButton.setBounds(20, 520, 160, 36);
         fileButton.addActionListener(e -> selectFiles());
@@ -132,7 +136,7 @@ public class NoticeWritePanel extends JPanel {
         requiredLabel.setBounds(20, 698, 340, 20);
         card.add(requiredLabel);
 
-        JButton saveButton = new JButton("공지 등록");
+        saveButton = new JButton("공지 등록");
         AppTheme.stylePrimaryButton(saveButton);
         saveButton.setBounds(20, 730, 340, 44);
         saveButton.addActionListener(e -> saveNotice());
@@ -141,6 +145,7 @@ public class NoticeWritePanel extends JPanel {
 
     public void resetForEntry() {
         clearFields();
+        setFormBusy(false);
         titleField.requestFocusInWindow();
         contentArea.setCaretPosition(0);
         javax.swing.SwingUtilities.invokeLater(() -> {
@@ -166,32 +171,60 @@ public class NoticeWritePanel extends JPanel {
             return;
         }
 
-        boolean success = noticeDAO.addNotice(adminId, title, content);
-        int noticeId = success ? noticeDAO.getLastNoticeId() : -1;
-        if (!success || noticeId <= 0) {
-            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 등록하지 못했습니다.",
-                    "등록 실패", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        List<File> filesToUpload = List.copyOf(attachedFiles);
+        setFormBusy(true);
+        new SwingWorker<SaveResult, Void>() {
+            @Override
+            protected SaveResult doInBackground() {
+                boolean noticeSaved = noticeDAO.addNotice(adminId, title, content);
+                int noticeId = noticeSaved ? noticeDAO.getLastNoticeId() : -1;
+                if (!noticeSaved || noticeId <= 0) {
+                    return SaveResult.noticeFailure();
+                }
 
-        boolean allFilesUploaded = true;
-        for (File file : attachedFiles) {
-            if (!noticeFileDAO.uploadFile(noticeId, adminId, file)) {
-                allFilesUploaded = false;
+                int failedFileCount = 0;
+                for (File file : filesToUpload) {
+                    if (!noticeFileDAO.uploadFile(noticeId, adminId, file)) {
+                        failedFileCount++;
+                    }
+                }
+                return SaveResult.success(filesToUpload.size(), failedFileCount);
             }
-        }
 
-        if (allFilesUploaded) {
-            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 등록했습니다.",
-                    "등록 완료", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(getDialogParent(),
-                    "공지사항은 등록되었지만 일부 첨부파일을 저장하지 못했습니다.",
-                    "첨부파일 오류", JOptionPane.ERROR_MESSAGE);
-        }
+            @Override
+            protected void done() {
+                try {
+                    SaveResult result = get();
+                    if (!result.noticeSaved) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 등록하지 못했습니다.",
+                                "등록 실패", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
 
-        clearFields();
-        mainAdminPanel.showPanel("NoticeAdmin");
+                    if (result.failedFileCount == 0) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 등록했습니다.",
+                                "등록 완료", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항은 등록되었지만 첨부파일 "
+                                        + result.totalFileCount + "개 중 "
+                                        + result.failedFileCount + "개를 저장하지 못했습니다.",
+                                "첨부파일 오류", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    clearFields();
+                    mainAdminPanel.showPanel("NoticeAdmin");
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항 등록 중 오류가 발생했습니다.",
+                            "등록 실패", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    setFormBusy(false);
+                }
+            }
+        }.execute();
     }
 
     private void selectFiles() {
@@ -235,6 +268,16 @@ public class NoticeWritePanel extends JPanel {
         removeFileButton.setEnabled(false);
     }
 
+    private void setFormBusy(boolean busy) {
+        listButton.setEnabled(!busy);
+        fileButton.setEnabled(!busy);
+        saveButton.setEnabled(!busy);
+        titleField.setEnabled(!busy);
+        contentArea.setEnabled(!busy);
+        fileList.setEnabled(!busy);
+        removeFileButton.setEnabled(!busy && !fileListModel.isEmpty());
+    }
+
     private JLabel createFieldLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(AppTheme.BODY_BOLD_FONT);
@@ -265,6 +308,26 @@ public class NoticeWritePanel extends JPanel {
     private Component getDialogParent() {
         Window window = SwingUtilities.getWindowAncestor(this);
         return window != null ? window : this;
+    }
+
+    private static class SaveResult {
+        private final boolean noticeSaved;
+        private final int totalFileCount;
+        private final int failedFileCount;
+
+        private SaveResult(boolean noticeSaved, int totalFileCount, int failedFileCount) {
+            this.noticeSaved = noticeSaved;
+            this.totalFileCount = totalFileCount;
+            this.failedFileCount = failedFileCount;
+        }
+
+        private static SaveResult noticeFailure() {
+            return new SaveResult(false, 0, 0);
+        }
+
+        private static SaveResult success(int totalFileCount, int failedFileCount) {
+            return new SaveResult(true, totalFileCount, failedFileCount);
+        }
     }
 
     private static class FileNameList extends JList<String> {

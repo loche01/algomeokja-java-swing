@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import main.MainUserPanel;
 import model.NoticeBean;
 import ui_n_utils.AppTheme;
@@ -35,6 +36,8 @@ public class NoticePanel extends JPanel {
     private final NoticeDAO noticeDAO;
     private final NoticeListPanel noticeListPanel;
     private final JScrollPane noticeScrollPane;
+    private int reloadGeneration;
+    private int detailOpenGeneration;
 
     public NoticePanel(MainUserPanel mainUserPanel) {
         this.mainUserPanel = mainUserPanel;
@@ -77,7 +80,30 @@ public class NoticePanel extends JPanel {
     }
 
     public void reloadNotices() {
-        List<NoticeBean> notices = noticeDAO.getAllNotices();
+        int requestedGeneration = ++reloadGeneration;
+        new SwingWorker<List<NoticeBean>, Void>() {
+            @Override
+            protected List<NoticeBean> doInBackground() {
+                return noticeDAO.getAllNotices();
+            }
+
+            @Override
+            protected void done() {
+                if (requestedGeneration != reloadGeneration) {
+                    return;
+                }
+                try {
+                    refreshNoticeList(get());
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항 목록을 불러오지 못했습니다.",
+                            "공지사항", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
+    }
+
+    private void refreshNoticeList(List<NoticeBean> notices) {
         noticeListPanel.removeAll();
 
         if (notices.isEmpty()) {
@@ -153,14 +179,35 @@ public class NoticePanel extends JPanel {
     }
 
     private void openNotice(int noticeId) {
-        NoticeBean selectedNotice = noticeDAO.getNoticeById(noticeId);
-        if (selectedNotice == null) {
-            JOptionPane.showMessageDialog(getDialogParent(),
-                    "공지사항을 불러오지 못했습니다.", "공지사항", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        mainUserPanel.getNoticeDetailPanel().updateNoticeDetail(selectedNotice);
-        mainUserPanel.showPanel("noticeDetailPanel");
+        int requestedGeneration = ++detailOpenGeneration;
+        new SwingWorker<NoticeBean, Void>() {
+            @Override
+            protected NoticeBean doInBackground() {
+                return noticeDAO.getNoticeById(noticeId);
+            }
+
+            @Override
+            protected void done() {
+                if (requestedGeneration != detailOpenGeneration) {
+                    return;
+                }
+                try {
+                    NoticeBean selectedNotice = get();
+                    if (selectedNotice == null) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 불러오지 못했습니다.",
+                                "공지사항", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    mainUserPanel.getNoticeDetailPanel().updateNoticeDetail(selectedNotice);
+                    mainUserPanel.showPanel("noticeDetailPanel");
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항을 불러오지 못했습니다.",
+                            "공지사항", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
     }
 
     private void addOpenListener(Component component, MouseAdapter listener) {
