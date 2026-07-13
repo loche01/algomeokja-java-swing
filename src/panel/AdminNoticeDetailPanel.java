@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import main.MainAdminPanel;
 import model.NoticeBean;
 import ui_n_utils.AppTheme;
@@ -35,7 +36,12 @@ public class AdminNoticeDetailPanel extends JPanel {
     private final JScrollPane contentScrollPane;
     private final JPanel fileListPanel;
     private final JScrollPane fileScrollPane;
+    private final JButton listButton;
+    private final JButton editButton;
+    private final JButton deleteButton;
+    private final JButton bottomListButton;
     private int currentNoticeId;
+    private int detailLoadGeneration;
 
     public AdminNoticeDetailPanel(MainAdminPanel mainAdminPanel) {
         this.mainAdminPanel = mainAdminPanel;
@@ -57,7 +63,7 @@ public class AdminNoticeDetailPanel extends JPanel {
         screenTitle.setBounds(20, 16, 220, 34);
         card.add(screenTitle);
 
-        JButton listButton = new JButton("목록으로");
+        listButton = new JButton("목록으로");
         AppTheme.styleSecondaryButton(listButton);
         listButton.setBounds(268, 16, 92, 36);
         listButton.addActionListener(e -> mainAdminPanel.showPanel("NoticeAdmin"));
@@ -131,19 +137,19 @@ public class AdminNoticeDetailPanel extends JPanel {
         fileScrollPane.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
         card.add(fileScrollPane);
 
-        JButton editButton = new JButton("수정");
+        editButton = new JButton("수정");
         AppTheme.styleSecondaryButton(editButton);
         editButton.setBounds(20, 724, 104, 42);
         editButton.addActionListener(e -> openEditPanel());
         card.add(editButton);
 
-        JButton deleteButton = new JButton("삭제");
+        deleteButton = new JButton("삭제");
         AppTheme.styleDangerButton(deleteButton);
         deleteButton.setBounds(136, 724, 104, 42);
         deleteButton.addActionListener(e -> deleteCurrentNotice());
         card.add(deleteButton);
 
-        JButton bottomListButton = new JButton("목록으로");
+        bottomListButton = new JButton("목록으로");
         AppTheme.stylePrimaryButton(bottomListButton);
         bottomListButton.setBounds(252, 724, 108, 42);
         bottomListButton.addActionListener(e -> mainAdminPanel.showPanel("NoticeAdmin"));
@@ -154,13 +160,48 @@ public class AdminNoticeDetailPanel extends JPanel {
 
     public void loadNoticeDetail(int noticeId) {
         resetNoticeDetail();
-        NoticeBean notice = noticeDAO.getNoticeById(noticeId);
-        if (notice == null) {
-            JOptionPane.showMessageDialog(getDialogParent(),
-                    "공지사항을 불러오지 못했습니다.", "공지사항", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        setActionButtonsEnabled(false);
+        int requestedGeneration = ++detailLoadGeneration;
+        new SwingWorker<DetailData, Void>() {
+            @Override
+            protected DetailData doInBackground() {
+                NoticeBean notice = noticeDAO.getNoticeById(noticeId);
+                if (notice == null) {
+                    return null;
+                }
+                List<Map<String, Object>> files =
+                        noticeFileDAO.getFilesByNoticeId(notice.getNotice_num());
+                return new DetailData(notice, files);
+            }
 
+            @Override
+            protected void done() {
+                if (requestedGeneration != detailLoadGeneration) {
+                    return;
+                }
+                try {
+                    DetailData detailData = get();
+                    if (detailData == null) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 불러오지 못했습니다.",
+                                "공지사항", JOptionPane.ERROR_MESSAGE);
+                        mainAdminPanel.showPanel("NoticeAdmin");
+                        return;
+                    }
+                    applyNoticeDetail(detailData.notice, detailData.files);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항을 불러오지 못했습니다.",
+                            "공지사항", JOptionPane.ERROR_MESSAGE);
+                    mainAdminPanel.showPanel("NoticeAdmin");
+                } finally {
+                    setActionButtonsEnabled(true);
+                }
+            }
+        }.execute();
+    }
+
+    private void applyNoticeDetail(NoticeBean notice, List<Map<String, Object>> files) {
         currentNoticeId = notice.getNotice_num();
         titleArea.setText(safeText(notice.getNotice_title(), "제목 없음"));
         titleArea.setToolTipText(safeText(notice.getNotice_title(), "제목 없음"));
@@ -168,8 +209,7 @@ public class AdminNoticeDetailPanel extends JPanel {
         dateLabel.setText("작성일  " + formatDate(notice));
         contentArea.setText(safeText(notice.getNotice_content(), "내용이 없습니다."));
         contentArea.setCaretPosition(0);
-
-        showFiles(noticeFileDAO.getFilesByNoticeId(notice.getNotice_num()));
+        showFiles(files);
         resetScrollPositions();
     }
 
@@ -206,15 +246,37 @@ public class AdminNoticeDetailPanel extends JPanel {
             return;
         }
 
-        if (noticeDAO.deleteNotice(currentNoticeId)) {
-            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 삭제했습니다.",
-                    "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
-            currentNoticeId = 0;
-            mainAdminPanel.showPanel("NoticeAdmin");
-        } else {
-            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 삭제하지 못했습니다.",
-                    "삭제 실패", JOptionPane.ERROR_MESSAGE);
-        }
+        int noticeToDelete = currentNoticeId;
+        setActionButtonsEnabled(false);
+        new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() {
+                return noticeDAO.deleteNotice(noticeToDelete);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (get()) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 삭제했습니다.",
+                                "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
+                        currentNoticeId = 0;
+                        mainAdminPanel.showPanel("NoticeAdmin");
+                    } else {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "공지사항을 삭제하지 못했습니다.",
+                                "삭제 실패", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항 삭제 중 오류가 발생했습니다.",
+                            "삭제 실패", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    setActionButtonsEnabled(true);
+                }
+            }
+        }.execute();
     }
 
     private void resetNoticeDetail() {
@@ -228,6 +290,13 @@ public class AdminNoticeDetailPanel extends JPanel {
         fileListPanel.revalidate();
         fileListPanel.repaint();
         resetScrollPositions();
+    }
+
+    private void setActionButtonsEnabled(boolean enabled) {
+        listButton.setEnabled(enabled);
+        editButton.setEnabled(enabled);
+        deleteButton.setEnabled(enabled);
+        bottomListButton.setEnabled(enabled);
     }
 
     private void showFiles(List<Map<String, Object>> files) {
@@ -306,5 +375,15 @@ public class AdminNoticeDetailPanel extends JPanel {
     private Component getDialogParent() {
         Window window = SwingUtilities.getWindowAncestor(this);
         return window != null ? window : this;
+    }
+
+    private static class DetailData {
+        private final NoticeBean notice;
+        private final List<Map<String, Object>> files;
+
+        private DetailData(NoticeBean notice, List<Map<String, Object>> files) {
+            this.notice = notice;
+            this.files = files;
+        }
     }
 }

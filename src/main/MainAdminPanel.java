@@ -42,20 +42,32 @@ public class MainAdminPanel extends JPanel {
 
     // 📌 패널 전환 메서드 (공지사항 관리/작성 화면 전환)
     public void showPanel(String panelName) {
-        if ("NoticeAdmin".equals(panelName)) {
-            noticeAdminPanel.loadNotices();
-        } else if ("NoticeWrite".equals(panelName)) {
-            noticeWritePanel.resetForEntry();
-        } else if ("AdminNoticeDetail".equals(panelName)) {
-            adminNoticeDetailPanel.resetScrollPositions();
-        } else if ("NoticeEditPanel".equals(panelName)) {
-            noticeEditPanel.resetScrollPositions();
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> showPanel(panelName));
+            return;
         }
 
         noticeAdminPanel.setVisible("NoticeAdmin".equals(panelName));
         noticeWritePanel.setVisible("NoticeWrite".equals(panelName));
         adminNoticeDetailPanel.setVisible("AdminNoticeDetail".equals(panelName)); // ✅ 수정된 부분
         noticeEditPanel.setVisible("NoticeEditPanel".equals(panelName));
+
+        if ("NoticeAdmin".equals(panelName)) {
+            noticeAdminPanel.setEnabled(true);
+            noticeAdminPanel.loadNotices();
+        } else if ("NoticeWrite".equals(panelName)) {
+            noticeWritePanel.setEnabled(true);
+            noticeWritePanel.resetForEntry();
+        } else if ("AdminNoticeDetail".equals(panelName)) {
+            adminNoticeDetailPanel.setEnabled(true);
+            adminNoticeDetailPanel.resetScrollPositions();
+        } else if ("NoticeEditPanel".equals(panelName)) {
+            noticeEditPanel.setEnabled(true);
+            noticeEditPanel.resetScrollPositions();
+        }
+
+        revalidate();
+        repaint();
     }
 
     // 📌 NoticeAdminPanel을 반환하는 메서드 추가 (NoticeWritePanel에서 사용)

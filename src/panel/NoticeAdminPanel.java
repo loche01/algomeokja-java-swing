@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import main.MainAdminPanel;
 import model.NoticeBean;
 import ui_n_utils.AppTheme;
@@ -39,6 +40,8 @@ public class NoticeAdminPanel extends JPanel {
     private final NoticeListPanel noticeListPanel;
     private final JScrollPane scrollPane;
     private final Map<JCheckBox, Integer> noticeSelections = new LinkedHashMap<>();
+    private final JButton deleteButton;
+    private int reloadGeneration;
 
     public NoticeAdminPanel(MainAdminPanel mainAdminPanel) {
         this.mainAdminPanel = mainAdminPanel;
@@ -79,7 +82,7 @@ public class NoticeAdminPanel extends JPanel {
         scrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
         add(scrollPane);
 
-        JButton deleteButton = new JButton("선택 삭제");
+        deleteButton = new JButton("선택 삭제");
         AppTheme.styleDangerButton(deleteButton);
         deleteButton.setBounds(30, 720, CARD_WIDTH, 42);
         deleteButton.addActionListener(e -> deleteSelectedNotices());
@@ -87,7 +90,27 @@ public class NoticeAdminPanel extends JPanel {
     }
 
     public void loadNotices() {
-        refreshNotices(noticeDAO.getAllNotices());
+        int requestedGeneration = ++reloadGeneration;
+        new SwingWorker<List<NoticeBean>, Void>() {
+            @Override
+            protected List<NoticeBean> doInBackground() {
+                return noticeDAO.getAllNotices();
+            }
+
+            @Override
+            protected void done() {
+                if (requestedGeneration != reloadGeneration) {
+                    return;
+                }
+                try {
+                    refreshNotices(get());
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항 목록을 불러오지 못했습니다.",
+                            "공지사항 관리", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
     }
 
     public void refreshNotices(List<NoticeBean> notices) {
@@ -202,21 +225,42 @@ public class NoticeAdminPanel extends JPanel {
             return;
         }
 
-        boolean allDeleted = true;
-        for (int noticeId : selectedIds) {
-            if (!noticeDAO.deleteNotice(noticeId)) {
-                allDeleted = false;
+        deleteButton.setEnabled(false);
+        new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() {
+                boolean allDeleted = true;
+                for (int noticeId : selectedIds) {
+                    if (!noticeDAO.deleteNotice(noticeId)) {
+                        allDeleted = false;
+                    }
+                }
+                return allDeleted;
             }
-        }
 
-        loadNotices();
-        if (allDeleted) {
-            JOptionPane.showMessageDialog(getDialogParent(), "선택한 공지사항을 삭제했습니다.",
-                    "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(getDialogParent(), "일부 공지사항을 삭제하지 못했습니다.",
-                    "삭제 실패", JOptionPane.ERROR_MESSAGE);
-        }
+            @Override
+            protected void done() {
+                try {
+                    boolean allDeleted = get();
+                    loadNotices();
+                    if (allDeleted) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "선택한 공지사항을 삭제했습니다.",
+                                "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "일부 공지사항을 삭제하지 못했습니다.",
+                                "삭제 실패", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(getDialogParent(),
+                            "공지사항 삭제 중 오류가 발생했습니다.",
+                            "삭제 실패", JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    deleteButton.setEnabled(true);
+                }
+            }
+        }.execute();
     }
 
     private void addOpenListener(Component component, MouseAdapter listener) {
