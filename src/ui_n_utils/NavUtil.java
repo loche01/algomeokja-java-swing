@@ -21,10 +21,11 @@ public class NavUtil {
     	 if (panelManager == null) {
     	        System.out.println("🚨 [오류] MainUserPanel이 NavUtil에 전달되지 않음!");
     	    }
-    	JPanel navPanel = new JPanel();
+        JPanel navPanel = new JPanel();
         navPanel.setLayout(null);
-        navPanel.setBounds(0, 826, 440, 90); 
-        navPanel.setBackground(Color.WHITE);
+        navPanel.setBounds(0, 826, 440, 90);
+        navPanel.setBackground(AppTheme.CARD);
+        navPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, AppTheme.BORDER));
 
         // 네비게이션 버튼 생성
         BottonNav btnHome = new BottonNav(
@@ -37,10 +38,10 @@ public class NavUtil {
                 "내 정보", "/images/profile1.png", "/images/profile.png");
 
         // 위치 설정
-        btnHome.setBounds(0, 0, 100, 100);
-        btnCalendar.setBounds(105, 0, 100, 100);
-        btnWorkout.setBounds(215, 0, 100, 100);
-        btnProfile.setBounds(325, 0, 100, 100);
+        btnHome.setBounds(0, 0, 110, 90);
+        btnCalendar.setBounds(110, 0, 110, 90);
+        btnWorkout.setBounds(220, 0, 110, 90);
+        btnProfile.setBounds(330, 0, 110, 90);
 
         // 버튼 배열
         BottonNav[] buttons = {btnHome, btnCalendar, btnWorkout, btnProfile};
@@ -101,20 +102,23 @@ public class NavUtil {
         //private JLabel textLabel;
 
         public BottonNav(String text, String defaultIconPath, String selectedIconPath) {
-            setPreferredSize(new Dimension(80, 80));
-            setBackground(Color.WHITE);
+            setPreferredSize(new Dimension(110, 90));
+            setBackground(AppTheme.CARD);
+            setOpaque(true);
+            setContentAreaFilled(true);
             setFocusPainted(false);
             setBorderPainted(false);
 
             // 아이콘 로드
             defaultIcon = ClasspathIconLoader.loadScaled(
-                    NavUtil.class, defaultIconPath, 50, 50);
+                    NavUtil.class, defaultIconPath, 40, 40);
             selectedIcon = ClasspathIconLoader.loadScaled(
-                    NavUtil.class, selectedIconPath, 50, 50);
+                    NavUtil.class, selectedIconPath, 40, 40);
             
             // 텍스트 스타일 적용
             setText(text);
-            setFont(new Font("맑은 고딕", Font.BOLD, 11));
+            setFont(AppTheme.CAPTION_FONT.deriveFont(Font.BOLD));
+            setIconTextGap(4);
             
             setHorizontalTextPosition(SwingConstants.CENTER);
             setVerticalTextPosition(
@@ -127,7 +131,8 @@ public class NavUtil {
             ImageIcon requestedIcon = isSelected ? selectedIcon : defaultIcon;
             ImageIcon fallbackIcon = isSelected ? defaultIcon : selectedIcon;
             setIcon(requestedIcon != null ? requestedIcon : fallbackIcon);
-            setForeground(isSelected ? Color.BLACK : Color.GRAY);
+            setBackground(AppTheme.CARD);
+            setForeground(isSelected ? AppTheme.PRIMARY_DARK : AppTheme.TEXT_SECONDARY);
         }
         
     }

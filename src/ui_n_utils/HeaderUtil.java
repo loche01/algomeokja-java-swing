@@ -10,17 +10,14 @@ public class HeaderUtil {
 	 public static JPanel createHeader(String titleText,
 			 MainUserPanel mainPanel, ActionListener noticeListener) {
 	        JPanel headerPanel = new JPanel(null);
-	        headerPanel.setBackground(Color.white);
+	        headerPanel.setBackground(AppTheme.CARD);
+	        headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppTheme.BORDER));
 
 
 		     // 제목 버튼 (JLabel → JButton 변경)
 		        JButton titleButton = new JButton(titleText);
-		        titleButton.setFont(new Font("Inter", Font.BOLD, 50));
+		        styleBrandButton(titleButton);
 		        titleButton.setHorizontalAlignment(JButton.LEFT);
-		        titleButton.setForeground(new Color(0xC0E993));
-		        titleButton.setBorderPainted(false);
-		        titleButton.setContentAreaFilled(false);
-		        titleButton.setFocusPainted(false);
 
 		        // ✅ 버튼 클릭 시 홈 화면으로 이동하고 네비게이션 바도 홈으로 설정
 		        titleButton.addActionListener(e -> {
@@ -34,18 +31,13 @@ public class HeaderUtil {
 	        
 	        
 	        // 공지사항 버튼 (JButton)
-	        JButton noticeButton = new JButton("<html>공지<br>사항</html>");
-	        noticeButton.setFont(new Font("Inter", Font.BOLD, 20));
-	        noticeButton.setHorizontalAlignment(JButton.RIGHT);
-	        noticeButton.setForeground(new Color(0xC0E993));
-	        noticeButton.setBorderPainted(false);
-	        noticeButton.setContentAreaFilled(false);
-	        noticeButton.setFocusPainted(false);
-	        noticeButton.setBounds(320, 20, 100, 80);
+	        JButton noticeButton = new JButton("공지사항");
+	        AppTheme.styleSecondaryButton(noticeButton);
+	        noticeButton.setBounds(300, 31, 110, AppTheme.SECONDARY_BUTTON_HEIGHT);
 	        noticeButton.addActionListener(noticeListener); // 버튼 클릭 이벤트 등록
 
 	        // 위치 설정
-	        titleButton.setBounds(10, 20, 250, 80);
+	        titleButton.setBounds(20, 20, 250, 58);
 	        headerPanel.add(titleButton);
 	        headerPanel.add(noticeButton);
 	        headerPanel.setBounds(0, 0, 440, 110);
@@ -60,38 +52,37 @@ public class HeaderUtil {
 		public static JPanel createAdminHeader(String titleText, ActionListener noticeListener,
 				ActionListener logoutListener) {
 			JPanel headerPanel = new JPanel(null);
-			headerPanel.setBackground(Color.white);
-		
+			headerPanel.setBackground(AppTheme.CARD);
+			headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppTheme.BORDER));
 			JButton titleButton = new JButton(titleText);
-			titleButton.setFont(new Font("Inter", Font.BOLD, 50));
+			styleBrandButton(titleButton);
 			titleButton.setHorizontalAlignment(JButton.LEFT);
-			titleButton.setForeground(new Color(0xC0E993));
-			titleButton.setBorderPainted(false);
-			titleButton.setContentAreaFilled(false);
-			titleButton.setFocusPainted(false);
-			
-			JButton noticeButton = new JButton("<html>공지<br>사항</html>");
-			noticeButton.setFont(new Font("Inter", Font.BOLD, 20));
-			noticeButton.setHorizontalAlignment(JButton.RIGHT);
-			noticeButton.setForeground(new Color(0xC0E993));
-			noticeButton.setBorderPainted(false);
-			noticeButton.setContentAreaFilled(false);
-			noticeButton.setFocusPainted(false);
-			noticeButton.setBounds(232, 20, 82, 70);
+			JButton noticeButton = new JButton("공지사항");
+			AppTheme.styleSecondaryButton(noticeButton);
+			noticeButton.setBounds(218, 31, 88, AppTheme.SECONDARY_BUTTON_HEIGHT);
 			noticeButton.addActionListener(noticeListener);
 
 			JButton logoutButton = new JButton("로그아웃");
 			AppTheme.styleDangerButton(logoutButton);
-			logoutButton.setBounds(320, 32, 100, 38);
+			logoutButton.setBounds(314, 31, 96, AppTheme.SECONDARY_BUTTON_HEIGHT);
 			logoutButton.addActionListener(logoutListener);
 
-			titleButton.setBounds(10, 20, 220, 80);
+			titleButton.setBounds(20, 20, 190, 58);
 			headerPanel.add(titleButton);
 			headerPanel.add(noticeButton);
 			headerPanel.add(logoutButton);
 			headerPanel.setBounds(0, 0, 440, 110);
 		
 			return headerPanel;
+		}
+
+		private static void styleBrandButton(JButton button) {
+			button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
+			button.setForeground(AppTheme.PRIMARY);
+			button.setBorderPainted(false);
+			button.setContentAreaFilled(false);
+			button.setFocusPainted(false);
+			button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		}
 		
 }
