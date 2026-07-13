@@ -1,215 +1,290 @@
 package panel;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import DB.NoticeDAO;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
-import javax.swing.*;
-
-import DB.NoticeDAO;
+import java.util.Map;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import main.MainAdminPanel;
 import model.NoticeBean;
-import ui_n_utils.RoundedComponent;
+import ui_n_utils.AppTheme;
 
-public class NoticeAdminPanel extends JPanel implements ActionListener {
-    private RoundedComponent noticePanel, aButton, deleteButton;
-    private NoticeDAO noticeDAO;
-    private MainAdminPanel mainAdminPanel;
-    private JPanel noticeListPanel;
-    private JScrollPane scrollPane;
-    private List<JCheckBox> checkBoxes = new ArrayList<>();
+public class NoticeAdminPanel extends JPanel {
+    private static final int CARD_WIDTH = 380;
+    private static final int NOTICE_CARD_HEIGHT = 118;
+
+    private final NoticeDAO noticeDAO;
+    private final MainAdminPanel mainAdminPanel;
+    private final NoticeListPanel noticeListPanel;
+    private final JScrollPane scrollPane;
+    private final Map<JCheckBox, Integer> noticeSelections = new LinkedHashMap<>();
 
     public NoticeAdminPanel(MainAdminPanel mainAdminPanel) {
         this.mainAdminPanel = mainAdminPanel;
+        this.noticeDAO = new NoticeDAO();
+
         setLayout(null);
-        setBackground(new Color(0xC0E993));
-        setBounds(0, 0, 440, 956);
+        setBackground(AppTheme.BACKGROUND);
+        setBounds(0, 0, 440, 856);
 
-        noticeDAO = new NoticeDAO();
+        JLabel titleLabel = new JLabel("공지사항 관리");
+        titleLabel.setFont(AppTheme.TITLE_FONT);
+        titleLabel.setForeground(AppTheme.TEXT);
+        titleLabel.setBounds(30, 22, 220, 32);
+        add(titleLabel);
 
-        // 공지사항 패널
-        noticePanel = new RoundedComponent(400, 670, 30, "panel", "",
-                new Color(192, 150, 147), Color.white, Color.black, " ", 0, 0);
-        noticePanel.setBounds(12, 50, 400, 670);
-        noticePanel.setLayout(null);
-        add(noticePanel);
+        JLabel descriptionLabel = new JLabel("공지사항을 등록하고 관리합니다.");
+        descriptionLabel.setFont(AppTheme.CAPTION_FONT);
+        descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        descriptionLabel.setBounds(30, 55, 250, 22);
+        add(descriptionLabel);
 
-        JLabel titleLabel = new JLabel("공지사항 목록");
-        titleLabel.setFont(new Font("Inter", Font.BOLD, 30));
-        titleLabel.setBounds(20, 10, 200, 40);
-        noticePanel.add(titleLabel);
+        JButton writeButton = new JButton("공지 작성");
+        AppTheme.stylePrimaryButton(writeButton);
+        writeButton.setBounds(288, 25, 122, 38);
+        writeButton.addActionListener(e -> mainAdminPanel.showPanel("NoticeWrite"));
+        add(writeButton);
 
-        // 공지사항 목록 헤더
-        String[] headers = {"번호", "제목", "작성자", "작성날짜"};
-        int[] headerX = {30, 70, 210, 275};
-
-        for (int i = 0; i < headers.length; i++) {
-            JLabel label = new JLabel(headers[i]);
-            label.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-            label.setBounds(headerX[i], 60, 100, 20);
-            noticePanel.add(label);
-        }
-
-        JSeparator separator = new JSeparator();
-        separator.setBounds(0, 85, 400, 3);
-        separator.setForeground(Color.BLACK);
-        noticePanel.add(separator);
-
-        // 🔹 공지사항 리스트 패널 (스크롤 적용)
-        noticeListPanel = new JPanel();
-        noticeListPanel.setLayout(null);
-        noticeListPanel.setBackground(Color.WHITE);
-        noticeListPanel.setBorder(null);
+        noticeListPanel = new NoticeListPanel();
+        noticeListPanel.setBackground(AppTheme.BACKGROUND);
+        noticeListPanel.setBorder(BorderFactory.createEmptyBorder(1, 1, 12, 1));
 
         scrollPane = new JScrollPane(noticeListPanel);
-        scrollPane.setBounds(10, 100, 380, 430);
+        scrollPane.setBounds(30, 94, CARD_WIDTH, 610);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.getViewport().setBackground(Color.WHITE);
-        noticePanel.add(scrollPane);
+        scrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
+        add(scrollPane);
 
-        // 🔹 글쓰기 버튼
-        aButton = new RoundedComponent(50, 25, 0, "button", "글쓰기 |", Color.WHITE,
-                Color.WHITE, Color.BLACK, "Inter", Font.BOLD, 13);
-        aButton.setBounds(20, 550, 70, 25);
-        aButton.getButton().addActionListener(this);
-        noticePanel.add(aButton);
-
-        // 🔹 삭제 버튼 (글쓰기 버튼과 같은 디자인 적용)
-        deleteButton = new RoundedComponent(50, 25, 0, "button", "삭제", Color.WHITE,
-                Color.WHITE, Color.BLACK, "Inter", Font.BOLD, 13);
-        deleteButton.setBounds(100, 550, 70, 25);
-        deleteButton.getButton().addActionListener(e -> deleteSelectedNotices());
-        noticePanel.add(deleteButton);
-
-        // 공지사항 목록 불러오기
-        loadNotices();
+        JButton deleteButton = new JButton("선택 삭제");
+        AppTheme.styleDangerButton(deleteButton);
+        deleteButton.setBounds(30, 720, CARD_WIDTH, 42);
+        deleteButton.addActionListener(e -> deleteSelectedNotices());
+        add(deleteButton);
     }
 
-    /**
-     * 선택된 공지사항 삭제 메서드
-     * 체크된 항목을 찾아 삭제하고 UI를 갱신함
-     */
-    private void deleteSelectedNotices() {
-        List<Integer> selectedIds = new ArrayList<>();
-
-        // 🔹 체크된 공지사항 ID 수집
-        for (int i = 0; i < checkBoxes.size(); i++) {
-            if (checkBoxes.get(i).isSelected()) {
-                selectedIds.add(Integer.parseInt(((JLabel) noticeListPanel.getComponent(i * 5 + 1)).getText())); // 공지사항 ID
-            }
-        }
-
-        if (selectedIds.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "삭제할 공지사항을 선택하세요!", "경고", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(null, "선택한 공지사항을 삭제하시겠습니까?", "삭제 확인", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            for (int noticeId : selectedIds) {
-                noticeDAO.deleteNotice(noticeId);
-            }
-
-            // ✅ UI 갱신
-            loadNotices();
-        }
-    }
-
-    // 🔹 공지사항 목록 불러오기 (DB 연동)
     public void loadNotices() {
-        List<NoticeBean> notices = noticeDAO.getAllNotices();
-        refreshNotices(notices);
+        refreshNotices(noticeDAO.getAllNotices());
     }
 
-    // 🔹 공지사항 목록 새로고침
     public void refreshNotices(List<NoticeBean> notices) {
         noticeListPanel.removeAll();
-        checkBoxes.clear();
-
-        // ✅ 패널 크기 설정 (공지 개수에 따라 동적 조정)
-        noticeListPanel.setPreferredSize(new Dimension(360, Math.max(430, notices.size() * 52)));
+        noticeSelections.clear();
 
         if (notices.isEmpty()) {
-            JLabel noDataLabel = new JLabel("📢 등록된 공지사항이 없습니다.");
-            noDataLabel.setFont(new Font("맑은 고딕", Font.BOLD, 14));
-            noDataLabel.setBounds(100, 200, 300, 30);
-            noticeListPanel.add(noDataLabel);
+            JPanel emptyCard = new JPanel(new BorderLayout());
+            AppTheme.styleCard(emptyCard);
+            emptyCard.setAlignmentX(Component.LEFT_ALIGNMENT);
+            emptyCard.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+            emptyCard.setPreferredSize(new Dimension(CARD_WIDTH, 120));
+
+            JLabel emptyLabel = new JLabel("등록된 공지사항이 없습니다.", SwingConstants.CENTER);
+            emptyLabel.setFont(AppTheme.BODY_FONT);
+            emptyLabel.setForeground(AppTheme.TEXT_SECONDARY);
+            emptyCard.add(emptyLabel, BorderLayout.CENTER);
+            noticeListPanel.add(emptyCard);
         } else {
-            for (int i = 0; i < notices.size(); i++) {
-                NoticeBean notice = notices.get(i);
-                int rowY = i * 52;
-
-                JCheckBox checkBox = new JCheckBox();
-                checkBox.setBounds(5, rowY + 7, 24, 30);
-                checkBox.setBackground(new Color(0xF8FAF6));
-                checkBoxes.add(checkBox);
-
-                JLabel number = new JLabel(String.valueOf(notice.getNotice_num()));
-                JLabel title = new JLabel(notice.getNotice_title());
-                JLabel author = new JLabel(notice.getAdmin_id());
-                JLabel date = new JLabel(new SimpleDateFormat("yyyy-MM-dd")
-                        .format(new Date(notice.getNotice_time().getTime())));
-
-                number.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
-                title.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-                author.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
-                date.setFont(new Font("Malgun Gothic", Font.PLAIN, 12));
-                author.setForeground(Color.DARK_GRAY);
-                date.setForeground(Color.GRAY);
-                title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                title.setToolTipText(notice.getNotice_title());
-
-                JLabel[] rowLabels = {number, title, author, date};
-                for (JLabel label : rowLabels) {
-                    label.setOpaque(true);
-                    label.setBackground(new Color(0xF8FAF6));
-                    label.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, new Color(0xE1E7DD)));
-                }
-
-                // 📌 제목 클릭 시 상세 페이지 이동
-                title.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        int noticeNum = notice.getNotice_num();
-                        NoticeBean selectedNotice = new NoticeDAO().getNoticeById(noticeNum);
-
-                        if (selectedNotice != null) {
-                        	 AdminNoticeDetailPanel detailPanel = mainAdminPanel.getAdminNoticeDetailPanel(); 
-                        	 detailPanel.loadNoticeDetail(noticeNum); // ✅ 공지사항 데이터 적용
-                             mainAdminPanel.showPanel("AdminNoticeDetail"); // ✅ 패널 전환 수정
-                        }
-                    }
-                });
-
-                number.setBounds(30, rowY, 40, 44);
-                title.setBounds(70, rowY, 140, 44);
-                author.setBounds(210, rowY, 65, 44);
-                date.setBounds(275, rowY, 85, 44);
-
-                noticeListPanel.add(checkBox);
-                noticeListPanel.add(number);
-                noticeListPanel.add(title);
-                noticeListPanel.add(author);
-                noticeListPanel.add(date);
+            for (NoticeBean notice : notices) {
+                noticeListPanel.add(createNoticeCard(notice));
+                noticeListPanel.add(Box.createVerticalStrut(14));
             }
         }
 
         noticeListPanel.revalidate();
         noticeListPanel.repaint();
+        SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == aButton.getButton()) {
-            mainAdminPanel.showPanel("NoticeWrite");
+    private JPanel createNoticeCard(NoticeBean notice) {
+        JPanel card = new JPanel(new BorderLayout(10, 0));
+        AppTheme.styleCard(card);
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+        card.setMaximumSize(new Dimension(Integer.MAX_VALUE, NOTICE_CARD_HEIGHT));
+        card.setPreferredSize(new Dimension(CARD_WIDTH, NOTICE_CARD_HEIGHT));
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(AppTheme.BORDER),
+                BorderFactory.createEmptyBorder(10, 10, 10, 12)));
+
+        JCheckBox checkBox = new JCheckBox();
+        checkBox.setOpaque(false);
+        checkBox.setToolTipText("삭제할 공지사항 선택");
+        checkBox.setPreferredSize(new Dimension(28, 28));
+        noticeSelections.put(checkBox, notice.getNotice_num());
+
+        JPanel contentPanel = new JPanel();
+        contentPanel.setOpaque(false);
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        contentPanel.setToolTipText("공지사항 상세 보기");
+
+        String fullTitle = safeText(notice.getNotice_title(), "제목 없음");
+        JLabel titleLabel = new JLabel();
+        titleLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        titleLabel.setForeground(AppTheme.TEXT);
+        titleLabel.setText(ellipsize(fullTitle, titleLabel.getFontMetrics(titleLabel.getFont()), 292));
+        titleLabel.setToolTipText(fullTitle);
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel authorLabel = new JLabel("작성자  " + safeText(notice.getAdmin_id(), "정보 없음"));
+        authorLabel.setFont(AppTheme.CAPTION_FONT);
+        authorLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel dateLabel = new JLabel("작성일  " + formatDate(notice));
+        dateLabel.setFont(AppTheme.CAPTION_FONT);
+        dateLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        dateLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        contentPanel.add(titleLabel);
+        contentPanel.add(Box.createVerticalStrut(7));
+        contentPanel.add(authorLabel);
+        contentPanel.add(Box.createVerticalStrut(3));
+        contentPanel.add(dateLabel);
+
+        MouseAdapter openListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                openNoticeDetail(notice.getNotice_num());
+            }
+        };
+        addOpenListener(contentPanel, openListener);
+
+        card.add(checkBox, BorderLayout.WEST);
+        card.add(contentPanel, BorderLayout.CENTER);
+        return card;
+    }
+
+    private void openNoticeDetail(int noticeId) {
+        AdminNoticeDetailPanel detailPanel = mainAdminPanel.getAdminNoticeDetailPanel();
+        detailPanel.loadNoticeDetail(noticeId);
+        mainAdminPanel.showPanel("AdminNoticeDetail");
+    }
+
+    private void deleteSelectedNotices() {
+        List<Integer> selectedIds = noticeSelections.entrySet().stream()
+                .filter(entry -> entry.getKey().isSelected())
+                .map(Map.Entry::getValue)
+                .toList();
+
+        if (selectedIds.isEmpty()) {
+            JOptionPane.showMessageDialog(getDialogParent(), "삭제할 공지사항을 선택하세요.",
+                    "선택 삭제", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(getDialogParent(),
+                "선택한 공지사항을 삭제하시겠습니까?", "삭제 확인",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        boolean allDeleted = true;
+        for (int noticeId : selectedIds) {
+            if (!noticeDAO.deleteNotice(noticeId)) {
+                allDeleted = false;
+            }
+        }
+
+        loadNotices();
+        if (allDeleted) {
+            JOptionPane.showMessageDialog(getDialogParent(), "선택한 공지사항을 삭제했습니다.",
+                    "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(getDialogParent(), "일부 공지사항을 삭제하지 못했습니다.",
+                    "삭제 실패", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void addOpenListener(Component component, MouseAdapter listener) {
+        component.addMouseListener(listener);
+        component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        if (component instanceof java.awt.Container) {
+            for (Component child : ((java.awt.Container) component).getComponents()) {
+                addOpenListener(child, listener);
+            }
+        }
+    }
+
+    private String formatDate(NoticeBean notice) {
+        if (notice.getNotice_time() == null) {
+            return "정보 없음";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(notice.getNotice_time());
+    }
+
+    private String safeText(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
+
+    private String ellipsize(String text, FontMetrics metrics, int maxWidth) {
+        if (metrics.stringWidth(text) <= maxWidth) {
+            return text;
+        }
+        String ellipsis = "…";
+        int end = text.length();
+        while (end > 0 && metrics.stringWidth(text.substring(0, end) + ellipsis) > maxWidth) {
+            end--;
+        }
+        return text.substring(0, end) + ellipsis;
+    }
+
+    private Component getDialogParent() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        return window != null ? window : this;
+    }
+
+    private static class NoticeListPanel extends JPanel implements Scrollable {
+        NoticeListPanel() {
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return Math.max(visibleRect.height - 32, 16);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
         }
     }
 }

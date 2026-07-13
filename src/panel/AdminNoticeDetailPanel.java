@@ -1,30 +1,39 @@
 package panel;
 
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import DB.NoticeDAO;
+import DB.NoticeFileDAO;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Window;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import javax.swing.*;
-
-import DB.NoticeDAO;
-import DB.NoticeFileDAO;
-import model.NoticeBean;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import main.MainAdminPanel;
-import ui_n_utils.RoundedComponent;
+import model.NoticeBean;
+import ui_n_utils.AppTheme;
 
 public class AdminNoticeDetailPanel extends JPanel {
-
-    private RoundedComponent noticePanel,editButton;
-    private JLabel titleValue, authorLabel, dateLabel;
-    private JTextArea contentArea;
-    private JScrollPane contentScrollPane;
-    private JButton closeButton;
-    private JPanel fileListPanel;
-    private NoticeDAO noticeDAO;
-    private NoticeFileDAO noticeFileDAO;
-    private MainAdminPanel mainAdminPanel;
+    private final NoticeDAO noticeDAO;
+    private final NoticeFileDAO noticeFileDAO;
+    private final MainAdminPanel mainAdminPanel;
+    private final JTextArea titleArea;
+    private final JLabel authorLabel;
+    private final JLabel dateLabel;
+    private final JTextArea contentArea;
+    private final JScrollPane contentScrollPane;
+    private final JPanel fileListPanel;
+    private final JScrollPane fileScrollPane;
     private int currentNoticeId;
 
     public AdminNoticeDetailPanel(MainAdminPanel mainAdminPanel) {
@@ -33,183 +42,261 @@ public class AdminNoticeDetailPanel extends JPanel {
         this.noticeFileDAO = new NoticeFileDAO();
 
         setLayout(null);
-        setBackground(new Color(0xC0E993));
-        setBounds(0, 0, 440, 956);
+        setBackground(AppTheme.BACKGROUND);
+        setBounds(0, 0, 440, 856);
 
-        // 🔹 배경 패널
-        JPanel backgroundPanel = new JPanel();
-        backgroundPanel.setBounds(0, 0, 440, 956);
-        backgroundPanel.setBackground(new Color(0xC0E993));
-        backgroundPanel.setLayout(null);
-        add(backgroundPanel);
+        JPanel card = new JPanel(null);
+        AppTheme.styleCard(card);
+        card.setBounds(30, 18, 380, 792);
+        add(card);
 
-        // 🔹 공지사항 패널 (NoticeDetailPanel 디자인 반영)
-        noticePanel = new RoundedComponent(380, 670, 30, "panel", "",
-                new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
-        noticePanel.setBounds(21, 40, 380, 670);
-        noticePanel.setBackground(Color.WHITE);
-        noticePanel.setLayout(null);
-        backgroundPanel.add(noticePanel);
+        JLabel screenTitle = new JLabel("공지사항 상세");
+        screenTitle.setFont(AppTheme.TITLE_FONT);
+        screenTitle.setForeground(AppTheme.TEXT);
+        screenTitle.setBounds(20, 16, 220, 34);
+        card.add(screenTitle);
 
-        // 🔹 공지사항 제목
-        JLabel titleLabel = new JLabel("공지사항 ");
-        titleLabel.setFont(new Font("Inter", Font.BOLD, 30));
-        titleLabel.setBounds(20, 10, 300, 40);
-        noticePanel.add(titleLabel);
+        JButton listButton = new JButton("목록으로");
+        AppTheme.styleSecondaryButton(listButton);
+        listButton.setBounds(268, 16, 92, 36);
+        listButton.addActionListener(e -> mainAdminPanel.showPanel("NoticeAdmin"));
+        card.add(listButton);
 
-        // 🔹 닫기 버튼 (위치 및 크기 수정)
-        closeButton = new JButton("X");
-        closeButton.setBounds(330, 10, 50, 50);
-        closeButton.setFont(new Font("Inter", Font.BOLD, 14));
-        closeButton.setFocusPainted(false);
-        closeButton.setBorderPainted(false);
-        closeButton.setContentAreaFilled(false);
-        closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        noticePanel.add(closeButton);
-        closeButton.addActionListener(e -> mainAdminPanel.showPanel("NoticeAdmin"));
+        titleArea = new JTextArea();
+        titleArea.setFont(AppTheme.SECTION_TITLE_FONT);
+        titleArea.setForeground(AppTheme.TEXT);
+        titleArea.setBackground(AppTheme.CARD);
+        titleArea.setEditable(false);
+        titleArea.setFocusable(false);
+        titleArea.setLineWrap(true);
+        titleArea.setWrapStyleWord(true);
+        titleArea.setBorder(BorderFactory.createEmptyBorder());
+        titleArea.setBounds(20, 72, 340, 62);
+        card.add(titleArea);
 
-        // 🔹 제목 표시줄
-        JLabel smallTitleLabel = new JLabel("제목:");
-        smallTitleLabel.setFont(new Font("Inter", Font.BOLD, 14));
-        smallTitleLabel.setBounds(10, 60, 50, 20);
-        noticePanel.add(smallTitleLabel);
+        authorLabel = createMetadataLabel();
+        authorLabel.setBounds(20, 143, 340, 20);
+        card.add(authorLabel);
 
-        titleValue = new JLabel();
-        titleValue.setFont(new Font("Inter", Font.BOLD, 14));
-        titleValue.setBounds(70, 60, 300, 20);
-        noticePanel.add(titleValue);
+        dateLabel = createMetadataLabel();
+        dateLabel.setBounds(20, 166, 340, 20);
+        card.add(dateLabel);
 
-        JSeparator separator1 = new JSeparator();
-        separator1.setBounds(10, 85, 360, 1);
-        separator1.setForeground(Color.BLACK);
-        noticePanel.add(separator1);
+        JLabel contentLabel = new JLabel("본문");
+        contentLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        contentLabel.setForeground(AppTheme.TEXT);
+        contentLabel.setBounds(20, 199, 100, 22);
+        card.add(contentLabel);
 
-        // 🔹 작성자 및 날짜 정보 (위치 및 크기 조정)
-        authorLabel = new JLabel();
-        authorLabel.setFont(new Font("Inter", Font.BOLD, 12));
-        authorLabel.setForeground(Color.GRAY);
-        authorLabel.setBounds(10, 95, 360, 20);
-        noticePanel.add(authorLabel);
-
-        dateLabel = new JLabel();
-        dateLabel.setFont(new Font("Inter", Font.BOLD, 12));
-        dateLabel.setForeground(Color.GRAY);
-        dateLabel.setBounds(10, 118, 360, 20);
-        dateLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        noticePanel.add(dateLabel);
-
-        JSeparator separator2 = new JSeparator();
-        separator2.setBounds(10, 145, 360, 1);
-        separator2.setForeground(Color.BLACK);
-        noticePanel.add(separator2);
-
-        // 🔹 본문 내용 (JTextArea + JScrollPane)
         contentArea = new JTextArea();
-        contentArea.setFont(new Font("Inter", Font.PLAIN, 14));
+        contentArea.setFont(AppTheme.BODY_FONT);
+        contentArea.setForeground(AppTheme.TEXT);
+        contentArea.setBackground(AppTheme.INPUT_BACKGROUND);
         contentArea.setWrapStyleWord(true);
         contentArea.setLineWrap(true);
         contentArea.setEditable(false);
-        contentArea.setCursor(null);
-        contentArea.setBackground(Color.WHITE);
-        contentArea.setMargin(new Insets(5, 5, 5, 5));
+        contentArea.setMargin(new java.awt.Insets(10, 10, 10, 10));
 
         contentScrollPane = new JScrollPane(contentArea);
-        contentScrollPane.setBounds(10, 155, 360, 325);
+        contentScrollPane.setBounds(20, 225, 340, 325);
         contentScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         contentScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        contentScrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xE0E0E0)));
-        noticePanel.add(contentScrollPane);
+        contentScrollPane.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
+        card.add(contentScrollPane);
 
-        // 🔹 파일 목록 패널 추가 (위치 조정)
+        JLabel fileTitleLabel = new JLabel("첨부파일");
+        fileTitleLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        fileTitleLabel.setForeground(AppTheme.TEXT);
+        fileTitleLabel.setBounds(20, 565, 120, 22);
+        card.add(fileTitleLabel);
+
         fileListPanel = new JPanel();
         fileListPanel.setLayout(new BoxLayout(fileListPanel, BoxLayout.Y_AXIS));
-        fileListPanel.setBounds(10, 500, 360, 90);
-        fileListPanel.setBackground(Color.WHITE);
-        noticePanel.add(fileListPanel);
+        fileListPanel.setBackground(AppTheme.CARD);
+        fileListPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 
-        // 🔹 구분선 추가 (본문 아래)
-        JSeparator separator3 = new JSeparator();
-        separator3.setBounds(10, 600, 360, 1);
-        separator3.setForeground(Color.BLACK);
-        noticePanel.add(separator3);
-        
-     // 🔹 수정 버튼 추가 (이 부분이 빠져 있어서 NullPointerException 발생)
-        editButton = new RoundedComponent(100, 40, 10, "button", "수정", 
-                        Color.GRAY, Color.GRAY, Color.WHITE, "맑은 고딕", Font.BOLD, 16);
-        editButton.setBounds(140, 615, 100, 40);
-        noticePanel.add(editButton);
+        fileScrollPane = new JScrollPane(fileListPanel);
+        fileScrollPane.setBounds(20, 591, 340, 110);
+        fileScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        fileScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        fileScrollPane.getVerticalScrollBar().setUnitIncrement(14);
+        fileScrollPane.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
+        card.add(fileScrollPane);
 
-        
-  
- 
-        editButton.getButton().addActionListener(e -> {
-            if (currentNoticeId <= 0) {
-                JOptionPane.showMessageDialog(null, "수정할 공지사항이 없습니다!", "오류", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+        JButton editButton = new JButton("수정");
+        AppTheme.styleSecondaryButton(editButton);
+        editButton.setBounds(20, 724, 104, 42);
+        editButton.addActionListener(e -> openEditPanel());
+        card.add(editButton);
 
-            mainAdminPanel.showPanel("NoticeEditPanel");  
-            mainAdminPanel.getNoticeEditPanel().loadNoticeForEdit(currentNoticeId);
-        });
+        JButton deleteButton = new JButton("삭제");
+        AppTheme.styleDangerButton(deleteButton);
+        deleteButton.setBounds(136, 724, 104, 42);
+        deleteButton.addActionListener(e -> deleteCurrentNotice());
+        card.add(deleteButton);
 
+        JButton bottomListButton = new JButton("목록으로");
+        AppTheme.stylePrimaryButton(bottomListButton);
+        bottomListButton.setBounds(252, 724, 108, 42);
+        bottomListButton.addActionListener(e -> mainAdminPanel.showPanel("NoticeAdmin"));
+        card.add(bottomListButton);
 
-
-
-
-        
+        resetNoticeDetail();
     }
 
-    /**
-     * ✅ 공지사항 ID를 받아서 데이터베이스에서 불러와 적용하는 메서드
-     */
     public void loadNoticeDetail(int noticeId) {
+        resetNoticeDetail();
         NoticeBean notice = noticeDAO.getNoticeById(noticeId);
-
         if (notice == null) {
-            System.err.println("❌ 공지사항 데이터 없음");
+            JOptionPane.showMessageDialog(getDialogParent(),
+                    "공지사항을 불러오지 못했습니다.", "공지사항", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        this.currentNoticeId = notice.getNotice_num();  // ✅ 현재 공지사항 ID 저장
-
-        titleValue.setText(notice.getNotice_title());
-        titleValue.setToolTipText(notice.getNotice_title());
-        authorLabel.setText("작성자: " + notice.getAdmin_id());
-        dateLabel.setText("작성날짜: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(notice.getNotice_time()));
-        contentArea.setText(notice.getNotice_content());
+        currentNoticeId = notice.getNotice_num();
+        titleArea.setText(safeText(notice.getNotice_title(), "제목 없음"));
+        titleArea.setToolTipText(safeText(notice.getNotice_title(), "제목 없음"));
+        authorLabel.setText("작성자  " + safeText(notice.getAdmin_id(), "정보 없음"));
+        dateLabel.setText("작성일  " + formatDate(notice));
+        contentArea.setText(safeText(notice.getNotice_content(), "내용이 없습니다."));
         contentArea.setCaretPosition(0);
-        contentArea.revalidate();
-        contentArea.repaint();
 
-        
-        // 🔹 파일 목록 불러오기
-        List<Map<String, Object>> fileList = noticeFileDAO.getFilesByNoticeId(notice.getNotice_num());
-        fileListPanel.removeAll();
+        showFiles(noticeFileDAO.getFilesByNoticeId(notice.getNotice_num()));
+        resetScrollPositions();
+    }
 
-        if (fileList.isEmpty()) {
-            fileListPanel.add(new JLabel("📂 첨부 파일 없음"));
-        } else {
-            for (Map<String, Object> file : fileList) {
-                String fileName = (String) file.get("fileName");
-                int fileId = (int) file.get("fileId");
+    public void resetScrollPositions() {
+        contentArea.setCaretPosition(0);
+        SwingUtilities.invokeLater(() -> {
+            contentScrollPane.getVerticalScrollBar().setValue(0);
+            fileScrollPane.getVerticalScrollBar().setValue(0);
+        });
+    }
 
-                JLabel fileLabel = new JLabel("📄 " + fileName);
-                fileLabel.setFont(new Font("Inter", Font.PLAIN, 12));
-                fileLabel.setForeground(Color.BLUE);
-                fileLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                fileLabel.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        noticeFileDAO.downloadFile(fileId);
-                    }
-                });
-                fileListPanel.add(fileLabel);
-            }
+    private void openEditPanel() {
+        if (currentNoticeId <= 0) {
+            JOptionPane.showMessageDialog(getDialogParent(), "수정할 공지사항이 없습니다.",
+                    "공지사항 수정", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        mainAdminPanel.getNoticeEditPanel().loadNoticeForEdit(currentNoticeId);
+        mainAdminPanel.showPanel("NoticeEditPanel");
+    }
+
+    private void deleteCurrentNotice() {
+        if (currentNoticeId <= 0) {
+            JOptionPane.showMessageDialog(getDialogParent(), "삭제할 공지사항이 없습니다.",
+                    "공지사항 삭제", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
+        int confirm = JOptionPane.showConfirmDialog(getDialogParent(),
+                "이 공지사항을 삭제하시겠습니까?", "삭제 확인",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        if (noticeDAO.deleteNotice(currentNoticeId)) {
+            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 삭제했습니다.",
+                    "삭제 완료", JOptionPane.INFORMATION_MESSAGE);
+            currentNoticeId = 0;
+            mainAdminPanel.showPanel("NoticeAdmin");
+        } else {
+            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 삭제하지 못했습니다.",
+                    "삭제 실패", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void resetNoticeDetail() {
+        currentNoticeId = 0;
+        titleArea.setText("");
+        titleArea.setToolTipText(null);
+        authorLabel.setText("");
+        dateLabel.setText("");
+        contentArea.setText("");
+        fileListPanel.removeAll();
+        fileListPanel.revalidate();
+        fileListPanel.repaint();
+        resetScrollPositions();
+    }
+
+    private void showFiles(List<Map<String, Object>> files) {
+        fileListPanel.removeAll();
+        if (files.isEmpty()) {
+            JLabel emptyLabel = new JLabel("첨부파일 없음");
+            emptyLabel.setFont(AppTheme.CAPTION_FONT);
+            emptyLabel.setForeground(AppTheme.TEXT_SECONDARY);
+            emptyLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            fileListPanel.add(emptyLabel);
+        } else {
+            for (Map<String, Object> file : files) {
+                String fileName = safeText((String) file.get("fileName"), "이름 없는 파일");
+                Object fileIdValue = file.get("fileId");
+                if (!(fileIdValue instanceof Integer)) {
+                    continue;
+                }
+                JButton fileButton = createFileButton(fileName, (Integer) fileIdValue);
+                fileListPanel.add(fileButton);
+                fileListPanel.add(Box.createVerticalStrut(6));
+            }
+        }
         fileListPanel.revalidate();
         fileListPanel.repaint();
     }
-   
+
+    private JButton createFileButton(String fileName, int fileId) {
+        JButton fileButton = new JButton();
+        AppTheme.styleSecondaryButton(fileButton);
+        fileButton.setHorizontalAlignment(JButton.LEFT);
+        fileButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        fileButton.setPreferredSize(new Dimension(310, 32));
+        fileButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        FontMetrics metrics = fileButton.getFontMetrics(fileButton.getFont());
+        fileButton.setText(ellipsize(fileName, metrics, 270));
+        fileButton.setToolTipText(fileName);
+        fileButton.addActionListener(e -> {
+            if (!noticeFileDAO.downloadFile(fileId)) {
+                JOptionPane.showMessageDialog(getDialogParent(),
+                        "첨부파일을 열 수 없습니다.", "첨부파일", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        return fileButton;
+    }
+
+    private JLabel createMetadataLabel() {
+        JLabel label = new JLabel();
+        label.setFont(AppTheme.CAPTION_FONT);
+        label.setForeground(AppTheme.TEXT_SECONDARY);
+        return label;
+    }
+
+    private String formatDate(NoticeBean notice) {
+        if (notice.getNotice_time() == null) {
+            return "정보 없음";
+        }
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(notice.getNotice_time());
+    }
+
+    private String safeText(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
+    }
+
+    private String ellipsize(String text, FontMetrics metrics, int maxWidth) {
+        if (metrics.stringWidth(text) <= maxWidth) {
+            return text;
+        }
+        String ellipsis = "…";
+        int end = text.length();
+        while (end > 0 && metrics.stringWidth(text.substring(0, end) + ellipsis) > maxWidth) {
+            end--;
+        }
+        return text.substring(0, end) + ellipsis;
+    }
+
+    private Component getDialogParent() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        return window != null ? window : this;
+    }
 }
