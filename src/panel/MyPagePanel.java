@@ -127,7 +127,7 @@ public class MyPagePanel extends JPanel implements ActionListener {
                 JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
                 if (frame instanceof main.MainFrame) {
                     main.MainFrame mainFrame = (main.MainFrame) frame;
-                    mainFrame.showPanel("login");
+                    mainFrame.showLoginAfterLogout();
                 }
                 
                 // 로그아웃 성공 메시지

@@ -25,6 +25,9 @@ public class LoginPanel extends JPanel implements ActionListener {
 	private JCheckBox rememberMe;
 	private LoginDAO loginDAO;
 	private MainFrame mainFrame;
+	private JPasswordField passwordInput;
+	private JButton passwordVisibilityButton;
+	private char defaultPasswordEchoChar;
 
 	private Properties properties;
     private static final String PROPERTIES_FILE = "user.properties";
@@ -63,11 +66,11 @@ public class LoginPanel extends JPanel implements ActionListener {
 		passwordField.setBounds(62, 495, 315, 40);
 		add(passwordField);
 
-		JPasswordField passwordInput = (JPasswordField) passwordField.getComponent();
-		char defaultEchoChar = passwordInput.getEchoChar();
+		passwordInput = (JPasswordField) passwordField.getComponent();
+		defaultPasswordEchoChar = passwordInput.getEchoChar();
 		passwordInput.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		JButton passwordVisibilityButton = new JButton("보기");
+		passwordVisibilityButton = new JButton("보기");
 		passwordVisibilityButton.setFont(new Font("Malgun Gothic", Font.BOLD, 11));
 		passwordVisibilityButton.setForeground(new Color(0x4F6F46));
 		passwordVisibilityButton.setBackground(Color.WHITE);
@@ -82,7 +85,7 @@ public class LoginPanel extends JPanel implements ActionListener {
 		passwordVisibilityButton.addActionListener(e -> {
 			int caretPosition = passwordInput.getCaretPosition();
 			boolean showPassword = passwordInput.getEchoChar() != 0;
-			passwordInput.setEchoChar(showPassword ? (char) 0 : defaultEchoChar);
+			passwordInput.setEchoChar(showPassword ? (char) 0 : defaultPasswordEchoChar);
 			passwordVisibilityButton.setText(showPassword ? "숨김" : "보기");
 			passwordInput.requestFocusInWindow();
 			SwingUtilities.invokeLater(() -> passwordInput.setCaretPosition(
@@ -177,12 +180,12 @@ public class LoginPanel extends JPanel implements ActionListener {
 	// 로그인 시도 메서드 추가 (코드 중복 방지)
 	private void attemptLogin() {
 		String userId = loginField.getText();
-		JPasswordField passwordInput = (JPasswordField) passwordField.getComponent();
 		char[] userPassword = passwordInput.getPassword();
 
 		try {
 			if (userId.isEmpty() || userPassword.length == 0) {
 				CustomDialog.showDialog(mainFrame, "아이디와 비밀번호를 입력하세요.", "로그인 오류");
+				resetAfterFailure();
 			} else {
 				// 사용자 또는 관리자 정보를 가져옵니다
 				UserBean user = loginDAO.getUserInfo(userId, userPassword);
@@ -195,6 +198,7 @@ public class LoginPanel extends JPanel implements ActionListener {
 					} else {
 						clearUserId();
 					}
+					resetAfterSuccess();
 					
 					// 관리자 여부에 따라 다른 패널 표시
 					if (user.isAdmin() || LoginManager.getInstance().isAdmin()) {
@@ -213,13 +217,51 @@ public class LoginPanel extends JPanel implements ActionListener {
 					}
 				} else {
 					CustomDialog.showDialog(mainFrame, "아이디 혹은 비밀번호가 틀렸습니다.", "로그인 실패");
+					resetAfterFailure();
 				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			CustomDialog.showDialog(mainFrame, "로그인 처리 중 오류가 발생했습니다.", "로그인 오류");
+			resetAfterFailure();
 		} finally {
 			Arrays.fill(userPassword, '\0');
+		}
+	}
+
+	public void resetAfterFailure() {
+		clearPasswordInput();
+		resetPasswordVisibility();
+	}
+
+	public void resetAfterSuccess() {
+		clearPasswordInput();
+		resetPasswordVisibility();
+	}
+
+	public void resetForLogout() {
+		clearPasswordInput();
+		resetPasswordVisibility();
+
+		if (rememberMe.isSelected()) {
+			loadUserId();
+		} else if (loginField.getTextField() != null) {
+			loginField.getTextField().setText("");
+		}
+	}
+
+	private void clearPasswordInput() {
+		if (passwordInput != null) {
+			passwordInput.setText("");
+		}
+	}
+
+	private void resetPasswordVisibility() {
+		if (passwordInput != null) {
+			passwordInput.setEchoChar(defaultPasswordEchoChar);
+		}
+		if (passwordVisibilityButton != null) {
+			passwordVisibilityButton.setText("보기");
 		}
 	}
 
