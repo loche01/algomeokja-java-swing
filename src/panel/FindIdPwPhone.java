@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import main.MainFrame;
 import ui_n_utils.AppTheme;
 import ui_n_utils.CustomDialog;
@@ -27,6 +28,7 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
     private final JButton verifyIdButton;
     private final JButton verifyPasswordButton;
     private final JButton findPasswordButton;
+    private final JButton backButton;
     private final SmartTextField nameField1;
     private final SmartTextField nameField2;
     private final SmartTextField idField2;
@@ -57,7 +59,7 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         titleLabel.setBounds(20, 14, 245, 36);
         headerCard.add(titleLabel);
 
-        JButton backButton = new JButton("로그인으로");
+        backButton = new JButton("로그인으로");
         AppTheme.styleSecondaryButton(backButton);
         backButton.setBounds(267, 17, 88, 34);
         backButton.addActionListener(e -> returnToLogin());
@@ -173,6 +175,25 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         AppTheme.styleInputField(field);
         field.setForeground(AppTheme.TEXT_SECONDARY);
         return field;
+    }
+
+    public void resetForEntry() {
+        resetInputField(nameField1);
+        resetInputField(phoneField1);
+        resetInputField(nameField2);
+        resetInputField(idField2);
+        resetInputField(phoneField2);
+        clearIdVerification();
+        clearPasswordVerification();
+        hideFoundIdResult();
+        revalidate();
+        repaint();
+        SwingUtilities.invokeLater(backButton::requestFocusInWindow);
+    }
+
+    private void resetInputField(SmartTextField field) {
+        field.resetToPlaceholder();
+        field.setForeground(AppTheme.TEXT_SECONDARY);
     }
 
     @Override
@@ -410,6 +431,7 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
     private void returnToLogin() {
         clearIdVerification();
         clearPasswordVerification();
+        hideFoundIdResult();
         mainFrame.showPanel("login");
     }
 }
