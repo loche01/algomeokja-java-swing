@@ -52,27 +52,24 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         setBackground(AppTheme.BACKGROUND);
         setBounds(0, 0, 440, 956);
 
-        JPanel headerCard = createCard(30, 20, 380, 115);
         JLabel titleLabel = new JLabel("아이디·비밀번호 찾기");
-        titleLabel.setFont(AppTheme.TITLE_FONT);
-        titleLabel.setForeground(AppTheme.TEXT);
-        titleLabel.setBounds(20, 14, 245, 36);
-        headerCard.add(titleLabel);
+        AppTheme.styleScreenTitle(titleLabel);
+        titleLabel.setBounds(30, 22, 245, 36);
+        add(titleLabel);
 
         backButton = new JButton("로그인으로");
         AppTheme.styleSecondaryButton(backButton);
-        backButton.setBounds(267, 17, 88, 34);
+        backButton.setBounds(300, 22, 110, AppTheme.SECONDARY_BUTTON_HEIGHT);
         backButton.addActionListener(e -> returnToLogin());
-        headerCard.add(backButton);
+        add(backButton);
 
         JLabel descriptionLabel = new JLabel(
                 "<html>가입 시 등록한 이름과 휴대폰 번호로<br>사용자 정보를 확인합니다.</html>");
-        descriptionLabel.setFont(AppTheme.BODY_FONT);
-        descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
-        descriptionLabel.setBounds(20, 59, 335, 42);
-        headerCard.add(descriptionLabel);
+        AppTheme.styleScreenDescription(descriptionLabel);
+        descriptionLabel.setBounds(30, 62, 350, 42);
+        add(descriptionLabel);
 
-        JPanel findIdCard = createCard(30, 150, 380, 300);
+        JPanel findIdCard = createCard(30, 118, 380, 278);
         findIdCard.add(createSectionTitle("아이디 찾기"));
 
         addFieldLabel(findIdCard, "이름", 62);
@@ -92,7 +89,7 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         findIdCard.add(verifyIdButton);
 
         idResultPanel = new JPanel(new BorderLayout());
-        idResultPanel.setBackground(AppTheme.BACKGROUND);
+        idResultPanel.setBackground(AppTheme.PRIMARY_LIGHT);
         idResultPanel.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
         idResultPanel.setBounds(20, 163, 330, 50);
         foundIdResultLabel = new JLabel("", SwingConstants.CENTER);
@@ -108,7 +105,7 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         findIdButton.addActionListener(this);
         findIdCard.add(findIdButton);
 
-        JPanel findPasswordCard = createCard(30, 470, 380, 350);
+        JPanel findPasswordCard = createCard(30, 414, 380, 328);
         findPasswordCard.add(createSectionTitle("비밀번호 재설정"));
 
         addFieldLabel(findPasswordCard, "이름", 65);
@@ -156,8 +153,7 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
 
     private JLabel createSectionTitle(String text) {
         JLabel label = new JLabel(text);
-        label.setFont(AppTheme.SECTION_TITLE_FONT);
-        label.setForeground(AppTheme.PRIMARY_DARK);
+        AppTheme.styleSectionTitle(label);
         label.setBounds(20, 17, 220, 28);
         return label;
     }

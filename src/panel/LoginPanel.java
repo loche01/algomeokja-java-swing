@@ -14,6 +14,7 @@ import javax.swing.*;
 import main.MainFrame;
 import model.LoginManager;
 import model.UserBean;
+import ui_n_utils.AppTheme;
 import ui_n_utils.CustomDialog;
 import ui_n_utils.PasswordVisibilityToggle;
 import ui_n_utils.RoundedComponent;
@@ -38,32 +39,40 @@ public class LoginPanel extends JPanel implements ActionListener {
 		
 		properties = new Properties();
 		
-		setBackground(Color.WHITE);
+		setBackground(AppTheme.BACKGROUND);
 		setLayout(null);
 
-		// 상단 문구
-		JLabel titleLabel = new JLabel("\"건강한 식단 관리, 함께 시작해요!\"", SwingConstants.CENTER);
-		titleLabel.setFont(new Font("Inter", Font.BOLD, 22));
-		titleLabel.setBounds(48, 263, 345, 59);
+		JLabel brandLabel = new JLabel("알고먹자", SwingConstants.CENTER);
+		brandLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 42));
+		brandLabel.setForeground(AppTheme.ACCENT);
+		brandLabel.setBounds(30, 145, AppTheme.CARD_WIDTH, 58);
+		add(brandLabel);
+
+		JLabel titleLabel = new JLabel("건강한 식단 관리, 함께 시작해요", SwingConstants.CENTER);
+		AppTheme.styleScreenTitle(titleLabel);
+		titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 21));
+		titleLabel.setBounds(30, 218, AppTheme.CARD_WIDTH, 36);
 		add(titleLabel);
 
 		// 로그인 필드 레이블
-		add(UIUtils.createRequiredLabel("아이디", Color.black,64, 360, "Inter",Font.BOLD, 15));
+		add(UIUtils.createRequiredLabel("아이디", AppTheme.TEXT, 62, 300,
+				Font.SANS_SERIF, Font.BOLD, 14));
 		// 로그인 입력 필드 (둥근 입력 필드 사용)
-		loginField = new RoundedComponent(315, 40, 20, "textfield", ""
-				, new Color(217, 217, 217), new Color(217, 217, 217), Color.black, 
-				"Inter",Font.PLAIN, 14);
-		loginField.setBounds(62, 398, 315, 40);
+		loginField = new RoundedComponent(315, AppTheme.INPUT_HEIGHT, 14, "textfield", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		loginField.setBounds(62, 326, 315, AppTheme.INPUT_HEIGHT);
 		add(loginField);
 
 		
 		// 비밀번호 필드 레이블
-		add(UIUtils.createRequiredLabel("비밀번호", Color.black, 62, 459, "Inter", Font.BOLD, 15));
+		add(UIUtils.createRequiredLabel("비밀번호", AppTheme.TEXT, 62, 390,
+				Font.SANS_SERIF, Font.BOLD, 14));
 		// 비밀번호 입력 필드 (둥근 입력 필드 사용)
-		passwordField = new RoundedComponent(315, 40, 20, "password", "",
-				new Color(217, 217, 217), new Color(217, 217, 217), Color.black,
-				"Inter", Font.PLAIN, 14);
-		passwordField.setBounds(62, 495, 315, 40);
+		passwordField = new RoundedComponent(253, AppTheme.INPUT_HEIGHT, 14, "password", "",
+				AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT,
+				Font.SANS_SERIF, Font.PLAIN, 14);
+		passwordField.setBounds(62, 416, 253, AppTheme.INPUT_HEIGHT);
 		add(passwordField);
 
 		passwordInput = (JPasswordField) passwordField.getComponent();
@@ -71,13 +80,13 @@ public class LoginPanel extends JPanel implements ActionListener {
 
 		passwordVisibilityToggle = PasswordVisibilityToggle.attach(passwordInput);
 		JButton passwordVisibilityButton = passwordVisibilityToggle.getButton();
-		passwordVisibilityButton.setBounds(382, 495, 50, 40);
+		AppTheme.styleSecondaryButton(passwordVisibilityButton);
+		passwordVisibilityButton.setBounds(323, 416, 54, AppTheme.INPUT_HEIGHT);
 		add(passwordVisibilityButton);
 
 		JLabel passwordRuleLabel = new JLabel("6~20자, 영문과 특수문자를 함께 사용하세요.");
-		passwordRuleLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 11));
-		passwordRuleLabel.setForeground(Color.DARK_GRAY);
-		passwordRuleLabel.setBounds(64, 540, 313, 18);
+		AppTheme.styleCaption(passwordRuleLabel);
+		passwordRuleLabel.setBounds(62, 461, 315, 18);
 		add(passwordRuleLabel);
 
 		// 엔터키 입력 시 로그인 시도 기능 추가
@@ -106,28 +115,29 @@ public class LoginPanel extends JPanel implements ActionListener {
 		}
 
 		// Remember me & Forgot password
-		rememberMe = new JCheckBox("Remember me");
-		rememberMe.setFont(new Font("Inter", Font.PLAIN, 12));
-		rememberMe.setBounds(64, 570, 120, 20);
-		rememberMe.setBackground(Color.WHITE);
+		rememberMe = new JCheckBox("아이디 저장");
+		rememberMe.setFont(AppTheme.CAPTION_FONT);
+		rememberMe.setForeground(AppTheme.TEXT_SECONDARY);
+		rememberMe.setBounds(62, 491, 120, 22);
+		rememberMe.setBackground(AppTheme.BACKGROUND);
 		rememberMe.setFocusPainted(false);
 		add(rememberMe);
 
-		JLabel forgotPass = new JLabel("Forgot password/ID?");
-		forgotPass.setFont(new Font("맑은 고딕", Font.PLAIN, 12));
-		forgotPass.setForeground(Color.BLACK);
-		forgotPass.setBounds(260, 570, 150, 20);
+		JLabel forgotPass = new JLabel("아이디·비밀번호 찾기", SwingConstants.RIGHT);
+		forgotPass.setFont(AppTheme.CAPTION_FONT);
+		forgotPass.setForeground(AppTheme.PRIMARY_DARK);
+		forgotPass.setBounds(225, 491, 152, 22);
 		 // 🔹 클릭 가능하도록 커서 변경
 		// 🔹 기본 HTML 스타일 적용 (마우스 오버 시 효과 주기)
 		forgotPass.addMouseListener(new MouseAdapter() {
 			@Override
 		    public void mouseEntered(java.awt.event.MouseEvent evt) {
 				forgotPass.setCursor(new Cursor(Cursor.HAND_CURSOR));
-				forgotPass.setText("<html><u><span style='color:blue;'>Forgot password/ID?</span></u></html>"); // 🔹 마우스 올리면 색상 변경
+				forgotPass.setText("<html><u>아이디·비밀번호 찾기</u></html>");
 		    }
 		    @Override
 		    public void mouseExited(java.awt.event.MouseEvent evt) {
-		        forgotPass.setText("Forgot password/ID?"); // 🔹 원래 색상으로 복구
+		        forgotPass.setText("아이디·비밀번호 찾기");
 		    }
 			@Override
 		    public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -140,19 +150,20 @@ public class LoginPanel extends JPanel implements ActionListener {
         loadUserId();
 		
 		// 로그인 버튼 (둥근 버튼 사용)
-		loginButton = new RoundedComponent(132, 40, 20, "button", "Login", 
-				new Color(192, 233, 147), new Color(192, 233, 147), Color.black, 
-				"Inter",Font.BOLD, 14);
-		loginButton.setBounds(64, 598, 132, 40);
+		loginButton = new RoundedComponent(315, AppTheme.PRIMARY_BUTTON_HEIGHT, 14,
+				"button", "로그인", AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK,
+				Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
+		loginButton.setBounds(62, 535, 315, AppTheme.PRIMARY_BUTTON_HEIGHT);
 		loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		loginButton.getButton().addActionListener(this);
 		add(loginButton);
 
 		// 회원가입 버튼 (둥근 버튼 사용)
-		signUpButton = new RoundedComponent(132, 40, 20, "button", "회원가입", 
-				Color.BLACK, Color.BLACK, Color.WHITE, "Inter",Font.BOLD, 14);
-		
-		signUpButton.setBounds(242, 598, 135, 40);
+		signUpButton = new RoundedComponent(315, AppTheme.PRIMARY_BUTTON_HEIGHT, 14,
+				"button", "회원가입", AppTheme.PRIMARY, AppTheme.CARD,
+				AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 14);
+
+		signUpButton.setBounds(62, 591, 315, AppTheme.PRIMARY_BUTTON_HEIGHT);
 		signUpButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		signUpButton.getButton().addActionListener(this);
 		add(signUpButton);
