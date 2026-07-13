@@ -57,12 +57,11 @@ public class NoticeWritePanel extends JPanel {
 
         JPanel card = new JPanel(null);
         AppTheme.styleCard(card);
-        card.setBounds(30, 18, 380, 792);
+        card.setBounds(AppTheme.HORIZONTAL_MARGIN, 18, AppTheme.CARD_WIDTH, 792);
         add(card);
 
         JLabel screenTitle = new JLabel("공지 작성");
-        screenTitle.setFont(AppTheme.TITLE_FONT);
-        screenTitle.setForeground(AppTheme.TEXT);
+        AppTheme.styleScreenTitle(screenTitle);
         screenTitle.setBounds(20, 16, 220, 34);
         card.add(screenTitle);
 
@@ -72,17 +71,22 @@ public class NoticeWritePanel extends JPanel {
         listButton.addActionListener(e -> returnToList());
         card.add(listButton);
 
+        JLabel descriptionLabel = new JLabel("공지할 내용과 첨부파일을 등록합니다.");
+        AppTheme.styleScreenDescription(descriptionLabel);
+        descriptionLabel.setBounds(20, 52, 240, 22);
+        card.add(descriptionLabel);
+
         JLabel titleLabel = createFieldLabel("제목");
-        titleLabel.setBounds(20, 72, 120, 22);
+        titleLabel.setBounds(20, 84, 120, 22);
         card.add(titleLabel);
 
         titleField = new JTextField();
         AppTheme.styleInputField(titleField);
-        titleField.setBounds(20, 99, 340, AppTheme.INPUT_HEIGHT);
+        titleField.setBounds(20, 111, 340, AppTheme.INPUT_HEIGHT);
         card.add(titleField);
 
         JLabel contentLabel = createFieldLabel("본문");
-        contentLabel.setBounds(20, 151, 120, 22);
+        contentLabel.setBounds(20, 163, 120, 22);
         card.add(contentLabel);
 
         contentArea = new JTextArea();
@@ -95,7 +99,7 @@ public class NoticeWritePanel extends JPanel {
         contentArea.setMargin(new java.awt.Insets(10, 10, 10, 10));
 
         contentScrollPane = new JScrollPane(contentArea);
-        contentScrollPane.setBounds(20, 177, 340, 300);
+        contentScrollPane.setBounds(20, 189, 340, 270);
         contentScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         contentScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -103,18 +107,18 @@ public class NoticeWritePanel extends JPanel {
         card.add(contentScrollPane);
 
         JLabel fileLabel = createFieldLabel("첨부파일");
-        fileLabel.setBounds(20, 493, 120, 22);
+        fileLabel.setBounds(20, 475, 120, 22);
         card.add(fileLabel);
 
         fileButton = new JButton("파일 추가");
         AppTheme.styleSecondaryButton(fileButton);
-        fileButton.setBounds(20, 520, 160, 36);
+        fileButton.setBounds(20, 502, 160, 36);
         fileButton.addActionListener(e -> selectFiles());
         card.add(fileButton);
 
         removeFileButton = new JButton("선택 제거");
         AppTheme.styleSecondaryButton(removeFileButton);
-        removeFileButton.setBounds(200, 520, 160, 36);
+        removeFileButton.setBounds(200, 502, 160, 36);
         removeFileButton.setEnabled(false);
         removeFileButton.addActionListener(e -> removeSelectedFile());
         card.add(removeFileButton);
@@ -123,7 +127,7 @@ public class NoticeWritePanel extends JPanel {
         styleFileList(fileList);
 
         fileScrollPane = new JScrollPane(fileList);
-        fileScrollPane.setBounds(20, 568, 340, 120);
+        fileScrollPane.setBounds(20, 550, 340, 112);
         fileScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         fileScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         fileScrollPane.getVerticalScrollBar().setUnitIncrement(14);
@@ -133,12 +137,12 @@ public class NoticeWritePanel extends JPanel {
         JLabel requiredLabel = new JLabel("제목과 본문은 필수 입력 항목입니다.");
         requiredLabel.setFont(AppTheme.CAPTION_FONT);
         requiredLabel.setForeground(AppTheme.TEXT_SECONDARY);
-        requiredLabel.setBounds(20, 698, 340, 20);
+        requiredLabel.setBounds(20, 674, 340, 20);
         card.add(requiredLabel);
 
         saveButton = new JButton("공지 등록");
         AppTheme.stylePrimaryButton(saveButton);
-        saveButton.setBounds(20, 730, 340, 44);
+        saveButton.setBounds(20, 708, 340, 44);
         saveButton.addActionListener(e -> saveNotice());
         card.add(saveButton);
     }

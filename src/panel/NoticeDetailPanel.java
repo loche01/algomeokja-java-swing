@@ -47,12 +47,11 @@ public class NoticeDetailPanel extends JPanel {
 
         JPanel card = new JPanel(null);
         AppTheme.styleCard(card);
-        card.setBounds(30, 18, 380, 690);
+        card.setBounds(AppTheme.HORIZONTAL_MARGIN, 18, AppTheme.CARD_WIDTH, 690);
         add(card);
 
         JLabel screenTitle = new JLabel("공지사항 상세");
-        screenTitle.setFont(AppTheme.TITLE_FONT);
-        screenTitle.setForeground(AppTheme.TEXT);
+        AppTheme.styleScreenTitle(screenTitle);
         screenTitle.setBounds(20, 16, 220, 34);
         card.add(screenTitle);
 
@@ -61,6 +60,11 @@ public class NoticeDetailPanel extends JPanel {
         listButton.setBounds(268, 16, 92, 36);
         listButton.addActionListener(e -> mainUserPanel.showPanel("Notice"));
         card.add(listButton);
+
+        JLabel descriptionLabel = new JLabel("공지 내용과 첨부파일을 확인합니다.");
+        AppTheme.styleScreenDescription(descriptionLabel);
+        descriptionLabel.setBounds(20, 52, 235, 22);
+        card.add(descriptionLabel);
 
         titleArea = new JTextArea();
         titleArea.setFont(AppTheme.SECTION_TITLE_FONT);
@@ -73,7 +77,7 @@ public class NoticeDetailPanel extends JPanel {
         titleArea.setBorder(BorderFactory.createEmptyBorder());
 
         titleScrollPane = new JScrollPane(titleArea);
-        titleScrollPane.setBounds(20, 70, 340, 66);
+        titleScrollPane.setBounds(20, 82, 340, 66);
         titleScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         titleScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         titleScrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -81,17 +85,17 @@ public class NoticeDetailPanel extends JPanel {
         card.add(titleScrollPane);
 
         authorLabel = createMetadataLabel();
-        authorLabel.setBounds(20, 143, 340, 20);
+        authorLabel.setBounds(20, 153, 340, 20);
         card.add(authorLabel);
 
         dateLabel = createMetadataLabel();
-        dateLabel.setBounds(20, 166, 340, 20);
+        dateLabel.setBounds(20, 176, 340, 20);
         card.add(dateLabel);
 
         JLabel contentLabel = new JLabel("본문");
         contentLabel.setFont(AppTheme.BODY_BOLD_FONT);
         contentLabel.setForeground(AppTheme.TEXT);
-        contentLabel.setBounds(20, 199, 100, 22);
+        contentLabel.setBounds(20, 209, 100, 22);
         card.add(contentLabel);
 
         contentArea = new JTextArea();
@@ -104,7 +108,7 @@ public class NoticeDetailPanel extends JPanel {
         contentArea.setMargin(new java.awt.Insets(10, 10, 10, 10));
 
         contentScrollPane = new JScrollPane(contentArea);
-        contentScrollPane.setBounds(20, 225, 340, 300);
+        contentScrollPane.setBounds(20, 235, 340, 280);
         contentScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         contentScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         contentScrollPane.getVerticalScrollBar().setUnitIncrement(16);
@@ -114,7 +118,7 @@ public class NoticeDetailPanel extends JPanel {
         JLabel fileTitleLabel = new JLabel("첨부파일");
         fileTitleLabel.setFont(AppTheme.BODY_BOLD_FONT);
         fileTitleLabel.setForeground(AppTheme.TEXT);
-        fileTitleLabel.setBounds(20, 540, 120, 22);
+        fileTitleLabel.setBounds(20, 530, 120, 22);
         card.add(fileTitleLabel);
 
         fileListPanel = new JPanel();
@@ -123,7 +127,7 @@ public class NoticeDetailPanel extends JPanel {
         fileListPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 
         fileScrollPane = new JScrollPane(fileListPanel);
-        fileScrollPane.setBounds(20, 566, 340, 98);
+        fileScrollPane.setBounds(20, 556, 340, 108);
         fileScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         fileScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         fileScrollPane.getVerticalScrollBar().setUnitIncrement(14);

@@ -33,7 +33,7 @@ import model.NoticeBean;
 import ui_n_utils.AppTheme;
 
 public class NoticeAdminPanel extends JPanel {
-    private static final int CARD_WIDTH = 380;
+    private static final int CARD_WIDTH = AppTheme.CARD_WIDTH;
     private static final int NOTICE_CARD_HEIGHT = 118;
 
     private final NoticeDAO noticeDAO;
@@ -55,14 +55,12 @@ public class NoticeAdminPanel extends JPanel {
         setBounds(0, 0, 440, 856);
 
         JLabel titleLabel = new JLabel("공지사항 관리");
-        titleLabel.setFont(AppTheme.TITLE_FONT);
-        titleLabel.setForeground(AppTheme.TEXT);
+        AppTheme.styleScreenTitle(titleLabel);
         titleLabel.setBounds(30, 22, 220, 32);
         add(titleLabel);
 
         JLabel descriptionLabel = new JLabel("공지사항을 등록하고 관리합니다.");
-        descriptionLabel.setFont(AppTheme.CAPTION_FONT);
-        descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        AppTheme.styleScreenDescription(descriptionLabel);
         descriptionLabel.setBounds(30, 55, 250, 22);
         add(descriptionLabel);
 
@@ -128,14 +126,13 @@ public class NoticeAdminPanel extends JPanel {
             emptyCard.setPreferredSize(new Dimension(CARD_WIDTH, 120));
 
             JLabel emptyLabel = new JLabel("등록된 공지사항이 없습니다.", SwingConstants.CENTER);
-            emptyLabel.setFont(AppTheme.BODY_FONT);
-            emptyLabel.setForeground(AppTheme.TEXT_SECONDARY);
+            AppTheme.styleEmptyState(emptyLabel);
             emptyCard.add(emptyLabel, BorderLayout.CENTER);
             noticeListPanel.add(emptyCard);
         } else {
             for (NoticeBean notice : notices) {
                 noticeListPanel.add(createNoticeCard(notice));
-                noticeListPanel.add(Box.createVerticalStrut(14));
+                noticeListPanel.add(Box.createVerticalStrut(AppTheme.ROW_GAP));
             }
         }
 
