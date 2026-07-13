@@ -15,7 +15,7 @@ import ui_n_utils.ValidationUtils;
 
 
 public class FindIdPwPhone extends JPanel implements ActionListener {
-    private RoundedComponent findIdButton, phoneTabButton,emailTabButton,sendCodeButton1,sendCodeButton2,  findPwButton;
+    private RoundedComponent findIdButton, sendCodeButton1, sendCodeButton2, findPwButton;
     private SmartTextField nameField1,nameField2,idField2,phoneField1,phoneField2;
     private MainFrame mainFrame;
     private UserDAO userDAO;
@@ -38,9 +38,9 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         int startY = 100;
 
         // 상단 제목
-        JLabel titleLabel = new JLabel("ID/PW 찾기", JLabel.LEFT);
+        JLabel titleLabel = new JLabel("아이디·비밀번호 찾기", JLabel.LEFT);
         titleLabel.setFont(new Font("Inter", Font.BOLD, 32));
-        titleLabel.setBounds(centerX-30, startY-95, 200, 58);
+        titleLabel.setBounds(centerX-30, startY-95, 310, 58);
         add(titleLabel);
         
         JButton backButton = new JButton("<");
@@ -57,15 +57,12 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         divider.setForeground(Color.black);
         add(divider);
 
-        // 탭 버튼 (휴대전화/이메일)
-        phoneTabButton = new RoundedComponent(150,40, 35, "button", "휴대전화로 찾기", Color.black, Color.black, Color.white, "Inter", Font.BOLD, 15);//휴대 전화 찾
-        phoneTabButton.setBounds(centerX, startY + 25, 150, 40);
-        add(phoneTabButton);
-        
-        // 탭 버튼 (휴대전화/이메일)
-        emailTabButton = new RoundedComponent(150, 40, 35,"button", "이메일로 찾기",  Color.LIGHT_GRAY, Color.lightGray, Color.black, "Inter", Font.BOLD, 15);
-        emailTabButton.setBounds(centerX + 170, startY + 25, 150, 40);
-        add(emailTabButton);
+        JLabel descriptionLabel = new JLabel(
+                "가입 시 등록한 휴대폰 번호로 사용자 정보를 확인합니다.", JLabel.CENTER);
+        descriptionLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
+        descriptionLabel.setForeground(Color.DARK_GRAY);
+        descriptionLabel.setBounds(35, startY + 15, 370, 45);
+        add(descriptionLabel);
 
         // ID 찾기 섹션
         JLabel findIdLabel = new JLabel("아이디 찾기", JLabel.CENTER);
