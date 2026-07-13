@@ -4,6 +4,7 @@ import DB.NoticeDAO;
 import DB.NoticeFileDAO;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Window;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import main.MainAdminPanel;
 import model.NoticeBean;
@@ -147,7 +149,7 @@ public class NoticeEditPanel extends JPanel {
         NoticeBean notice = noticeDAO.getNoticeById(noticeId);
         if (notice == null) {
             this.noticeId = 0;
-            JOptionPane.showMessageDialog(this, "공지사항을 불러오지 못했습니다.",
+            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 불러오지 못했습니다.",
                     "공지 수정", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -180,12 +182,12 @@ public class NoticeEditPanel extends JPanel {
         String newTitle = titleField.getText().trim();
         String newContent = contentArea.getText().trim();
         if (newTitle.isEmpty() || newContent.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "제목과 본문을 입력해주세요.",
+            JOptionPane.showMessageDialog(getDialogParent(), "제목과 본문을 입력해주세요.",
                     "입력 확인", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (noticeId <= 0) {
-            JOptionPane.showMessageDialog(this, "수정할 공지사항을 확인할 수 없습니다.",
+            JOptionPane.showMessageDialog(getDialogParent(), "수정할 공지사항을 확인할 수 없습니다.",
                     "수정 실패", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -195,14 +197,14 @@ public class NoticeEditPanel extends JPanel {
             UserBean currentUser = UserSessionManager.getInstance().getCurrentUser();
             adminId = currentUser == null ? null : currentUser.getUser_id();
             if (adminId == null || adminId.isBlank()) {
-                JOptionPane.showMessageDialog(this, "로그인한 관리자 정보를 확인할 수 없습니다.",
+                JOptionPane.showMessageDialog(getDialogParent(), "로그인한 관리자 정보를 확인할 수 없습니다.",
                         "공지 수정", JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }
 
         if (!noticeDAO.updateNotice(noticeId, newTitle, newContent)) {
-            JOptionPane.showMessageDialog(this, "공지사항을 수정하지 못했습니다.",
+            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 수정하지 못했습니다.",
                     "수정 실패", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -215,10 +217,10 @@ public class NoticeEditPanel extends JPanel {
         }
 
         if (allFilesUploaded) {
-            JOptionPane.showMessageDialog(this, "공지사항을 수정했습니다.",
+            JOptionPane.showMessageDialog(getDialogParent(), "공지사항을 수정했습니다.",
                     "수정 완료", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(getDialogParent(),
                     "공지사항은 수정되었지만 일부 첨부파일을 저장하지 못했습니다.",
                     "첨부파일 오류", JOptionPane.ERROR_MESSAGE);
         }
@@ -233,7 +235,7 @@ public class NoticeEditPanel extends JPanel {
         fileChooser.setFileFilter(new FileNameExtensionFilter(
                 "이미지 및 문서 파일", "jpg", "png", "pdf", "docx", "txt"));
 
-        int returnValue = fileChooser.showOpenDialog(this);
+        int returnValue = fileChooser.showOpenDialog(getDialogParent());
         if (returnValue != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -248,12 +250,12 @@ public class NoticeEditPanel extends JPanel {
     private void removeSelectedFile() {
         int selectedIndex = fileList.getSelectedIndex();
         if (selectedIndex < 0) {
-            JOptionPane.showMessageDialog(this, "제거할 첨부파일을 선택하세요.",
+            JOptionPane.showMessageDialog(getDialogParent(), "제거할 첨부파일을 선택하세요.",
                     "첨부파일", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (selectedIndex < existingFiles.size()) {
-            JOptionPane.showMessageDialog(this,
+            JOptionPane.showMessageDialog(getDialogParent(),
                     "기존 첨부파일 삭제는 현재 기능에서 지원하지 않습니다.",
                     "첨부파일", JOptionPane.INFORMATION_MESSAGE);
             return;
@@ -305,5 +307,10 @@ public class NoticeEditPanel extends JPanel {
                 return label;
             }
         });
+    }
+
+    private Component getDialogParent() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        return window != null ? window : this;
     }
 }
