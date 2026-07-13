@@ -1,10 +1,7 @@
 package ui_n_utils;
 
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Insets;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
 
@@ -46,16 +43,9 @@ public final class PasswordVisibilityToggle {
 
     private JButton createButton() {
         JButton visibilityButton = new JButton("보기");
+        AppTheme.styleSecondaryButton(visibilityButton);
         visibilityButton.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 11));
-        visibilityButton.setForeground(new Color(0x4F6F46));
-        visibilityButton.setBackground(Color.WHITE);
-        visibilityButton.setFocusPainted(false);
-        visibilityButton.setBorder(
-                BorderFactory.createLineBorder(new Color(0x609056), 1, true));
-        visibilityButton.setContentAreaFilled(true);
-        visibilityButton.setOpaque(true);
         visibilityButton.setMargin(new Insets(0, 3, 0, 3));
-        visibilityButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return visibilityButton;
     }
 

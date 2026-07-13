@@ -11,33 +11,22 @@ public class CustomDialog extends JDialog {
         setSize(319, 226);
         setLocationRelativeTo(parent);
         setLayout(null);
-        getContentPane().setBackground(Color.WHITE);
+        getContentPane().setBackground(AppTheme.BACKGROUND);
 
         // 메시지 라벨
         JLabel messageLabel = new JLabel("<html><div style='text-align: center;'>" + message + "</div></html>");
-        messageLabel.setFont(new Font("Inter", Font.BOLD, 16));
+        messageLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        messageLabel.setForeground(AppTheme.TEXT);
         messageLabel.setBounds(40, 25, 228, 82);
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         add(messageLabel);
 
-        // 확인 버튼 배경 패널
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBounds(120, 124, 70, 30);
-        buttonPanel.setBackground(Color.BLACK);
-        buttonPanel.setLayout(new BorderLayout());
-        buttonPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-        add(buttonPanel);
-
         // 확인 버튼
         JButton confirmButton = new JButton("확인");
-        confirmButton.setFont(new Font("Inter", Font.BOLD, 14));
-        confirmButton.setForeground(Color.WHITE);
-        confirmButton.setBackground(Color.BLACK);
-        confirmButton.setBorderPainted(false);
-        confirmButton.setFocusPainted(false);
-        confirmButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        AppTheme.stylePrimaryButton(confirmButton);
+        confirmButton.setBounds(104, 124, 110, 38);
         confirmButton.addActionListener(e -> dispose());
-        buttonPanel.add(confirmButton, BorderLayout.CENTER);
+        add(confirmButton);
     }
 
     public CustomDialog(LoginPanel loginPanel, String message, String title) {
