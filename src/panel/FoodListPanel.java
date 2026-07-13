@@ -11,6 +11,7 @@ import javax.swing.*;
 import main.MainUserPanel;
 import model.FoodBean;
 import model.LoginManager;
+import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 
 
@@ -42,20 +43,22 @@ public class FoodListPanel extends JPanel {
         this.mealSaveService = new MealSaveService();
 
         setLayout(null);
-        setBackground(new Color(0xF3F5F0));
+        setBackground(AppTheme.BACKGROUND);
         setBounds(0, 0, 440, 686);
         
      // 상단 탭바 패널
         JPanel tabPanel = new JPanel();
         tabPanel.setLayout(null);
         tabPanel.setBounds(0, 0, 440, 40);
-        tabPanel.setBackground(new Color(160,212,104)); // 연한 초록색
+        tabPanel.setBackground(AppTheme.CARD);
+        tabPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppTheme.BORDER));
         add(tabPanel);
 
         // 검색 탭 버튼
         searchTabButton = new JButton("음식 검색");
-        searchTabButton.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
-        searchTabButton.setBounds(0, 5, 215, 30);
+        searchTabButton.setFont(AppTheme.BODY_BOLD_FONT);
+        searchTabButton.setForeground(AppTheme.PRIMARY_DARK);
+        searchTabButton.setBounds(0, 3, 220, 34);
         searchTabButton.setBorderPainted(false);
         searchTabButton.setFocusPainted(false);
         searchTabButton.setContentAreaFilled(false);
@@ -63,8 +66,9 @@ public class FoodListPanel extends JPanel {
 
         // 담은 목록 탭 버튼
         favoriteTabButton = new JButton("담은 음식 (0)");
-        favoriteTabButton.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
-        favoriteTabButton.setBounds(215, 5, 215, 30);
+        favoriteTabButton.setFont(AppTheme.BODY_BOLD_FONT);
+        favoriteTabButton.setForeground(AppTheme.TEXT_SECONDARY);
+        favoriteTabButton.setBounds(220, 3, 220, 34);
         favoriteTabButton.setBorderPainted(false);
         favoriteTabButton.setFocusPainted(false);
         favoriteTabButton.setContentAreaFilled(false);
@@ -72,8 +76,8 @@ public class FoodListPanel extends JPanel {
 
         // 선택된 탭 표시 (밑줄)
         selectedTabIndicator = new JPanel();
-        selectedTabIndicator.setBounds(0, 35, 215, 5); // 기본적으로 '검색' 선택
-        selectedTabIndicator.setBackground(new Color(96,144,86));
+        selectedTabIndicator.setBounds(0, 37, 220, 3); // 기본적으로 '검색' 선택
+        selectedTabIndicator.setBackground(AppTheme.PRIMARY_DARK);
         tabPanel.add(selectedTabIndicator);
 
         // 탭 버튼에 액션 리스너 추가
@@ -92,23 +96,20 @@ public class FoodListPanel extends JPanel {
         });
 
         mealTypeLabel = new JLabel("선택한 식사: 식사 유형을 선택해주세요");
-        mealTypeLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        mealTypeLabel.setForeground(new Color(0x406E38));
-        mealTypeLabel.setBounds(20, 47, 400, 28);
+        mealTypeLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        mealTypeLabel.setForeground(AppTheme.PRIMARY_DARK);
+        mealTypeLabel.setBounds(AppTheme.HORIZONTAL_MARGIN, 47, AppTheme.CARD_WIDTH, 28);
         add(mealTypeLabel);
 
         // 검색바 패널
         searchPanel = new JPanel(null);
-        searchPanel.setBounds(15, 80, 410, 42);
-        searchPanel.setBackground(new Color(0xF3F5F0));
+        searchPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 42);
+        searchPanel.setBackground(AppTheme.BACKGROUND);
 
         searchField = new JTextField(SEARCH_PLACEHOLDER);
-        searchField.setBounds(0, 0, 310, 42);
-        searchField.setFont(new Font("Malgun Gothic", Font.PLAIN, 15));
-        searchField.setForeground(Color.GRAY);
-        searchField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0xB8C8B2), 1, true),
-                BorderFactory.createEmptyBorder(0, 12, 0, 12)));
+        searchField.setBounds(0, 0, 280, 42);
+        AppTheme.styleInputField(searchField);
+        searchField.setForeground(AppTheme.TEXT_SECONDARY);
         
         // 🔹 검색 필드 클릭 시 플레이스홀더 효과 제거
         searchField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -116,7 +117,7 @@ public class FoodListPanel extends JPanel {
             public void focusGained(java.awt.event.FocusEvent e) {
                 if (searchField.getText().equals(SEARCH_PLACEHOLDER)) {
                     searchField.setText("");
-                    searchField.setForeground(Color.BLACK);
+                    searchField.setForeground(AppTheme.TEXT);
                 }
             }
 
@@ -124,21 +125,14 @@ public class FoodListPanel extends JPanel {
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (searchField.getText().isEmpty()) {
                     searchField.setText(SEARCH_PLACEHOLDER);
-                    searchField.setForeground(Color.GRAY);
+                    searchField.setForeground(AppTheme.TEXT_SECONDARY);
                 }
             }
         });
         
         searchButton = new JButton("검색");
-        searchButton.setBounds(320, 0, 90, 42);
-        searchButton.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
-        searchButton.setForeground(Color.WHITE);
-        searchButton.setBackground(new Color(0x609056));
-        searchButton.setOpaque(true);
-        searchButton.setContentAreaFilled(true);
-        searchButton.setBorder(BorderFactory.createLineBorder(new Color(0x609056), 1, true));
-        searchButton.setFocusPainted(false);
-        searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        searchButton.setBounds(290, 0, 90, 42);
+        AppTheme.stylePrimaryButton(searchButton);
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
 
@@ -163,45 +157,45 @@ public class FoodListPanel extends JPanel {
   
         // ✅ 검색 결과 리스트 패널
         searchContentPanel = new VerticalListPanel();
-        searchContentPanel.setBackground(new Color(0xF3F5F0));
-        searchContentPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+        searchContentPanel.setBackground(AppTheme.BACKGROUND);
+        searchContentPanel.setBorder(BorderFactory.createEmptyBorder(6, 0, 6, 0));
         
         // ✅ 검색 결과용 스크롤 패널
         searchScrollPane = new JScrollPane(searchContentPanel);
-        searchScrollPane.setBounds(10, 132, 420, 472);
+        searchScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 132, AppTheme.CARD_WIDTH, 472);
         searchScrollPane.setBorder(null);
         searchScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         searchScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         searchScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        searchScrollPane.getViewport().setBackground(new Color(0xF3F5F0));
+        searchScrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
         add(searchScrollPane);
         
         // ✅ 담은 목록 리스트 패널
         favoriteContentPanel = new VerticalListPanel();
-        favoriteContentPanel.setBackground(new Color(0xF3F5F0));
-        favoriteContentPanel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+        favoriteContentPanel.setBackground(AppTheme.BACKGROUND);
+        favoriteContentPanel.setBorder(BorderFactory.createEmptyBorder(6, 0, 6, 0));
 
         // ✅ 담은 목록용 스크롤 패널
         favoriteScrollPane = new JScrollPane(favoriteContentPanel);
-        favoriteScrollPane.setBounds(10, 80, 420, 524);
+        favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 524);
         favoriteScrollPane.setBorder(null);
         favoriteScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         favoriteScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         favoriteScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        favoriteScrollPane.getViewport().setBackground(new Color(0xF3F5F0));
+        favoriteScrollPane.getViewport().setBackground(AppTheme.BACKGROUND);
         favoriteScrollPane.setVisible(false);
         add(favoriteScrollPane);
         
         backButtonComponent = new RoundedComponent(130, 42, 10, "button", "식단 화면",
-                new Color(0x7A7A7A), Color.WHITE, new Color(0x4A4A4A), "Malgun Gothic", Font.BOLD, 15);
-        backButtonComponent.setBounds(20, 620, 130, 42);
+                AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 14);
+        backButtonComponent.setBounds(AppTheme.HORIZONTAL_MARGIN, 620, 130, 42);
         backButtonComponent.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         backButtonComponent.getButton().addActionListener(e -> mainUserPanel.showPanel("HomeMeal"));
         add(backButtonComponent);
 
         saveButtonComponent = new RoundedComponent(180, 42, 10, "button", "식단 저장",
-                new Color(0x609056), new Color(0x609056), Color.WHITE, "Malgun Gothic", Font.BOLD, 15);
-        saveButtonComponent.setBounds(240, 620, 180, 42);
+                AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
+        saveButtonComponent.setBounds(230, 620, 180, 42);
         saveButtonComponent.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         saveButtonComponent.getButton().addActionListener(e -> {
             if (favoriteItems.isEmpty()) {
@@ -311,7 +305,9 @@ public class FoodListPanel extends JPanel {
     }
     
     public void switchToFavoriteTab() {
-        selectedTabIndicator.setBounds(215, 35, 215, 5);
+        selectedTabIndicator.setBounds(220, 37, 220, 3);
+        searchTabButton.setForeground(AppTheme.TEXT_SECONDARY);
+        favoriteTabButton.setForeground(AppTheme.PRIMARY_DARK);
         searchPanel.setVisible(false);
         searchScrollPane.setVisible(false);
         favoriteScrollPane.setVisible(true);
@@ -319,7 +315,7 @@ public class FoodListPanel extends JPanel {
         isFavoriteList = true;
         showFavoriteItems();
         
-        saveButtonComponent.setBounds(240, 620, 180, 42);
+        saveButtonComponent.setBounds(230, 620, 180, 42);
     }
     
     // 담은 목록을 DB에 저장하는 메서드
@@ -385,9 +381,9 @@ public class FoodListPanel extends JPanel {
         itemPanel.setMinimumSize(new Dimension(0, 104));
         itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 104));
         itemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        itemPanel.setBackground(Color.WHITE);
+        itemPanel.setBackground(AppTheme.CARD);
         itemPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0xD8E6D2), 1, true),
+                BorderFactory.createLineBorder(AppTheme.BORDER, 1, true),
                 BorderFactory.createEmptyBorder(10, 14, 10, 12)));
         itemPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         itemPanel.setToolTipText("클릭하여 상세 보기");
@@ -409,7 +405,8 @@ public class FoodListPanel extends JPanel {
         infoPanel.addMouseListener(openDetailListener);
 
         JTextArea nameLabel = new JTextArea(food.getFoodName());
-        nameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 17));
+        nameLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        nameLabel.setForeground(AppTheme.TEXT);
         nameLabel.setLineWrap(true);
         nameLabel.setWrapStyleWord(true);
         nameLabel.setEditable(false);
@@ -432,19 +429,19 @@ public class FoodListPanel extends JPanel {
         JLabel weightLabel = new JLabel(isFavoriteList
                 ? "적용 중량 " + food.getWeight() + "g"
                 : "기준 중량 100g");
-        weightLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
-        weightLabel.setForeground(new Color(0x666666));
+        weightLabel.setFont(AppTheme.CAPTION_FONT);
+        weightLabel.setForeground(AppTheme.TEXT_SECONDARY);
         weightLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         weightLabel.addMouseListener(openDetailListener);
 
         JLabel dividerLabel = new JLabel("  |  ");
-        dividerLabel.setForeground(new Color(0xA0A0A0));
+        dividerLabel.setForeground(AppTheme.DISABLED);
         dividerLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         dividerLabel.addMouseListener(openDetailListener);
 
         JLabel kcalLabel = new JLabel("열량 " + (int) food.getFoodKcal() + " kcal");
-        kcalLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 13));
-        kcalLabel.setForeground(new Color(0x406E38));
+        kcalLabel.setFont(AppTheme.CAPTION_FONT.deriveFont(Font.BOLD));
+        kcalLabel.setForeground(AppTheme.PRIMARY_DARK);
         kcalLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         kcalLabel.addMouseListener(openDetailListener);
 
@@ -458,21 +455,11 @@ public class FoodListPanel extends JPanel {
         actionButton.setPreferredSize(new Dimension(90, 42));
         actionButton.setMinimumSize(new Dimension(90, 42));
         actionButton.setMaximumSize(new Dimension(90, 42));
-        actionButton.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-        actionButton.setFocusPainted(false);
-        actionButton.setOpaque(true);
-        actionButton.setContentAreaFilled(true);
-        actionButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
         if (isFavoriteList) {
-            actionButton.setForeground(new Color(0x4A4A4A));
-            actionButton.setBackground(Color.WHITE);
-            actionButton.setBorder(BorderFactory.createLineBorder(new Color(0x8A8A8A), 1, true));
+            AppTheme.styleSecondaryButton(actionButton);
             actionButton.addActionListener(e -> removeFavoriteItem(food));
         } else {
-            actionButton.setForeground(Color.WHITE);
-            actionButton.setBackground(new Color(0x609056));
-            actionButton.setBorder(BorderFactory.createLineBorder(new Color(0x609056), 1, true));
+            AppTheme.stylePrimaryButton(actionButton);
             actionButton.addActionListener(e -> openFoodDetail(food));
         }
 
@@ -496,14 +483,12 @@ public class FoodListPanel extends JPanel {
         emptyPanel.setPreferredSize(new Dimension(0, 150));
         emptyPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
         emptyPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        emptyPanel.setBackground(Color.WHITE);
-        emptyPanel.setBorder(BorderFactory.createLineBorder(new Color(0xD8E6D2), 1, true));
+        AppTheme.styleCard(emptyPanel);
 
         JLabel messageLabel = new JLabel(
                 "<html><div style='text-align:center;width:340px'>" + message + "</div></html>",
                 SwingConstants.CENTER);
-        messageLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
-        messageLabel.setForeground(new Color(0x666666));
+        AppTheme.styleEmptyState(messageLabel);
         emptyPanel.add(messageLabel, BorderLayout.CENTER);
         return emptyPanel;
     }
@@ -552,7 +537,7 @@ public class FoodListPanel extends JPanel {
         
         // 검색 필드 초기화
         searchField.setText(SEARCH_PLACEHOLDER);
-        searchField.setForeground(Color.GRAY);
+        searchField.setForeground(AppTheme.TEXT_SECONDARY);
         populateItems("");
     }
 
@@ -566,7 +551,7 @@ public class FoodListPanel extends JPanel {
         currentMealType = "";
         mealTypeLabel.setText("선택한 식사: 식사 유형을 선택해주세요");
         searchField.setText(SEARCH_PLACEHOLDER);
-        searchField.setForeground(Color.GRAY);
+        searchField.setForeground(AppTheme.TEXT_SECONDARY);
         updateFavoriteTabTitle();
         showFavoriteItems();
         
@@ -577,7 +562,9 @@ public class FoodListPanel extends JPanel {
 
     // 검색 탭으로 전환하는 메서드
     public void switchToSearchTab() {
-        selectedTabIndicator.setBounds(0, 35, 215, 5);
+        selectedTabIndicator.setBounds(0, 37, 220, 3);
+        searchTabButton.setForeground(AppTheme.PRIMARY_DARK);
+        favoriteTabButton.setForeground(AppTheme.TEXT_SECONDARY);
         searchPanel.setVisible(true);
         searchScrollPane.setVisible(true);
         favoriteScrollPane.setVisible(false);

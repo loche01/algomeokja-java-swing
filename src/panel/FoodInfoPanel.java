@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import main.MainUserPanel;
 import model.FoodBean;
+import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 
 public class FoodInfoPanel extends JPanel {
@@ -19,20 +20,20 @@ public class FoodInfoPanel extends JPanel {
         this.mainUserPanel = mainUserPanel;
         
         setLayout(null);
-        setBackground(new Color(192, 233, 147));
+        setBackground(AppTheme.BACKGROUND);
         setBounds(0, 0, 440, 736);
 
         // 메인 패널 생성
-        mainPanel = new RoundedComponent(400, 650, 30, "panel", " ",
-                new Color(192, 233, 147), Color.white, Color.black, " ", 0, 0);
-        mainPanel.setBounds(20, 20, 400, 650);
+        mainPanel = new RoundedComponent(AppTheme.CARD_WIDTH, 620, 20, "panel", " ",
+                AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, " ", 0, 0);
+        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, AppTheme.CARD_WIDTH, 620);
         mainPanel.setLayout(null);
         add(mainPanel);
 
         // 뒤로가기 버튼
         backButton = new RoundedComponent(100, 40, 10, "button", "목록으로",
-                new Color(0x7A7A7A), Color.white, new Color(0x4A4A4A), "Malgun Gothic", Font.BOLD, 14);
-        backButton.setBounds(16, 16, 100, 40);
+                AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 13);
+        backButton.setBounds(20, 16, 100, 40);
         backButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         backButton.getButton().addActionListener(e ->{
         	 resetFoodInfo(); // 🔹 뒤로가기 시 음식 정보 초기화
@@ -41,43 +42,43 @@ public class FoodInfoPanel extends JPanel {
         mainPanel.add(backButton);
 
         mealTypeLabel = new JLabel("선택한 식사: -", SwingConstants.RIGHT);
-        mealTypeLabel.setForeground(new Color(0x406E38));
-        mealTypeLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
-        mealTypeLabel.setBounds(126, 22, 250, 28);
+        mealTypeLabel.setForeground(AppTheme.PRIMARY_DARK);
+        mealTypeLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        mealTypeLabel.setBounds(126, 22, 230, 28);
         mainPanel.add(mealTypeLabel);
 
         // 음식명 라벨
         foodNameLabel = new JLabel("음식 이름", SwingConstants.CENTER);
-        foodNameLabel.setForeground(new Color(0x609056));
-        foodNameLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
-        foodNameLabel.setBounds(20, 72, 360, 62);
+        foodNameLabel.setForeground(AppTheme.TEXT);
+        foodNameLabel.setFont(AppTheme.TITLE_FONT);
+        foodNameLabel.setBounds(20, 72, 340, 62);
         foodNameLabel.setVerticalAlignment(SwingConstants.CENTER);
         mainPanel.add(foodNameLabel);
 
         // 🔹 탄수화물 패널
-		carbPanel = createNutritionPanel(15, 155, "탄수화물", "",
-        		new Color(243,243,243),new Color(255,203,164));
+		carbPanel = createNutritionPanel(16, 155, "탄수화물", "",
+				AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_DARK);
         mainPanel.add(carbPanel);
         
         // 🔹 단백질 패널
-		proteinPanel = createNutritionPanel(145, 155, "단백질", "",
-        		new Color(255,203,164),new Color(0x002D62));
+		proteinPanel = createNutritionPanel(138, 155, "단백질", "",
+				AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_DARK);
         mainPanel.add(proteinPanel);
 
         // 🔹 지방 패널
-		fatPanel = createNutritionPanel(275, 155, "지방", "",
-        		new Color(0x002D62), Color.white);
+		fatPanel = createNutritionPanel(260, 155, "지방", "",
+				AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_DARK);
         mainPanel.add(fatPanel);
 
         JLabel weightLabel = new JLabel("선택 중량 (10g 단위)", SwingConstants.CENTER);
-        weightLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        weightLabel.setForeground(new Color(0x406E38));
+        weightLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        weightLabel.setForeground(AppTheme.PRIMARY_DARK);
         weightLabel.setBounds(50, 282, 300, 26);
         mainPanel.add(weightLabel);
 
         // 🔹 단위 선택 패널
         gPanel = new RoundedComponent(300, 50, 24, "panel", " ",
-                new Color(0x609056), new Color(0x609056), Color.black, " ", 0, 0);
+                AppTheme.BORDER, AppTheme.INPUT_BACKGROUND, AppTheme.TEXT, " ", 0, 0);
         gPanel.setBounds(50, 315, 300, 50);
         gPanel.setLayout(null);
         mainPanel.add(gPanel);
@@ -89,12 +90,13 @@ public class FoodInfoPanel extends JPanel {
         gPanel.add(aButton);
         
         searchField = new RoundedComponent(80, 40, 20, "textfield", weightValue + "g",
-                new Color(0x609056), new Color(0x609056), Color.black,
-                "Malgun Gothic", Font.BOLD , 18);
+                AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT,
+                Font.SANS_SERIF, Font.BOLD , 16);
         searchField.setBounds(110, 5, 80, 40);
         searchField.getTextField().setHorizontalAlignment(SwingConstants.CENTER);
         searchField.getTextField().setEditable(false);
         searchField.getTextField().setFocusable(false);
+        AppTheme.styleReadOnlyField(searchField.getTextField());
         gPanel.add(searchField);
 		
 		bButton = createRoundButton("+10g", 210, 5, 80, 40, 14);
@@ -105,22 +107,24 @@ public class FoodInfoPanel extends JPanel {
 
         // 🔹 총 열량 라벨
         JLabel calorieLabel = new JLabel("총 열량");
-        calorieLabel.setFont(new Font("Inter", Font.BOLD, 25));
+        calorieLabel.setFont(AppTheme.SECTION_TITLE_FONT);
+		calorieLabel.setForeground(AppTheme.TEXT);
 		calorieLabel.setBounds(20, 405, 360, 30);
 		calorieLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(calorieLabel);
 
         kcalLabel = new JLabel();
-        kcalLabel.setFont(new Font("Inter", Font.BOLD, 26));
+        kcalLabel.setFont(AppTheme.TITLE_FONT);
+		kcalLabel.setForeground(AppTheme.PRIMARY_DARK);
 		kcalLabel.setBounds(20, 440, 360, 62);
 		kcalLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(kcalLabel);
 
         // 🔹 담기 버튼
         finishButton = new RoundedComponent(240, 48, 12, "button", "담은 목록에 반영",
-                new Color(0x609056), new Color(0x609056), Color.WHITE, "Malgun Gothic",
-                Font.BOLD, 16);
-        finishButton.setBounds(80, 535, 240, 48);
+                AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF,
+                Font.BOLD, 14);
+        finishButton.setBounds(25, 520, 330, 48);
         finishButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mainPanel.add(finishButton);
         finishButton.getButton().addActionListener(e -> {
@@ -154,21 +158,23 @@ public class FoodInfoPanel extends JPanel {
 
     // 🔹 영양 성분 패널 생성 함수
     private RoundedComponent createNutritionPanel(int x, int y, String title, String value, Color bgColor,Color ftColor) {
-        RoundedComponent panel = new RoundedComponent(110, 110, 30, "panel", " ",
+        RoundedComponent panel = new RoundedComponent(104, 110, 18, "panel", " ",
                 bgColor, bgColor, Color.black, " ", 0, 0);
-        panel.setBounds(x, y, 110, 110);
+        panel.setBounds(x, y, 104, 110);
         panel.setLayout(null);
 
         JLabel label = new JLabel(title);
         label.setForeground(ftColor);
-        label.setFont(new Font("Inter", Font.BOLD, 15));
-        label.setBounds(30, 22, 80, 20);
+        label.setFont(AppTheme.BODY_BOLD_FONT);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setBounds(8, 20, 88, 20);
         panel.add(label);
 
         JLabel valueLabel = new JLabel(value);
         valueLabel.setForeground(ftColor);
-        valueLabel.setFont(new Font("Inter", Font.BOLD, 24));
-        valueLabel.setBounds(27, 43, 80, 40);
+        valueLabel.setFont(AppTheme.SECTION_TITLE_FONT);
+        valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        valueLabel.setBounds(8, 46, 88, 40);
         panel.add(valueLabel);
 
         return panel;
@@ -244,8 +250,8 @@ public class FoodInfoPanel extends JPanel {
     // 🔹 둥근 버튼 생성 함수
     private RoundedComponent createRoundButton(String text, int x, int y, int width, int height, int fontSize) {
         RoundedComponent button = new RoundedComponent(width, height, 10, "button", text,
-                new Color(0x609056), new Color(0x609056),
-                Color.WHITE, "Malgun Gothic", Font.BOLD, fontSize);
+                AppTheme.PRIMARY, AppTheme.CARD,
+                AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, fontSize);
         button.setBounds(x, y, width, height);
         return button;
     }
