@@ -5,9 +5,9 @@
 - 작업 브랜치: `codex-final-polish`
 - 기준 브랜치: `codex-audit`
 - 기준 커밋: `4089009`
-- 현재 단계: 체크포인트 5 Eclipse 사용자 검증 완료, 최종 고도화 정리 진행
+- 현재 단계: 최종 고도화 정리 및 정적 검증 완료, 병합 준비 보고 대기
 - 마지막 기능 커밋: `e25015c 정리: JDBC 드라이버 생성 경고 제거`
-- 다음 작업: 저장소 보안 점검, README 반영과 최종 정적 검증
+- 다음 작업: 사용자 최종 스모크 테스트 및 `codex-audit` 병합 여부 결정
 - 사용자 Eclipse 검증 대기: 아니요
 
 ## 작업 기록
@@ -303,3 +303,18 @@
 - 검증 결과: DB 접속 없이 JDK 21 전체 `src`를 `-Xlint:deprecation`으로 컴파일해 성공했고 제거 예정 API 경고가 사라졌다. raw `Vector` 사용에 따른 unchecked 안내는 대규모 제네릭화 범위이므로 후속 과제로 유지한다.
 - 제한 준수: `src/db.properties`를 읽지 않았고 DB 접속·SQL 실행 없이 정적 컴파일만 수행했다.
 - 커밋: `e25015c 정리: JDBC 드라이버 생성 경고 제거`
+
+### 2026-07-13 / 최종 고도화 정리 및 병합 준비
+
+- 상태: 체크포인트 1~5 기능·UI 사용자 검증과 최종 정적 검증 완료, 병합·push 없이 `codex-final-polish`에서 중단
+- README: 식단 UI/UX, 식단 단일 트랜잭션, 월간 캘린더, 사용자·관리자 공지, 로그인 초기화 로그, DB 연결 관리자 경고, PBKDF2 인증·점진 전환과 회원가입·재설정·회원정보 변경을 실제 완료 범위에 맞게 반영했다.
+- README 한계: 실제 SMS 인증, 평문 호환 제거 시점, 관리자 계정 생성·재설정 UI 부재, 실제 장애 rollback 실행 검증 보류, raw `Vector` unchecked 안내와 식단 시각 디자인 추가 개선을 후속 과제로 명시했다.
+- 비밀번호 저장 경로: JDBC에 raw 비밀번호를 직접 바인딩하는 경로 0건, 로그인 SQL의 비밀번호 직접 비교 0건, `PasswordHasher.hash()` 저장 호출 4곳을 확인했다.
+- 객체·로그: `UserBean`과 `UserSessionManager`의 비밀번호 필드·getter·setter가 없고 활성 콘솔 출력에서 raw 비밀번호, 저장값, hash, salt 또는 실제 사용자 ID를 조합하는 표현이 없음을 확인했다.
+- PBKDF2 재검증: 저장 길이 90자, 정상 검증 성공, 오입력과 손상 형식 거부를 저장소 밖 임의 입력 테스트로 확인했다. JDK 21 단일 측정은 생성 185ms, 검증 98ms였으며 반복 600,000회를 유지했다.
+- 식단 트랜잭션: `MealSaveService`가 하나의 `Connection`을 헤더·상세 DAO 오버로드에 전달하고 `setAutoCommit(false)` 뒤 전체 성공 시 `commit`, 예외 시 `rollback`, 마지막에 auto-commit 복원과 단일 반환을 수행함을 재확인했다.
+- 민감정보: 현재 추적 파일에서 제거 전 관리자 seed 비밀번호, 완성된 PBKDF2 문자열, 대표 접근 토큰 패턴과 개인 키 표식이 0건이다. 추적된 실제 `src/db.properties`도 0건이며 파일 내용은 읽지 않았다.
+- 전체 컴파일: JDK 21 전체 `src`를 `-Xlint:deprecation -Xlint:unchecked`로 컴파일해 성공했다. deprecation 경고는 0건이고 `DBConnectionMgr` raw `Vector.addElement` unchecked 경고 2건만 남는다.
+- diff 검증: `codex-audit..HEAD`와 작업 트리의 `git diff --check`를 모두 통과했다. DB 접속·SQL 실행, 로컬 데이터 변경, 외부 라이브러리 추가는 하지 않았다.
+- 최종 스모크 테스트: 일반 사용자 로그인 → 관리자 로그인 → 회원가입 → 비밀번호 재설정 → 회원정보 비밀번호 변경 → 다건 식단 저장 → 캘린더 기록 → 사용자 공지 → 관리자 공지 작성·수정·삭제 → 앱 종료·재실행 → 콘솔 민감정보·Java 예외 부재 순서로 확인한다.
+- 병합 준비: 기준 `codex-audit`는 `4089009`이며 최종 고도화 변경은 기능별 한국어 커밋과 별도 문서 커밋으로 분리했다. 실제 병합·push는 수행하지 않는다.
