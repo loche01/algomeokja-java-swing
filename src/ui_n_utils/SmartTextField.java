@@ -47,4 +47,11 @@ public class SmartTextField extends JTextField {
 		return showingPlaceholder ? "" : getText();
 	}
 
+	public void resetToPlaceholder() {
+		showingPlaceholder = true;
+		setForeground(Color.LIGHT_GRAY);
+		setText(placeholder);
+		setCaretPosition(0);
+	}
+
 }

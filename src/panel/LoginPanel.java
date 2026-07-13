@@ -131,7 +131,7 @@ public class LoginPanel extends JPanel implements ActionListener {
 		    }
 			@Override
 		    public void mouseClicked(java.awt.event.MouseEvent evt) {
-		        mainFrame.showPanel("findIdPw"); // 🔹 ID/PW 찾기 패널로 이동
+		        mainFrame.showFindIdPwPanel(); // 🔹 입력 상태 초기화 후 ID/PW 찾기 패널로 이동
 		    }
 		});
 		add(forgotPass);
