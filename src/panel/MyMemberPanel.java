@@ -93,12 +93,13 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         JLabel passwordRuleLabel = new JLabel("새 비밀번호: 6~20자, 영문과 특수문자 포함");
         passwordRuleLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 11));
         passwordRuleLabel.setForeground(Color.DARK_GRAY);
-        passwordRuleLabel.setBounds(65, 535, 280, 20);
+        passwordRuleLabel.setBounds(35, 535, 315, 20);
         mainPanel.add(passwordRuleLabel);
 
-        finishButton = new RoundedComponent(100, 40, 10, "button", "완료", 
-                Color.BLACK, Color.BLACK, Color.WHITE, "맑은고딕", Font.BOLD, 14);
-        finishButton.setBounds(140, 565, 100, 40);
+        finishButton = new RoundedComponent(315, 44, 12, "button", "변경사항 저장",
+                new Color(0x4F6F46), new Color(0x4F6F46), Color.WHITE,
+                "맑은 고딕", Font.BOLD, 15);
+        finishButton.setBounds(35, 565, 315, 44);
         finishButton.getButton().addActionListener(this);
         mainPanel.add(finishButton);
     }

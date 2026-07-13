@@ -40,10 +40,10 @@ public class MyPagePanel extends JPanel implements ActionListener {
         mainPanel.add(memberInfoLabel);
         
         // 수정 버튼
-        editMemberBtn = new RoundedComponent(100, 40, 10, "Button", "수정", 
-                Color.white, Color.white, Color.red, "맑은 고딕", Font.BOLD, 17);
-        editMemberBtn.setBounds(270, 30, 100, 40);
-        editMemberBtn.getButton().addActionListener(this);
+        editMemberBtn = new RoundedComponent(150, 36, 10, "button", "회원정보 수정",
+                new Color(0x609056), Color.WHITE, new Color(0x4F6F46),
+                "맑은 고딕", Font.BOLD, 14);
+        editMemberBtn.setBounds(220, 32, 150, 36);
         mainPanel.add(editMemberBtn);
         editMemberBtn.getButton().addActionListener(e -> mainUserPanel.showPanel("MyMember")); // 📌 MyMemberPanel로 전환
         
