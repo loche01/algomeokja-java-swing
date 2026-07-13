@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 import main.MainFrame;
 import ui_n_utils.CustomDialog;
+import ui_n_utils.PasswordDocumentFilter;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.SmartTextField;
 import ui_n_utils.ValidationUtils;
@@ -255,6 +256,8 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         while (true) {
             JPasswordField newPasswordField = new JPasswordField(20);
             JPasswordField confirmPasswordField = new JPasswordField(20);
+            PasswordDocumentFilter.install(newPasswordField);
+            PasswordDocumentFilter.install(confirmPasswordField);
             JPanel resetPanel = new JPanel(new GridLayout(0, 1, 0, 6));
             resetPanel.add(new JLabel("새 비밀번호"));
             resetPanel.add(newPasswordField);
