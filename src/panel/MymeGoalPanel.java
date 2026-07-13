@@ -44,8 +44,7 @@ public class MymeGoalPanel extends JPanel implements ActionListener {
         add(formCard);
 
         titleLabel = new JLabel("목표 설정");
-        titleLabel.setFont(AppTheme.TITLE_FONT);
-        titleLabel.setForeground(AppTheme.TEXT);
+        AppTheme.styleScreenTitle(titleLabel);
         titleLabel.setBounds(24, 18, 195, 36);
         formCard.add(titleLabel);
 
@@ -55,31 +54,35 @@ public class MymeGoalPanel extends JPanel implements ActionListener {
         backButton.addActionListener(e -> mainUserPanel.showPanel("HomeTarget"));
         formCard.add(backButton);
 
+        JLabel descriptionLabel = new JLabel("체중 목표와 목표 기간을 입력해주세요.");
+        AppTheme.styleScreenDescription(descriptionLabel);
+        descriptionLabel.setBounds(24, 55, 290, 24);
+        formCard.add(descriptionLabel);
+
         JSeparator headerDivider = new JSeparator();
         headerDivider.setForeground(AppTheme.BORDER);
-        headerDivider.setBounds(24, 70, 331, 1);
+        headerDivider.setBounds(24, 86, 331, 1);
         formCard.add(headerDivider);
 
         JLabel sectionTitle = new JLabel("목표 정보");
-        sectionTitle.setFont(AppTheme.SECTION_TITLE_FONT);
-        sectionTitle.setForeground(AppTheme.PRIMARY_DARK);
-        sectionTitle.setBounds(24, 91, 160, 28);
+        AppTheme.styleSectionTitle(sectionTitle);
+        sectionTitle.setBounds(24, 102, 160, 28);
         formCard.add(sectionTitle);
 
-        startWeightField = addInputRow(formCard, "시작 체중", "kg", 132);
-        targetWeightField = addInputRow(formCard, "목표 체중", "kg", 194);
-        durationField = addInputRow(formCard, "목표 기간", "일", 256);
+        startWeightField = addInputRow(formCard, "시작 체중", "kg", 142);
+        targetWeightField = addInputRow(formCard, "목표 체중", "kg", 204);
+        durationField = addInputRow(formCard, "목표 기간", "일", 266);
 
         JLabel inputGuide = new JLabel(
                 "<html>체중은 숫자로 입력해주세요.<br>목표 기간은 1일 이상입니다.</html>");
         inputGuide.setFont(AppTheme.CAPTION_FONT);
         inputGuide.setForeground(AppTheme.TEXT_SECONDARY);
-        inputGuide.setBounds(145, 313, 205, 40);
+        inputGuide.setBounds(145, 323, 205, 40);
         formCard.add(inputGuide);
 
         saveButton = new JButton("목표 저장");
         AppTheme.stylePrimaryButton(saveButton);
-        saveButton.setBounds(145, 382, 205, 44);
+        saveButton.setBounds(145, 392, 205, 44);
         saveButton.addActionListener(this);
         formCard.add(saveButton);
     }

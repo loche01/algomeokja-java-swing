@@ -9,6 +9,7 @@ import javax.swing.*;
 import main.MainUserPanel;
 import model.LoginManager;
 import model.UserBean;
+import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 import java.util.Map;
 import java.util.HashMap;
@@ -40,61 +41,61 @@ public class HomeMealPanel extends JPanel {
 		this.userDAO = new UserDAO();
 		
 		setLayout(null);
-		setBackground(new Color(192, 233, 147));
+		setBackground(AppTheme.BACKGROUND);
 		setBounds(0, 140, 440, 686);
 		
 		// 사용자 이름과 안내 문구를 분리해 긴 이름에서도 겹치지 않도록 배치
 		userIdLabel = new JLabel();
-		userIdLabel.setFont(new Font("Inter", Font.BOLD, 28));
-		userIdLabel.setBounds(22, 18, 396, 38);
-		userIdLabel.setForeground(Color.white);
+		userIdLabel.setFont(AppTheme.TITLE_FONT);
+		userIdLabel.setBounds(30, 18, 380, 34);
+		userIdLabel.setForeground(AppTheme.TEXT);
 		add(userIdLabel);
 		
 		mealGuideLabel = new JLabel("식사별 기록을 확인하고 음식을 추가해보세요");
-		mealGuideLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-		mealGuideLabel.setBounds(22, 58, 396, 26);
-		mealGuideLabel.setForeground(new Color(255, 255, 255));
+		mealGuideLabel.setFont(AppTheme.BODY_FONT);
+		mealGuideLabel.setBounds(30, 54, 380, 24);
+		mealGuideLabel.setForeground(AppTheme.TEXT_SECONDARY);
 		mealGuideLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
 		add(mealGuideLabel);
 
 		aaLabel = new JLabel("아직이에요");
-		aPanel = createMealCard("아침", 22, 100, aaLabel);
+		aPanel = createMealCard("아침", 30, 96, aaLabel);
 		add(aPanel);
 
 		baLabel = new JLabel("아직이에요");
-		bPanel = createMealCard("점심", 230, 100, baLabel);
+		bPanel = createMealCard("점심", 228, 96, baLabel);
 		add(bPanel);
 
 		daLabel = new JLabel("아직이에요");
-		dPanel = createMealCard("저녁", 22, 286, daLabel);
+		dPanel = createMealCard("저녁", 30, 282, daLabel);
 		add(dPanel);
 
 		caLabel = new JLabel("아직이에요");
-		cPanel = createMealCard("간식", 230, 286, caLabel);
+		cPanel = createMealCard("간식", 228, 282, caLabel);
 		add(cPanel);
 		
 		//물섭취
-		ePanel = new RoundedComponent(396, 150, 30, "panel", " ", new Color(0x609056), new Color(0x609056), Color.black,
+		ePanel = new RoundedComponent(380, 138, 18, "panel", " ", AppTheme.BORDER, AppTheme.PRIMARY_LIGHT, AppTheme.TEXT,
 				" ", 0, 0);
-		ePanel.setBounds(22, 472, 396, 150);
+		ePanel.setBounds(30, 468, 380, 138);
 		ePanel.setLayout(null);
 		add(ePanel);
 		
 		JLabel eLabel = new JLabel("물 섭취");
-		eLabel.setForeground(Color.white);
-		eLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
+		eLabel.setForeground(AppTheme.PRIMARY_DARK);
+		eLabel.setFont(AppTheme.SECTION_TITLE_FONT);
 		eLabel.setBounds(18, 16, 120, 30);
 		ePanel.add(eLabel);
 		
 		JLabel waterMessageLabel = new JLabel("오늘도 잊지 말고 물을 챙겨주세요");
-		waterMessageLabel.setForeground(Color.WHITE);
-		waterMessageLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
+		waterMessageLabel.setForeground(AppTheme.TEXT);
+		waterMessageLabel.setFont(AppTheme.BODY_BOLD_FONT);
 		waterMessageLabel.setBounds(18, 60, 360, 28);
 		ePanel.add(waterMessageLabel);
 
 		JLabel waterGuideLabel = new JLabel("충분한 수분 섭취로 건강한 하루를 만들어요");
-		waterGuideLabel.setForeground(new Color(0xC0E993));
-		waterGuideLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+		waterGuideLabel.setForeground(AppTheme.TEXT_SECONDARY);
+		waterGuideLabel.setFont(AppTheme.BODY_FONT);
 		waterGuideLabel.setBounds(18, 96, 360, 24);
 		ePanel.add(waterGuideLabel);
 
@@ -111,25 +112,25 @@ public class HomeMealPanel extends JPanel {
 	}
 
 	private RoundedComponent createMealCard(String mealType, int x, int y, JLabel calorieLabel) {
-		RoundedComponent card = new RoundedComponent(188, 170, 24, "panel", " ",
-				new Color(0x609056), new Color(0x609056), Color.BLACK, " ", 0, 0);
-		card.setBounds(x, y, 188, 170);
+		RoundedComponent card = new RoundedComponent(182, 170, 18, "panel", " ",
+				AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, AppTheme.TEXT, " ", 0, 0);
+		card.setBounds(x, y, 182, 170);
 		card.setLayout(null);
 
 		JLabel titleLabel = new JLabel(mealType);
 		titleLabel.setForeground(Color.WHITE);
-		titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 22));
+		titleLabel.setFont(AppTheme.SECTION_TITLE_FONT);
 		titleLabel.setBounds(16, 14, 100, 30);
 		card.add(titleLabel);
 
 		JLabel recordLabel = new JLabel("오늘 기록");
-		recordLabel.setForeground(new Color(0xE4F4D3));
-		recordLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
+		recordLabel.setForeground(AppTheme.PRIMARY_LIGHT);
+		recordLabel.setFont(AppTheme.CAPTION_FONT);
 		recordLabel.setBounds(16, 55, 100, 22);
 		card.add(recordLabel);
 
-		calorieLabel.setForeground(new Color(0xC0E993));
-		calorieLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 19));
+		calorieLabel.setForeground(AppTheme.ACCENT);
+		calorieLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
 		calorieLabel.setBounds(16, 78, 156, 30);
 		card.add(calorieLabel);
 
@@ -142,15 +143,8 @@ public class HomeMealPanel extends JPanel {
 
 	private JButton createMealAddButton() {
 		JButton button = new JButton("음식 추가");
-		button.setBounds(16, 124, 156, 34);
-		button.setFont(new Font("Malgun Gothic", Font.BOLD, 14));
-		button.setForeground(new Color(0x406E38));
-		button.setBackground(Color.WHITE);
-		button.setOpaque(true);
-		button.setFocusPainted(false);
-		button.setContentAreaFilled(true);
-		button.setBorder(BorderFactory.createLineBorder(new Color(0xE4F4D3), 1, true));
-		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		button.setBounds(16, 124, 150, 34);
+		AppTheme.styleSecondaryButton(button);
 		return button;
 	}
 
@@ -222,7 +216,7 @@ public class HomeMealPanel extends JPanel {
 			label.setForeground(Color.WHITE);
 		} else {
 			label.setText("아직이에요");
-			label.setForeground(new Color(0xC0E993));
+			label.setForeground(AppTheme.ACCENT);
 		}
 	}
 
@@ -238,7 +232,7 @@ public class HomeMealPanel extends JPanel {
 	private void resetLabel(JLabel label) {
 		if (label != null) {
 			label.setText("아직이에요");
-			label.setForeground(new Color(0xC0E993));
+			label.setForeground(AppTheme.ACCENT);
 		}
 	}
 

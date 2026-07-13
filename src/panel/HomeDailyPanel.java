@@ -8,6 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.*;
 import model.LoginManager;
+import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 
 public class HomeDailyPanel extends JPanel {
@@ -40,7 +41,7 @@ public class HomeDailyPanel extends JPanel {
 	
     public HomeDailyPanel() {
         setBounds(0, 140, 440, 700);
-        setBackground(new Color(192, 233, 147)); // 연한 초록색 (#C0E993)
+        setBackground(AppTheme.BACKGROUND);
         setLayout(null);
 
         // DAO 초기화
@@ -54,166 +55,171 @@ public class HomeDailyPanel extends JPanel {
         if (targetFat <= 0) targetFat = 36.0;
 
         todayLabel = new JLabel("오늘 하루");
-        todayLabel.setBounds(124, 25, 192, 60);
-        todayLabel.setFont(new Font("Inter", Font.BOLD, 42));
-        todayLabel.setForeground(new Color(107, 142, 78));
+        todayLabel.setBounds(AppTheme.HORIZONTAL_MARGIN, 18, AppTheme.CARD_WIDTH, 34);
+        AppTheme.styleScreenTitle(todayLabel);
         add(todayLabel);
+
+        JLabel todayDescription = new JLabel("오늘 섭취한 칼로리와 영양소를 확인합니다.");
+        todayDescription.setBounds(AppTheme.HORIZONTAL_MARGIN, 54, AppTheme.CARD_WIDTH, 24);
+        AppTheme.styleScreenDescription(todayDescription);
+        add(todayDescription);
 
         // 칼로리 표시 레이블
         currentCalorieLabel = new JLabel("0");
-        currentCalorieLabel.setForeground(Color.black);
-        currentCalorieLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 34));
-        currentCalorieLabel.setBounds(110, 100, 100, 30);
+        currentCalorieLabel.setForeground(AppTheme.TEXT);
+        currentCalorieLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 30));
+        currentCalorieLabel.setBounds(112, 92, 82, 34);
         add(currentCalorieLabel);
 
         JLabel slashLabel = new JLabel("/");
-        slashLabel.setForeground(Color.black);
-        slashLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 34));
-        slashLabel.setBounds(190, 100, 20, 30);
+        slashLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        slashLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 26));
+        slashLabel.setBounds(190, 94, 18, 30);
         add(slashLabel);
 
         targetCalorieLabel = new JLabel("1200");
-        targetCalorieLabel.setForeground(Color.white);
-        targetCalorieLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
-        targetCalorieLabel.setBounds(205, 100, 100, 30);
+        targetCalorieLabel.setForeground(AppTheme.PRIMARY_DARK);
+        targetCalorieLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 24));
+        targetCalorieLabel.setBounds(207, 94, 76, 30);
         add(targetCalorieLabel);
 		
 		JLabel cTitle = new JLabel("kcal");
-	    cTitle.setForeground(Color.black);
-		cTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
-        cTitle.setBounds(270, 100, 100, 30);
+	    cTitle.setForeground(AppTheme.TEXT_SECONDARY);
+		cTitle.setFont(AppTheme.BODY_BOLD_FONT);
+        cTitle.setBounds(283, 100, 48, 24);
 		add(cTitle);
 
         // 반원형 게이지 생성 및 추가 (내부 클래스 활용)
         calorieGauge = new IntegratedSemiCircularGauge(300, 150);
-        calorieGauge.setBounds(60, 250, 330, 150);
+        calorieGauge.setBounds(55, 190, 330, 150);
         // 현재 섭취한 칼로리의 퍼센트 설정 (초기값 0%)
         calorieGauge.setPercentage(0);
         add(calorieGauge);
         
 		//탄수화물 패널
-		tPanel = new RoundedComponent(35, 35, 35, "panel", " ", new Color(0xF3F3F3),new Color(0xF3F3F3), Color.black,
+		tPanel = new RoundedComponent(35, 35, 35, "panel", " ", AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_LIGHT, AppTheme.TEXT,
 				" ", 0, 0);
-        tPanel.setBounds(60, 175, 35, 35); // Y 위치를 게이지 아래로 조정
+        tPanel.setBounds(60, 142, 35, 35);
 		tPanel.setLayout(null);
 		tPanel.setEnabled(false);
         add(tPanel);
         
 		JLabel tLabel = new JLabel("탄");
-		tLabel.setForeground(Color.black);
-		tLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
+		tLabel.setForeground(AppTheme.PRIMARY_DARK);
+		tLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
 		tLabel.setBounds(8, 6, 40, 20);
 		tPanel.add(tLabel);
 		
 		JLabel taLabel = new JLabel("37%");
-        taLabel.setForeground(Color.black);
-		taLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
-        taLabel.setBounds(105, 175, 45, 30); // Y 위치를 게이지 아래로 조정
+        taLabel.setForeground(AppTheme.TEXT);
+		taLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        taLabel.setBounds(105, 145, 45, 30);
 		add(taLabel);
 		
 		//단백질 패널
-		tbPanel = new RoundedComponent(35, 35, 35, "panel", " ", new Color(0xF6F6B5),new Color(0xF6F6B5), Color.black,
+		tbPanel = new RoundedComponent(35, 35, 35, "panel", " ", AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_LIGHT, AppTheme.TEXT,
 				" ", 0, 0);
-        tbPanel.setBounds(170, 175, 35, 35); // Y 위치를 게이지 아래로 조정
+        tbPanel.setBounds(170, 142, 35, 35);
 		tbPanel.setLayout(null);
 		tbPanel.setEnabled(false);
         add(tbPanel);
         
 		JLabel tbLabel = new JLabel("단");
-		tbLabel.setForeground(Color.black);
-		tbLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
+		tbLabel.setForeground(AppTheme.PRIMARY_DARK);
+		tbLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
 		tbLabel.setBounds(8, 6, 40, 20);
 		tbPanel.add(tbLabel);
 		
 		JLabel tbaLabel = new JLabel("20%");
-        tbaLabel.setForeground(Color.black);
-		tbaLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
-        tbaLabel.setBounds(215, 175, 45, 30); // Y 위치를 게이지 아래로 조정
+        tbaLabel.setForeground(AppTheme.TEXT);
+		tbaLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        tbaLabel.setBounds(215, 145, 45, 30);
 		add(tbaLabel);
 		
 		//지방 패널
-		tcPanel = new RoundedComponent(35, 35, 35, "panel", " ", new Color(0x3B467A),new Color(0x3B467A), Color.black,
+		tcPanel = new RoundedComponent(35, 35, 35, "panel", " ", AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_LIGHT, AppTheme.TEXT,
 				" ", 0, 0);
-        tcPanel.setBounds(278, 175, 35, 35); // Y 위치를 게이지 아래로 조정
+        tcPanel.setBounds(278, 142, 35, 35);
 		tcPanel.setLayout(null);
 		tcPanel.setEnabled(false);
         add(tcPanel);
         
 		JLabel tcLabel = new JLabel("지");
-		tcLabel.setForeground(Color.white);
-		tcLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
+		tcLabel.setForeground(AppTheme.PRIMARY_DARK);
+		tcLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
 		tcLabel.setBounds(8, 6, 40, 20);
 		tcPanel.add(tcLabel);
 		
 		JLabel tcaLabel = new JLabel("20%");
-        tcaLabel.setForeground(Color.black);
-		tcaLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 20));
-        tcaLabel.setBounds(323, 175, 45, 30); // Y 위치를 게이지 아래로 조정
+        tcaLabel.setForeground(AppTheme.TEXT);
+		tcaLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        tcaLabel.setBounds(323, 145, 45, 30);
 		add(tcaLabel);
 		
         // 추가된 부분: 칼로리 남은 정보 라벨
         calorieInfoLabel = new JLabel("0 kcal 소모 | 0 kcal 더 먹을 수 있어요");
-        calorieInfoLabel.setForeground(Color.black);
-        calorieInfoLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        calorieInfoLabel.setBounds(78, 435, 330, 20);
+        calorieInfoLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        calorieInfoLabel.setFont(AppTheme.BODY_FONT);
+        calorieInfoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        calorieInfoLabel.setBounds(30, 354, 380, 24);
         add(calorieInfoLabel);
         
         // 수정: 영양소 섹션을 커스텀 프로그레스 바로 변경
         // 탄수화물 프로그레스 바 섹션
         JLabel carbLabel = new JLabel("탄수화물");
-        carbLabel.setForeground(Color.black);
-        carbLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        carbLabel.setBounds(50, 505, 100, 20);
+        carbLabel.setForeground(AppTheme.TEXT);
+		carbLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        carbLabel.setBounds(47, 420, 100, 20);
         add(carbLabel);
         
         // 커스텀 둥근 프로그레스 바 추가 (탄수화물)
-        carbProgressBar = new CustomProgressBar(0, new Color(0x609056));
-        carbProgressBar.setBounds(30, 540, 100, 15);
+        carbProgressBar = new CustomProgressBar(0, AppTheme.PRIMARY);
+        carbProgressBar.setBounds(30, 452, 100, 12);
         add(carbProgressBar);
         
         // 탄수화물 값 라벨
         carbValueLabel = new JLabel("0 / " + (int)targetCarbs + "g");
-        carbValueLabel.setForeground(Color.black);
-        carbValueLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        carbValueLabel.setBounds(45, 565, 100, 25);
+        carbValueLabel.setForeground(AppTheme.TEXT_SECONDARY);
+		carbValueLabel.setFont(AppTheme.CAPTION_FONT);
+        carbValueLabel.setBounds(45, 474, 100, 25);
         add(carbValueLabel);
         
         // 단백질 프로그레스 바 섹션
         JLabel proteinLabel = new JLabel("단백질");
-        proteinLabel.setForeground(Color.black);
-        proteinLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        proteinLabel.setBounds(185, 505, 100, 20);
+        proteinLabel.setForeground(AppTheme.TEXT);
+		proteinLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        proteinLabel.setBounds(181, 420, 100, 20);
         add(proteinLabel);
         
         // 커스텀 둥근 프로그레스 바 추가 (단백질)
-        proteinProgressBar = new CustomProgressBar(0, new Color(0x609056));
-        proteinProgressBar.setBounds(160, 540, 100, 15);
+        proteinProgressBar = new CustomProgressBar(0, AppTheme.PRIMARY);
+        proteinProgressBar.setBounds(160, 452, 100, 12);
         add(proteinProgressBar);
         
         // 단백질 값 라벨
         proteinValueLabel = new JLabel("0 / " + (int)targetProtein + "g");
-        proteinValueLabel.setForeground(Color.black);
-        proteinValueLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        proteinValueLabel.setBounds(175, 565, 100, 25);
+        proteinValueLabel.setForeground(AppTheme.TEXT_SECONDARY);
+		proteinValueLabel.setFont(AppTheme.CAPTION_FONT);
+        proteinValueLabel.setBounds(175, 474, 100, 25);
         add(proteinValueLabel);
         
         // 지방 프로그레스 바 섹션
         JLabel fatLabel = new JLabel("지방");
-        fatLabel.setForeground(Color.black);
-        fatLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        fatLabel.setBounds(325, 505, 100, 20);
+        fatLabel.setForeground(AppTheme.TEXT);
+		fatLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        fatLabel.setBounds(319, 420, 100, 20);
         add(fatLabel);
         
         // 커스텀 둥근 프로그레스 바 추가 (지방)
-        fatProgressBar = new CustomProgressBar(0, new Color(0x609056));
-        fatProgressBar.setBounds(290, 540, 100, 15);
+        fatProgressBar = new CustomProgressBar(0, AppTheme.PRIMARY);
+        fatProgressBar.setBounds(290, 452, 100, 12);
         add(fatProgressBar);
         
         // 지방 값 라벨
         fatValueLabel = new JLabel("0 / " + (int)targetFat + "g");
-        fatValueLabel.setForeground(Color.black);
-        fatValueLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        fatValueLabel.setBounds(310, 565, 100, 25);
+        fatValueLabel.setForeground(AppTheme.TEXT_SECONDARY);
+		fatValueLabel.setFont(AppTheme.CAPTION_FONT);
+        fatValueLabel.setBounds(310, 474, 100, 25);
         add(fatValueLabel);
         
         // 타이머 설정 - 30초마다 업데이트
@@ -376,19 +382,19 @@ public class HomeDailyPanel extends JPanel {
             int arcY = topMargin;
             
             // 배경 반원 그리기
-            g2.setColor(new Color(0x609056));
+            g2.setColor(AppTheme.BORDER);
             g2.setStroke(new BasicStroke(strokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.drawArc(arcX, arcY, arcDiameter, arcDiameter, 0, 180);
             
             // 진행된 반원 그리기
-            g2.setColor(Color.white); // 흰색
+            g2.setColor(AppTheme.PRIMARY);
             int arcAngle = (int) (180 * (percentage / 100.0));
             g2.drawArc(arcX, arcY, arcDiameter, arcDiameter, 180, -arcAngle);
             
             // 중앙 퍼센트 텍스트 표시
             String percentageText = percentage + "%";
             int fontSize = Math.min(39, gaugeWidth / 6); // 글꼴 크기 조정
-            Font font = new Font("Inter", Font.BOLD, fontSize);
+            Font font = new Font(Font.SANS_SERIF, Font.BOLD, fontSize);
             g2.setFont(font);
             FontMetrics metrics = g2.getFontMetrics(font);
             
@@ -396,7 +402,7 @@ public class HomeDailyPanel extends JPanel {
             // 텍스트를 반원의 중앙 아래쪽에 배치 (반원 중심보다 약간 아래)
             int textY = arcY + (arcDiameter / 3) + (metrics.getHeight() / 2);
             
-            g2.setColor(Color.BLACK);
+            g2.setColor(AppTheme.TEXT);
             g2.drawString(percentageText, textX, textY);
         }
     }
@@ -422,8 +428,8 @@ public class HomeDailyPanel extends JPanel {
             int width = getWidth();
             int height = getHeight();
             
-            // 배경 막대 (흰색)
-            g2.setColor(Color.white);
+            // 배경 막대
+            g2.setColor(AppTheme.BORDER);
             g2.fillRoundRect(0, 0, width, height, arc, arc);
 
             // 진행 막대 (색상)

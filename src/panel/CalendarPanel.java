@@ -12,11 +12,12 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.*;
 import model.LoginManager;
+import ui_n_utils.AppTheme;
 
 public class CalendarPanel extends JPanel {
-    private static final Color BACKGROUND_COLOR = new Color(0xF4F6F1);
-    private static final Color PRIMARY_COLOR = new Color(0x609056);
-    private static final Color TODAY_COLOR = new Color(0xC0E993);
+    private static final Color BACKGROUND_COLOR = AppTheme.BACKGROUND;
+    private static final Color PRIMARY_COLOR = AppTheme.PRIMARY;
+    private static final Color TODAY_COLOR = AppTheme.PRIMARY_LIGHT;
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy년 M월");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy년 M월 d일");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -40,57 +41,55 @@ public class CalendarPanel extends JPanel {
         setLayout(null);
 
         JButton previousButton = createMonthButton("<");
-        previousButton.setBounds(25, 20, 48, 40);
+        previousButton.setBounds(30, 20, 44, 38);
         previousButton.addActionListener(e -> changeMonth(-1));
         add(previousButton);
 
         monthLabel = new JLabel("", SwingConstants.CENTER);
-        monthLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
-        monthLabel.setBounds(80, 20, 280, 40);
+        monthLabel.setFont(AppTheme.TITLE_FONT);
+        monthLabel.setForeground(AppTheme.TEXT);
+        monthLabel.setBounds(82, 20, 276, 38);
         add(monthLabel);
 
         JButton nextButton = createMonthButton(">");
-        nextButton.setBounds(367, 20, 48, 40);
+        nextButton.setBounds(366, 20, 44, 38);
         nextButton.addActionListener(e -> changeMonth(1));
         add(nextButton);
 
         JPanel weekdayPanel = new JPanel(new GridLayout(1, 7, 4, 0));
-        weekdayPanel.setBounds(25, 72, 390, 28);
+        weekdayPanel.setBounds(30, 72, 380, 28);
         weekdayPanel.setOpaque(false);
         String[] weekdays = {"일", "월", "화", "수", "목", "금", "토"};
         for (int i = 0; i < weekdays.length; i++) {
             JLabel weekdayLabel = new JLabel(weekdays[i], SwingConstants.CENTER);
-            weekdayLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 13));
-            if (i == 0) {
-                weekdayLabel.setForeground(new Color(0xC85050));
-            } else if (i == 6) {
-                weekdayLabel.setForeground(new Color(0x4F6FAE));
-            }
+            weekdayLabel.setFont(AppTheme.CAPTION_FONT.deriveFont(Font.BOLD));
+            weekdayLabel.setForeground(AppTheme.TEXT_SECONDARY);
             weekdayPanel.add(weekdayLabel);
         }
         add(weekdayPanel);
 
         calendarGridPanel = new JPanel(new GridLayout(6, 7, 4, 4));
-        calendarGridPanel.setBounds(25, 104, 390, 270);
+        calendarGridPanel.setBounds(30, 104, 380, 270);
         calendarGridPanel.setOpaque(false);
         add(calendarGridPanel);
 
         selectedDateLabel = new JLabel();
-        selectedDateLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        selectedDateLabel.setBounds(25, 390, 390, 30);
+        selectedDateLabel.setFont(AppTheme.SECTION_TITLE_FONT);
+        selectedDateLabel.setForeground(AppTheme.TEXT);
+        selectedDateLabel.setBounds(30, 390, 380, 30);
         add(selectedDateLabel);
 
         recordListPanel = new JPanel();
         recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
-        recordListPanel.setBackground(Color.WHITE);
+        recordListPanel.setBackground(AppTheme.CARD);
 
         recordScrollPane = new JScrollPane(recordListPanel);
-        recordScrollPane.setBounds(25, 425, 390, 275);
-        recordScrollPane.setBorder(BorderFactory.createLineBorder(new Color(0xDDDDDD)));
+        recordScrollPane.setBounds(30, 425, 380, 275);
+        recordScrollPane.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
         recordScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         recordScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         recordScrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        recordScrollPane.getViewport().setBackground(Color.WHITE);
+        recordScrollPane.getViewport().setBackground(AppTheme.CARD);
         add(recordScrollPane);
 
         renderCalendar();
@@ -104,12 +103,8 @@ public class CalendarPanel extends JPanel {
 
     private JButton createMonthButton(String text) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        button.setForeground(PRIMARY_COLOR);
-        button.setBackground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createLineBorder(PRIMARY_COLOR, 1, true));
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        AppTheme.styleSecondaryButton(button);
+        button.setFont(AppTheme.SECTION_TITLE_FONT);
         return button;
     }
 
@@ -146,7 +141,7 @@ public class CalendarPanel extends JPanel {
 
             LocalDate date = displayedMonth.atDay(day);
             JButton dayButton = new JButton(String.valueOf(day));
-            dayButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
+            dayButton.setFont(AppTheme.CAPTION_FONT);
             dayButton.setFocusPainted(false);
             dayButton.setMargin(new Insets(0, 0, 0, 0));
             dayButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -162,15 +157,9 @@ public class CalendarPanel extends JPanel {
     }
 
     private void styleDayButton(JButton button, LocalDate date) {
-        button.setBackground(Color.WHITE);
-        button.setForeground(Color.DARK_GRAY);
-        button.setBorder(BorderFactory.createEmptyBorder());
-
-        if (date.getDayOfWeek().getValue() == 7) {
-            button.setForeground(new Color(0xC85050));
-        } else if (date.getDayOfWeek().getValue() == 6) {
-            button.setForeground(new Color(0x4F6FAE));
-        }
+        button.setBackground(AppTheme.CARD);
+        button.setForeground(AppTheme.TEXT);
+        button.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
 
         if (date.equals(LocalDate.now())) {
             button.setBackground(TODAY_COLOR);
@@ -224,8 +213,8 @@ public class CalendarPanel extends JPanel {
 
     private void addSectionTitle(String title) {
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
-        titleLabel.setForeground(PRIMARY_COLOR);
+        titleLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        titleLabel.setForeground(AppTheme.PRIMARY_DARK);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(6, 12, 4, 0));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titleLabel.setMaximumSize(new Dimension(360, 32));
@@ -238,8 +227,8 @@ public class CalendarPanel extends JPanel {
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.setMaximumSize(new Dimension(360, 112));
         panel.setPreferredSize(new Dimension(360, 112));
-        panel.setBackground(new Color(0xF5F5F5));
-        panel.setBorder(BorderFactory.createLineBorder(new Color(0xDDDDDD)));
+        panel.setBackground(AppTheme.INPUT_BACKGROUND);
+        panel.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
 
         String exerciseName = (String) log.get("exercise_name");
         if (exerciseName == null || exerciseName.trim().isEmpty()) {
@@ -254,13 +243,13 @@ public class CalendarPanel extends JPanel {
         panel.add(nameArea);
 
         JLabel calorieLabel = new JLabel(calories + " kcal");
-        calorieLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        calorieLabel.setFont(AppTheme.BODY_FONT);
         calorieLabel.setBounds(16, 52, 120, 22);
         panel.add(calorieLabel);
 
         JLabel timeLabel = new JLabel("저장 시간: " + formatTime(log.get("exercise_date")));
-        timeLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 13));
-        timeLabel.setForeground(Color.DARK_GRAY);
+        timeLabel.setFont(AppTheme.CAPTION_FONT);
+        timeLabel.setForeground(AppTheme.TEXT_SECONDARY);
         timeLabel.setBounds(16, 80, 220, 20);
         panel.add(timeLabel);
 
@@ -272,8 +261,8 @@ public class CalendarPanel extends JPanel {
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.setMaximumSize(new Dimension(360, 125));
         panel.setPreferredSize(new Dimension(360, 125));
-        panel.setBackground(new Color(0xFFF9EE));
-        panel.setBorder(BorderFactory.createLineBorder(new Color(0xE4D7BE)));
+        panel.setBackground(AppTheme.INPUT_BACKGROUND);
+        panel.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
 
         String mealType = (String) log.get("meal_type");
         if (mealType == null || mealType.trim().isEmpty()) {
@@ -289,17 +278,17 @@ public class CalendarPanel extends JPanel {
         double calories = caloriesValue instanceof Number ? ((Number) caloriesValue).doubleValue() : 0;
 
         JLabel typeLabel = new JLabel(mealType + " · " + formatTime(log.get("meal_time")));
-        typeLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 16));
+        typeLabel.setFont(AppTheme.BODY_BOLD_FONT);
         typeLabel.setBounds(16, 10, 330, 24);
         panel.add(typeLabel);
 
         JTextArea foodArea = createWrappedTextArea(foodNames, Font.PLAIN, 14);
-        foodArea.setForeground(Color.DARK_GRAY);
+        foodArea.setForeground(AppTheme.TEXT_SECONDARY);
         foodArea.setBounds(16, 38, 328, 48);
         panel.add(foodArea);
 
         JLabel calorieLabel = new JLabel(String.format("총 %.0f kcal", calories));
-        calorieLabel.setFont(new Font("Malgun Gothic", Font.PLAIN, 14));
+        calorieLabel.setFont(AppTheme.BODY_FONT);
         calorieLabel.setBounds(16, 92, 180, 22);
         panel.add(calorieLabel);
 
@@ -308,7 +297,7 @@ public class CalendarPanel extends JPanel {
 
     private JTextArea createWrappedTextArea(String text, int fontStyle, int fontSize) {
         JTextArea textArea = new JTextArea(text);
-        textArea.setFont(new Font("Malgun Gothic", fontStyle, fontSize));
+        textArea.setFont(new Font(Font.SANS_SERIF, fontStyle, fontSize));
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setEditable(false);
@@ -334,7 +323,7 @@ public class CalendarPanel extends JPanel {
 
     private void addMessageLabel(String message) {
         JLabel messageLabel = new JLabel(message, SwingConstants.CENTER);
-        messageLabel.setFont(new Font("Malgun Gothic", Font.BOLD, 15));
+        AppTheme.styleEmptyState(messageLabel);
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         messageLabel.setMaximumSize(new Dimension(360, 80));
         messageLabel.setPreferredSize(new Dimension(360, 80));
