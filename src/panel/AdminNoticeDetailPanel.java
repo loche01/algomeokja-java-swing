@@ -334,10 +334,30 @@ public class AdminNoticeDetailPanel extends JPanel {
         fileButton.setText(ellipsize(fileName, metrics, 270));
         fileButton.setToolTipText(fileName);
         fileButton.addActionListener(e -> {
-            if (!noticeFileDAO.downloadFile(fileId)) {
-                JOptionPane.showMessageDialog(getDialogParent(),
-                        "첨부파일을 열 수 없습니다.", "첨부파일", JOptionPane.ERROR_MESSAGE);
-            }
+            fileButton.setEnabled(false);
+            new SwingWorker<Boolean, Void>() {
+                @Override
+                protected Boolean doInBackground() {
+                    return noticeFileDAO.downloadFile(fileId);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        if (!get()) {
+                            JOptionPane.showMessageDialog(getDialogParent(),
+                                    "첨부파일을 열 수 없습니다.",
+                                    "첨부파일", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception exception) {
+                        JOptionPane.showMessageDialog(getDialogParent(),
+                                "첨부파일을 열 수 없습니다.",
+                                "첨부파일", JOptionPane.ERROR_MESSAGE);
+                    } finally {
+                        fileButton.setEnabled(true);
+                    }
+                }
+            }.execute();
         });
         return fileButton;
     }
