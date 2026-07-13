@@ -1,26 +1,41 @@
 package panel;
 
 import DB.UserDAO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.SwingConstants;
 import main.MainFrame;
+import ui_n_utils.AppTheme;
 import ui_n_utils.CustomDialog;
 import ui_n_utils.PasswordDocumentFilter;
 import ui_n_utils.PasswordVisibilityToggle;
-import ui_n_utils.RoundedComponent;
 import ui_n_utils.SmartTextField;
 import ui_n_utils.ValidationUtils;
 
-
-
 public class FindIdPwPhone extends JPanel implements ActionListener {
-    private RoundedComponent findIdButton, sendCodeButton1, sendCodeButton2, findPwButton;
-    private SmartTextField nameField1,nameField2,idField2,phoneField1,phoneField2;
-    private MainFrame mainFrame;
-    private UserDAO userDAO;
+    private final JButton findIdButton;
+    private final JButton verifyIdButton;
+    private final JButton verifyPasswordButton;
+    private final JButton findPasswordButton;
+    private final SmartTextField nameField1;
+    private final SmartTextField nameField2;
+    private final SmartTextField idField2;
+    private final SmartTextField phoneField1;
+    private final SmartTextField phoneField2;
+    private final JPanel idResultPanel;
+    private final JLabel foundIdResultLabel;
+    private final MainFrame mainFrame;
+    private final UserDAO userDAO;
     private String verifiedId;
     private String verifiedIdName;
     private String verifiedIdPhone;
@@ -32,133 +47,149 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         this.mainFrame = mainFrame;
         this.userDAO = new UserDAO();
         setLayout(null);
-        setBackground(Color.WHITE);
+        setBackground(AppTheme.BACKGROUND);
         setBounds(0, 0, 440, 956);
 
-        int formWidth = 270;
-        int centerX = (getWidth() - formWidth) / 3;
-        int startY = 100;
+        JPanel headerCard = createCard(30, 20, 380, 115);
+        JLabel titleLabel = new JLabel("아이디·비밀번호 찾기");
+        titleLabel.setFont(AppTheme.TITLE_FONT);
+        titleLabel.setForeground(AppTheme.TEXT);
+        titleLabel.setBounds(20, 14, 245, 36);
+        headerCard.add(titleLabel);
 
-        // 상단 제목
-        JLabel titleLabel = new JLabel("아이디·비밀번호 찾기", JLabel.LEFT);
-        titleLabel.setFont(new Font("Inter", Font.BOLD, 32));
-        titleLabel.setBounds(centerX-30, startY-95, 310, 58);
-        add(titleLabel);
-        
-        JButton backButton = new JButton("<");
-        backButton.setBounds(360, 20, 60, 60);
-        backButton.setBorderPainted(false);
-        backButton.setContentAreaFilled(false);
-        backButton.setFocusPainted(false);
+        JButton backButton = new JButton("로그인으로");
+        AppTheme.styleSecondaryButton(backButton);
+        backButton.setBounds(267, 17, 88, 34);
         backButton.addActionListener(e -> returnToLogin());
-        add(backButton);
-        
-        // 구분선
-        JSeparator divider = new JSeparator();
-        divider.setBounds(centerX-60, startY -30, 440, 1);
-        divider.setForeground(Color.black);
-        add(divider);
+        headerCard.add(backButton);
 
         JLabel descriptionLabel = new JLabel(
-                "가입 시 등록한 휴대폰 번호로 사용자 정보를 확인합니다.", JLabel.CENTER);
-        descriptionLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 13));
-        descriptionLabel.setForeground(Color.DARK_GRAY);
-        descriptionLabel.setBounds(35, startY + 15, 370, 45);
-        add(descriptionLabel);
+                "<html>가입 시 등록한 이름과 휴대폰 번호로<br>사용자 정보를 확인합니다.</html>");
+        descriptionLabel.setFont(AppTheme.BODY_FONT);
+        descriptionLabel.setForeground(AppTheme.TEXT_SECONDARY);
+        descriptionLabel.setBounds(20, 59, 335, 42);
+        headerCard.add(descriptionLabel);
 
-        // ID 찾기 섹션
-        JLabel findIdLabel = new JLabel("아이디 찾기", JLabel.CENTER);
-        findIdLabel.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-        findIdLabel.setBounds(centerX+15, startY + 100, formWidth, 30);
-        add(findIdLabel);
+        JPanel findIdCard = createCard(30, 150, 380, 300);
+        findIdCard.add(createSectionTitle("아이디 찾기"));
 
-        // 이름 입력 필드
-        addInputField("이름", centerX-10, startY + 165, formWidth);
-        nameField1 = new SmartTextField("실명을 입력해주세요", 30);
-        nameField1.setBounds(centerX+50, startY + 165, formWidth, 30);
-        add(nameField1);
-        
-    	// 휴대전화 입력 필드
-        addInputField("휴대전화", centerX-10, startY + 225, formWidth);
-        phoneField1 = new SmartTextField("전화번호를 입력해주세요", 20);
-        phoneField1.setBounds(centerX+50, startY + 225, 170, 30);
-        add(phoneField1);
+        addFieldLabel(findIdCard, "이름", 62);
+        nameField1 = createInputField("실명을 입력해주세요");
+        nameField1.setBounds(105, 55, 245, AppTheme.INPUT_HEIGHT);
+        findIdCard.add(nameField1);
 
-        sendCodeButton1 = new RoundedComponent(90, 30,0,"button", "사용자 확인",Color.black, Color.black, Color.white, "Inter", Font.BOLD, 13 );
-        sendCodeButton1.setBounds(centerX + 230, startY + 225, 90, 30);
-        sendCodeButton1.getButton().addActionListener(this);
-        add(sendCodeButton1);
-        
-        // 아이디 찾기 버튼
-        findIdButton = new RoundedComponent(198, 44, 35, "button", "아이디 찾기", new Color(0xC0E993),  new Color(0xC0E993), Color.white, "Inter", Font.BOLD, 15);
-        findIdButton.setBounds(centerX+50, startY + 320, 198, 44);
-        findIdButton.getButton().addActionListener(this);
-        add(findIdButton);
+        addFieldLabel(findIdCard, "휴대폰 번호", 112);
+        phoneField1 = createInputField("010-1234-5678");
+        phoneField1.setBounds(105, 105, 145, AppTheme.INPUT_HEIGHT);
+        findIdCard.add(phoneField1);
 
-        // 구분선
-        JSeparator divider1 = new JSeparator();
-        divider1.setBounds(centerX-60, startY + 390, 440, 2);
-        divider1.setForeground(Color.black);
-        add(divider1);
+        verifyIdButton = new JButton("사용자 확인");
+        AppTheme.styleSecondaryButton(verifyIdButton);
+        verifyIdButton.setBounds(258, 105, 92, AppTheme.INPUT_HEIGHT);
+        verifyIdButton.addActionListener(this);
+        findIdCard.add(verifyIdButton);
 
-        // 비밀번호 찾기 섹션
-        JLabel findPwLabel = new JLabel("비밀번호 찾기", JLabel.CENTER);
-        findPwLabel.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-        findPwLabel.setBounds(centerX+18, startY + 410, formWidth, 30);
-        add(findPwLabel);
-        	
-        // 이름 입력 필드
-        addInputField("이름", centerX-10, startY + 475, formWidth);
-        nameField2 = new SmartTextField("실명을 입력해주세요", 30);
-        nameField2.setBounds(centerX+50, startY + 475, formWidth, 30);
-        add(nameField2);
-        
-        // 아이디 찾기 버튼
-        addInputField("아이디", centerX-10, startY + 535, formWidth);
-        idField2 = new SmartTextField("아이디를 입력해주세요", 30);
-        idField2.setBounds(centerX+50, startY + 535, formWidth, 30);
-        add(idField2);
-        
-        //
-        addInputField("휴대전화", centerX-10, startY + 595, formWidth);
-        phoneField2 = new SmartTextField("전화번호를 입력해주세요", 30);
-        phoneField2.setBounds(centerX+50, startY + 595, 170, 30);
-        add(phoneField2);
+        idResultPanel = new JPanel(new BorderLayout());
+        idResultPanel.setBackground(AppTheme.BACKGROUND);
+        idResultPanel.setBorder(BorderFactory.createLineBorder(AppTheme.BORDER));
+        idResultPanel.setBounds(20, 163, 330, 50);
+        foundIdResultLabel = new JLabel("", SwingConstants.CENTER);
+        foundIdResultLabel.setFont(AppTheme.BODY_BOLD_FONT);
+        foundIdResultLabel.setForeground(AppTheme.PRIMARY_DARK);
+        idResultPanel.add(foundIdResultLabel, BorderLayout.CENTER);
+        idResultPanel.setVisible(false);
+        findIdCard.add(idResultPanel);
 
-        sendCodeButton2 = new RoundedComponent(90, 30, 0, "button","사용자 확인",Color.black, Color.black, Color.white, "Inter", Font.BOLD, 13 );
-        sendCodeButton2.setBounds(centerX + 230, startY + 595, 90, 30);
-        sendCodeButton2.getButton().addActionListener(this);
-        
-        add(sendCodeButton2);
-        
-        findPwButton = new RoundedComponent(198, 44, 35, "button", "새 비밀번호 설정", new Color(0xC0E993),  new Color(0xC0E993), Color.white, "Inter", Font.BOLD, 15);
-        findPwButton.setBounds(centerX+50, startY + 700, 198, 44);
-        findPwButton.getButton().addActionListener(this);
-        add(findPwButton);
+        findIdButton = new JButton("아이디 찾기");
+        AppTheme.stylePrimaryButton(findIdButton);
+        findIdButton.setBounds(105, 232, 245, 42);
+        findIdButton.addActionListener(this);
+        findIdCard.add(findIdButton);
 
-      //setVisible(true);
+        JPanel findPasswordCard = createCard(30, 470, 380, 350);
+        findPasswordCard.add(createSectionTitle("비밀번호 재설정"));
+
+        addFieldLabel(findPasswordCard, "이름", 65);
+        nameField2 = createInputField("실명을 입력해주세요");
+        nameField2.setBounds(105, 58, 245, AppTheme.INPUT_HEIGHT);
+        findPasswordCard.add(nameField2);
+
+        addFieldLabel(findPasswordCard, "아이디", 115);
+        idField2 = createInputField("아이디를 입력해주세요");
+        idField2.setBounds(105, 108, 245, AppTheme.INPUT_HEIGHT);
+        findPasswordCard.add(idField2);
+
+        addFieldLabel(findPasswordCard, "휴대폰 번호", 165);
+        phoneField2 = createInputField("010-1234-5678");
+        phoneField2.setBounds(105, 158, 145, AppTheme.INPUT_HEIGHT);
+        findPasswordCard.add(phoneField2);
+
+        verifyPasswordButton = new JButton("사용자 확인");
+        AppTheme.styleSecondaryButton(verifyPasswordButton);
+        verifyPasswordButton.setBounds(258, 158, 92, AppTheme.INPUT_HEIGHT);
+        verifyPasswordButton.addActionListener(this);
+        findPasswordCard.add(verifyPasswordButton);
+
+        findPasswordButton = new JButton("새 비밀번호 설정");
+        AppTheme.stylePrimaryButton(findPasswordButton);
+        findPasswordButton.setBounds(105, 233, 245, 42);
+        findPasswordButton.addActionListener(this);
+        findPasswordCard.add(findPasswordButton);
+
+        JLabel passwordGuide = new JLabel(
+                "<html>사용자 확인 후 새 비밀번호를<br>설정할 수 있습니다.</html>");
+        passwordGuide.setFont(AppTheme.CAPTION_FONT);
+        passwordGuide.setForeground(AppTheme.TEXT_SECONDARY);
+        passwordGuide.setBounds(105, 283, 245, 38);
+        findPasswordCard.add(passwordGuide);
     }
 
-    private void addInputField(String labelText, int x, int y, int width) {
-        JLabel label = new JLabel(labelText);
-        label.setBounds(x, y, 100, 20);
-        add(label);
+    private JPanel createCard(int x, int y, int width, int height) {
+        JPanel card = new JPanel(null);
+        AppTheme.styleCard(card);
+        card.setBounds(x, y, width, height);
+        add(card);
+        return card;
+    }
+
+    private JLabel createSectionTitle(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(AppTheme.SECTION_TITLE_FONT);
+        label.setForeground(AppTheme.PRIMARY_DARK);
+        label.setBounds(20, 17, 220, 28);
+        return label;
+    }
+
+    private void addFieldLabel(JPanel card, String text, int y) {
+        JLabel label = new JLabel(text);
+        label.setFont(AppTheme.BODY_BOLD_FONT);
+        label.setForeground(AppTheme.TEXT_SECONDARY);
+        label.setBounds(20, y, 82, 24);
+        card.add(label);
+    }
+
+    private SmartTextField createInputField(String placeholder) {
+        SmartTextField field = new SmartTextField(placeholder, 20);
+        AppTheme.styleInputField(field);
+        field.setForeground(AppTheme.TEXT_SECONDARY);
+        return field;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == sendCodeButton1.getButton()) {
+        if (e.getSource() == verifyIdButton) {
             verifyIdOwner();
-        } else if (e.getSource() == findIdButton.getButton()) {
+        } else if (e.getSource() == findIdButton) {
             showFoundId();
-        } else if (e.getSource() == sendCodeButton2.getButton()) {
+        } else if (e.getSource() == verifyPasswordButton) {
             verifyPasswordOwner();
-        } else if (e.getSource() == findPwButton.getButton()) {
+        } else if (e.getSource() == findPasswordButton) {
             resetPassword();
         }
     }
 
     private void verifyIdOwner() {
+        hideFoundIdResult();
         String userName = nameField1.getRealText().trim();
         String userPhone = phoneField1.getRealText().trim();
 
@@ -168,14 +199,20 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
             return;
         }
         if (!ValidationUtils.isValidPhone(userPhone)) {
-            CustomDialog.showDialog(mainFrame, "휴대폰 번호를 010-1234-5678 형식으로 입력해주세요.", "사용자 확인");
+            CustomDialog.showDialog(
+                    mainFrame,
+                    "휴대폰 번호를 010-1234-5678 형식으로 입력해주세요.",
+                    "사용자 확인");
             clearIdVerification();
             return;
         }
 
         String userId = userDAO.findUserIdByNameAndPhone(userName, userPhone);
         if (userId == null) {
-            CustomDialog.showDialog(mainFrame, "입력한 정보와 일치하는 사용자를 찾을 수 없습니다.", "사용자 확인");
+            CustomDialog.showDialog(
+                    mainFrame,
+                    "입력한 정보와 일치하는 사용자를 찾을 수 없습니다.",
+                    "사용자 확인");
             clearIdVerification();
             return;
         }
@@ -189,18 +226,26 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
     private void showFoundId() {
         String userName = nameField1.getRealText().trim();
         String userPhone = phoneField1.getRealText().trim();
-        if (verifiedId == null || !userName.equals(verifiedIdName) || !userPhone.equals(verifiedIdPhone)) {
-            CustomDialog.showDialog(mainFrame, "이름과 휴대폰 번호로 사용자 확인을 먼저 완료해주세요.", "아이디 찾기");
+        if (verifiedId == null
+                || !userName.equals(verifiedIdName)
+                || !userPhone.equals(verifiedIdPhone)) {
+            CustomDialog.showDialog(
+                    mainFrame,
+                    "이름과 휴대폰 번호로 사용자 확인을 먼저 완료해주세요.",
+                    "아이디 찾기");
             clearIdVerification();
+            hideFoundIdResult();
             return;
         }
 
-        JOptionPane.showMessageDialog(mainFrame,
-                "회원님의 아이디는 " + verifiedId + " 입니다.",
-                "아이디 찾기",
-                JOptionPane.INFORMATION_MESSAGE);
+        foundIdResultLabel.setText("회원님의 아이디: " + verifiedId);
+        idResultPanel.setVisible(true);
         clearIdVerification();
-        mainFrame.showPanel("login");
+    }
+
+    private void hideFoundIdResult() {
+        foundIdResultLabel.setText("");
+        idResultPanel.setVisible(false);
     }
 
     private void clearIdVerification() {
@@ -225,12 +270,18 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
             return;
         }
         if (!ValidationUtils.isValidPhone(userPhone)) {
-            CustomDialog.showDialog(mainFrame, "휴대폰 번호를 010-1234-5678 형식으로 입력해주세요.", "사용자 확인");
+            CustomDialog.showDialog(
+                    mainFrame,
+                    "휴대폰 번호를 010-1234-5678 형식으로 입력해주세요.",
+                    "사용자 확인");
             clearPasswordVerification();
             return;
         }
         if (!userDAO.verifyUserIdentity(userId, userName, userPhone)) {
-            CustomDialog.showDialog(mainFrame, "입력한 정보와 일치하는 사용자를 찾을 수 없습니다.", "사용자 확인");
+            CustomDialog.showDialog(
+                    mainFrame,
+                    "입력한 정보와 일치하는 사용자를 찾을 수 없습니다.",
+                    "사용자 확인");
             clearPasswordVerification();
             return;
         }
@@ -249,7 +300,10 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
                 || !userId.equals(verifiedPasswordUserId)
                 || !userName.equals(verifiedPasswordName)
                 || !userPhone.equals(verifiedPasswordPhone)) {
-            CustomDialog.showDialog(mainFrame, "이름·아이디·휴대폰 번호로 사용자 확인을 먼저 완료해주세요.", "비밀번호 재설정");
+            CustomDialog.showDialog(
+                    mainFrame,
+                    "이름·아이디·휴대폰 번호로 사용자 확인을 먼저 완료해주세요.",
+                    "비밀번호 재설정");
             clearPasswordVerification();
             return;
         }
@@ -259,31 +313,52 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
             JPasswordField confirmPasswordField = new JPasswordField(20);
             PasswordDocumentFilter.install(newPasswordField);
             PasswordDocumentFilter.install(confirmPasswordField);
+            AppTheme.styleInputField(newPasswordField);
+            AppTheme.styleInputField(confirmPasswordField);
+
             PasswordVisibilityToggle newPasswordVisibility =
                     PasswordVisibilityToggle.attach(newPasswordField);
             PasswordVisibilityToggle confirmPasswordVisibility =
                     PasswordVisibilityToggle.attach(confirmPasswordField);
 
             JPanel newPasswordRow = new JPanel(new BorderLayout(6, 0));
+            newPasswordRow.setBackground(AppTheme.CARD);
             newPasswordRow.add(newPasswordField, BorderLayout.CENTER);
             JButton newPasswordVisibilityButton = newPasswordVisibility.getButton();
-            newPasswordVisibilityButton.setPreferredSize(new Dimension(54, 30));
+            AppTheme.styleSecondaryButton(newPasswordVisibilityButton);
+            newPasswordVisibilityButton.setPreferredSize(new Dimension(54, 34));
             newPasswordRow.add(newPasswordVisibilityButton, BorderLayout.EAST);
 
             JPanel confirmPasswordRow = new JPanel(new BorderLayout(6, 0));
+            confirmPasswordRow.setBackground(AppTheme.CARD);
             confirmPasswordRow.add(confirmPasswordField, BorderLayout.CENTER);
             JButton confirmPasswordVisibilityButton = confirmPasswordVisibility.getButton();
-            confirmPasswordVisibilityButton.setPreferredSize(new Dimension(54, 30));
+            AppTheme.styleSecondaryButton(confirmPasswordVisibilityButton);
+            confirmPasswordVisibilityButton.setPreferredSize(new Dimension(54, 34));
             confirmPasswordRow.add(confirmPasswordVisibilityButton, BorderLayout.EAST);
-            JPanel resetPanel = new JPanel(new GridLayout(0, 1, 0, 6));
-            resetPanel.add(new JLabel("새 비밀번호"));
-            resetPanel.add(newPasswordRow);
-            resetPanel.add(new JLabel("새 비밀번호 확인"));
-            resetPanel.add(confirmPasswordRow);
-            resetPanel.add(new JLabel("6~20자, 영문과 특수문자를 함께 사용하세요."));
 
-            int result = JOptionPane.showConfirmDialog(mainFrame, resetPanel,
-                    "새 비밀번호 설정", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            JLabel newPasswordLabel = new JLabel("새 비밀번호");
+            newPasswordLabel.setFont(AppTheme.BODY_BOLD_FONT);
+            JLabel confirmPasswordLabel = new JLabel("새 비밀번호 확인");
+            confirmPasswordLabel.setFont(AppTheme.BODY_BOLD_FONT);
+            JLabel passwordRuleLabel = new JLabel("6~20자, 영문과 특수문자를 함께 사용하세요.");
+            passwordRuleLabel.setFont(AppTheme.CAPTION_FONT);
+            passwordRuleLabel.setForeground(AppTheme.TEXT_SECONDARY);
+
+            JPanel resetPanel = new JPanel(new GridLayout(0, 1, 0, 6));
+            resetPanel.setBackground(AppTheme.CARD);
+            resetPanel.add(newPasswordLabel);
+            resetPanel.add(newPasswordRow);
+            resetPanel.add(confirmPasswordLabel);
+            resetPanel.add(confirmPasswordRow);
+            resetPanel.add(passwordRuleLabel);
+
+            int result = JOptionPane.showConfirmDialog(
+                    mainFrame,
+                    resetPanel,
+                    "새 비밀번호 설정",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE);
             if (result != JOptionPane.OK_OPTION) {
                 clearPasswordVerification();
                 mainFrame.showPanel("login");
@@ -294,15 +369,24 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
             char[] confirmPasswordChars = confirmPasswordField.getPassword();
             try {
                 if (!Arrays.equals(newPasswordChars, confirmPasswordChars)) {
-                    CustomDialog.showDialog(mainFrame, "새 비밀번호와 확인값이 일치하지 않습니다.", "비밀번호 재설정");
+                    CustomDialog.showDialog(
+                            mainFrame,
+                            "새 비밀번호와 확인값이 일치하지 않습니다.",
+                            "비밀번호 재설정");
                     continue;
                 }
                 if (!ValidationUtils.isCreateUserPw(newPasswordChars)) {
-                    CustomDialog.showDialog(mainFrame, "비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.", "비밀번호 재설정");
+                    CustomDialog.showDialog(
+                            mainFrame,
+                            "비밀번호는 6~20자 영문과 특수문자를 포함해야 합니다.",
+                            "비밀번호 재설정");
                     continue;
                 }
                 if (!userDAO.updateUserPasswordFromRaw(verifiedPasswordUserId, newPasswordChars)) {
-                    CustomDialog.showDialog(mainFrame, "비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.", "비밀번호 재설정");
+                    CustomDialog.showDialog(
+                            mainFrame,
+                            "비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해주세요.",
+                            "비밀번호 재설정");
                     return;
                 }
 
@@ -328,5 +412,4 @@ public class FindIdPwPhone extends JPanel implements ActionListener {
         clearPasswordVerification();
         mainFrame.showPanel("login");
     }
-
 }
