@@ -15,6 +15,7 @@ import main.MainFrame;
 import model.LoginManager;
 import model.UserBean;
 import ui_n_utils.CustomDialog;
+import ui_n_utils.PasswordVisibilityToggle;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.UIUtils;
 
@@ -26,8 +27,7 @@ public class LoginPanel extends JPanel implements ActionListener {
 	private LoginDAO loginDAO;
 	private MainFrame mainFrame;
 	private JPasswordField passwordInput;
-	private JButton passwordVisibilityButton;
-	private char defaultPasswordEchoChar;
+	private PasswordVisibilityToggle passwordVisibilityToggle;
 
 	private Properties properties;
     private static final String PROPERTIES_FILE = "user.properties";
@@ -67,30 +67,11 @@ public class LoginPanel extends JPanel implements ActionListener {
 		add(passwordField);
 
 		passwordInput = (JPasswordField) passwordField.getComponent();
-		defaultPasswordEchoChar = passwordInput.getEchoChar();
 		passwordInput.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-		passwordVisibilityButton = new JButton("보기");
-		passwordVisibilityButton.setFont(new Font("Malgun Gothic", Font.BOLD, 11));
-		passwordVisibilityButton.setForeground(new Color(0x4F6F46));
-		passwordVisibilityButton.setBackground(Color.WHITE);
+		passwordVisibilityToggle = PasswordVisibilityToggle.attach(passwordInput);
+		JButton passwordVisibilityButton = passwordVisibilityToggle.getButton();
 		passwordVisibilityButton.setBounds(382, 495, 50, 40);
-		passwordVisibilityButton.setFocusPainted(false);
-		passwordVisibilityButton.setBorder(BorderFactory.createLineBorder(new Color(0x609056), 1, true));
-		passwordVisibilityButton.setContentAreaFilled(true);
-		passwordVisibilityButton.setOpaque(true);
-		passwordVisibilityButton.setVisible(true);
-		passwordVisibilityButton.setEnabled(true);
-		passwordVisibilityButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		passwordVisibilityButton.addActionListener(e -> {
-			int caretPosition = passwordInput.getCaretPosition();
-			boolean showPassword = passwordInput.getEchoChar() != 0;
-			passwordInput.setEchoChar(showPassword ? (char) 0 : defaultPasswordEchoChar);
-			passwordVisibilityButton.setText(showPassword ? "숨김" : "보기");
-			passwordInput.requestFocusInWindow();
-			SwingUtilities.invokeLater(() -> passwordInput.setCaretPosition(
-					Math.min(caretPosition, passwordInput.getDocument().getLength())));
-		});
 		add(passwordVisibilityButton);
 
 		JLabel passwordRuleLabel = new JLabel("6~20자, 영문과 특수문자를 함께 사용하세요.");
@@ -257,11 +238,8 @@ public class LoginPanel extends JPanel implements ActionListener {
 	}
 
 	private void resetPasswordVisibility() {
-		if (passwordInput != null) {
-			passwordInput.setEchoChar(defaultPasswordEchoChar);
-		}
-		if (passwordVisibilityButton != null) {
-			passwordVisibilityButton.setText("보기");
+		if (passwordVisibilityToggle != null) {
+			passwordVisibilityToggle.reset();
 		}
 	}
 

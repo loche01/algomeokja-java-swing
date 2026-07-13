@@ -10,6 +10,7 @@ import main.MainUserPanel;
 import model.LoginManager;
 import model.UserBean;
 import ui_n_utils.PasswordDocumentFilter;
+import ui_n_utils.PasswordVisibilityToggle;
 import ui_n_utils.RoundedComponent;
 import ui_n_utils.ValidationUtils;
 
@@ -17,6 +18,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
 	private MainUserPanel mainUserPanel;
     private final RoundedComponent mainPanel, finishButton, backButton;
     private RoundedComponent[] fields;
+	private PasswordVisibilityToggle[] passwordVisibilityToggles;
     private UserDAO userDAO;
 
     public MyMemberPanel(MainUserPanel mainUserPanel) {
@@ -51,6 +53,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
         String[] memberInfo = {"이름", "이메일", "전화번호", "ID",
                 "현재 비밀번호", "새 비밀번호", "새 비밀번호 확인"};
         fields = new RoundedComponent[memberInfo.length];
+        passwordVisibilityToggles = new PasswordVisibilityToggle[3];
 
         int labelStartY = 155;
         int fieldStartY = 150;
@@ -62,11 +65,22 @@ public class MyMemberPanel extends JPanel implements ActionListener {
             label.setBounds(35, labelStartY + (i * spacing), 135, 25);
             mainPanel.add(label);
 
-            String fieldType = i >= 4 ? "password" : "textField";
-            fields[i] = new RoundedComponent(180, 36, 7, fieldType, "",
+            boolean isPasswordField = i >= 4;
+            String fieldType = isPasswordField ? "password" : "textField";
+            int fieldWidth = isPasswordField ? 132 : 180;
+            fields[i] = new RoundedComponent(fieldWidth, 36, 7, fieldType, "",
                     Color.lightGray, new Color(0xD9D9D9), Color.black, "맑은 고딕", Font.BOLD, 12);
-            fields[i].setBounds(170, fieldStartY + (i * spacing), 180, 36);
+            fields[i].setBounds(170, fieldStartY + (i * spacing), fieldWidth, 36);
             mainPanel.add(fields[i]);
+
+            if (isPasswordField) {
+                PasswordVisibilityToggle visibilityToggle = PasswordVisibilityToggle.attach(
+                        (JPasswordField) fields[i].getComponent());
+                passwordVisibilityToggles[i - 4] = visibilityToggle;
+                JButton visibilityButton = visibilityToggle.getButton();
+                visibilityButton.setBounds(310, fieldStartY + (i * spacing), 52, 36);
+                mainPanel.add(visibilityButton);
+            }
         }
 
         PasswordDocumentFilter.install((JPasswordField) fields[5].getComponent());
@@ -100,6 +114,7 @@ public class MyMemberPanel extends JPanel implements ActionListener {
     
     // 사용자 정보 로드
     private void loadUserInfo() {
+        resetPasswordVisibility();
         UserBean user = LoginManager.getInstance().getCurrentUser();
         if (user != null) {
             fields[0].getTextField().setText(user.getUser_name());
@@ -178,9 +193,21 @@ public class MyMemberPanel extends JPanel implements ActionListener {
                 fields[4].setText("");
                 fields[5].setText("");
                 fields[6].setText("");
+                resetPasswordVisibility();
             }
         }
     }
+
+	private void resetPasswordVisibility() {
+		if (passwordVisibilityToggles == null) {
+			return;
+		}
+		for (PasswordVisibilityToggle visibilityToggle : passwordVisibilityToggles) {
+			if (visibilityToggle != null) {
+				visibilityToggle.reset();
+			}
+		}
+	}
 
     @Override
     public void actionPerformed(ActionEvent e) {
