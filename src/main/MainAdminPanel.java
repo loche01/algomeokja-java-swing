@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 import model.LoginManager;
 import panel.*;
+import ui_n_utils.AppTheme;
 import ui_n_utils.HeaderUtil;
 
 public class MainAdminPanel extends JPanel {
@@ -14,7 +15,7 @@ public class MainAdminPanel extends JPanel {
 
     public MainAdminPanel() {
         setLayout(null);
-        setBackground(Color.WHITE);
+        setBackground(AppTheme.BACKGROUND);
         setBounds(0, 0, 440, 956); // ✅ 프레임 크기에 맞춤
 
         JPanel header = HeaderUtil.createAdminHeader(
