@@ -38,9 +38,9 @@ public class ExerciseCaloriePanel extends JPanel {
         exerciseLogDAO = new ExerciseLogDAO();
 
         // ── 메인 패널 구성 ──
-        mainPanel = new RoundedComponent(380, 570, 20, "panel", " ",
+        mainPanel = new RoundedComponent(380, 458, 20, "panel", " ",
                 AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, " ", 0, 0);
-        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, AppTheme.CARD_WIDTH, 570);
+        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, AppTheme.CARD_WIDTH, 458);
         mainPanel.setLayout(null);
         mainPanel.setEnabled(false);
 

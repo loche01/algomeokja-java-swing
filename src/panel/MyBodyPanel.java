@@ -30,7 +30,7 @@ public class MyBodyPanel extends JPanel implements ActionListener {
         // 메인 패널 생성
         mainPanel = new JPanel(null);
         AppTheme.styleCard(mainPanel);
-        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, AppTheme.CARD_WIDTH, 620);
+        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, AppTheme.CARD_WIDTH, 448);
         add(mainPanel); // 패널 추가
 
         // 회원 정보 레이블
@@ -48,15 +48,15 @@ public class MyBodyPanel extends JPanel implements ActionListener {
 
         JLabel descriptionLabel = new JLabel("현재 신체 측정값을 입력해주세요.");
         AppTheme.styleScreenDescription(descriptionLabel);
-        descriptionLabel.setBounds(24, 54, 210, 24);
+        descriptionLabel.setBounds(24, 58, 210, 24);
         mainPanel.add(descriptionLabel);
 
         // 📌 신체정보 필드 라벨 및 입력 필드 배치
         String[] bodyInfo = {"키", "몸무게", "골격근량", "체지방량", "체지방률"};
         fields = new JTextField[5];
 
-        int fieldStartY = 104;
-        int spacing = 60;
+        int fieldStartY = 100;
+        int spacing = 54;
 
         for (int i = 0; i < bodyInfo.length; i++) {
             JLabel label = new JLabel(bodyInfo[i]);
@@ -80,7 +80,7 @@ public class MyBodyPanel extends JPanel implements ActionListener {
 
         finishButton = new RoundedComponent(205, 44, 10, "button", "변경사항 저장",
                 AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
-        finishButton.setBounds(145, 432, 205, 44);
+        finishButton.setBounds(145, 380, 205, 44);
         mainPanel.add(finishButton);
         finishButton.getButton().addActionListener(this);
 
