@@ -24,6 +24,41 @@ public final class AppTheme {
     public static final int PRIMARY_BUTTON_HEIGHT = 44;
     public static final int SECONDARY_BUTTON_HEIGHT = 38;
 
+    /**
+     * Fixed-frame geometry used only by panels that explicitly opt into layout calculations.
+     * Color, font, and component styling remain in the outer AppTheme class.
+     */
+    public static final class Layout {
+        public static final int USER_HEADER_BOTTOM = 100;
+        public static final int USER_CONTENT_TOP_WITHOUT_TAB = 90;
+        public static final int USER_CONTENT_TOP_WITH_TAB = 140;
+        public static final int USER_NAVIGATION_TOP = 826;
+        public static final int USER_CONTENT_HEIGHT_WITHOUT_TAB =
+                USER_NAVIGATION_TOP - USER_CONTENT_TOP_WITHOUT_TAB;
+        public static final int USER_CONTENT_HEIGHT_WITH_TAB =
+                USER_NAVIGATION_TOP - USER_CONTENT_TOP_WITH_TAB;
+
+        private static final float OPTICAL_TOP_SHARE = 0.40f;
+        private static final int MIN_EXTERNAL_MARGIN = 24;
+
+        private Layout() {
+        }
+
+        public static int calculateOpticalBlockY(
+                int contentTop, int contentBottom, int blockHeight) {
+            int availableHeight = Math.max(0, contentBottom - contentTop);
+            int remainingHeight = Math.max(0, availableHeight - blockHeight);
+            int opticalY = contentTop + Math.round(remainingHeight * OPTICAL_TOP_SHARE);
+            int minimumY = contentTop + MIN_EXTERNAL_MARGIN;
+            int maximumY = contentBottom - MIN_EXTERNAL_MARGIN - blockHeight;
+
+            if (maximumY < minimumY) {
+                return Math.max(contentTop, contentBottom - blockHeight);
+            }
+            return Math.max(minimumY, Math.min(opticalY, maximumY));
+        }
+    }
+
     public static final Color BACKGROUND = new Color(0xF3F7F1);
     public static final Color CONTENT_BACKGROUND = new Color(0xF7F9F6);
     public static final Color CARD = Color.WHITE;

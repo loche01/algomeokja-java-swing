@@ -40,7 +40,9 @@ public class ExerciseCaloriePanel extends JPanel {
         // ── 메인 패널 구성 ──
         mainPanel = new RoundedComponent(380, 458, 20, "panel", " ",
                 AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, " ", 0, 0);
-        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, AppTheme.CARD_WIDTH, 458);
+        int cardY = AppTheme.Layout.calculateOpticalBlockY(
+                0, AppTheme.Layout.USER_CONTENT_HEIGHT_WITHOUT_TAB, 458);
+        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, cardY, AppTheme.CARD_WIDTH, 458);
         mainPanel.setLayout(null);
         mainPanel.setEnabled(false);
 

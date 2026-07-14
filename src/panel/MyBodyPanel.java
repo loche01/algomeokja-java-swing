@@ -30,7 +30,9 @@ public class MyBodyPanel extends JPanel implements ActionListener {
         // 메인 패널 생성
         mainPanel = new JPanel(null);
         AppTheme.styleCard(mainPanel);
-        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, AppTheme.CARD_WIDTH, 448);
+        int cardY = AppTheme.Layout.calculateOpticalBlockY(
+                0, AppTheme.Layout.USER_CONTENT_HEIGHT_WITHOUT_TAB, 448);
+        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, cardY, AppTheme.CARD_WIDTH, 448);
         add(mainPanel); // 패널 추가
 
         // 회원 정보 레이블
