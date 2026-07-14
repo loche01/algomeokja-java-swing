@@ -14,7 +14,8 @@ import ui_n_utils.RoundedComponent;
 
 public class MyBodyPanel extends JPanel implements ActionListener {
     private MainUserPanel mainUserPanel;
-    private RoundedComponent mainPanel, finishButton, backButton;
+    private JPanel mainPanel;
+    private RoundedComponent finishButton, backButton;
     private JTextField[] fields;
     private String[] units = {"cm", "kg", "kg", "kg", "%"};
     private BodyInfoDAO bodyInfoDAO;
@@ -27,8 +28,8 @@ public class MyBodyPanel extends JPanel implements ActionListener {
         setBounds(0,40,440,736);
 
         // 메인 패널 생성
-        mainPanel = new RoundedComponent(AppTheme.CARD_WIDTH, 620, 20, "panel", " ",
-                AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, " ", 0, 0);
+        mainPanel = new JPanel(null);
+        AppTheme.styleCard(mainPanel);
         mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, AppTheme.CARD_WIDTH, 620);
         add(mainPanel); // 패널 추가
 
