@@ -8,6 +8,8 @@ import ui_n_utils.AppTheme;
 import ui_n_utils.RoundedComponent;
 
 public class FoodInfoPanel extends JPanel {
+    private static final int DETAIL_CARD_Y = 67;
+    private static final int DETAIL_CARD_HEIGHT = 569;
     private MainUserPanel mainUserPanel;
     private JLabel foodNameLabel, kcalLabel, mealTypeLabel;
     private RoundedComponent proteinPanel, carbPanel, fatPanel, gPanel, searchField;
@@ -24,16 +26,18 @@ public class FoodInfoPanel extends JPanel {
         setBounds(0, 0, 440, 736);
 
         // 메인 패널 생성
-        mainPanel = new RoundedComponent(AppTheme.CARD_WIDTH, 620, 20, "panel", " ",
+        mainPanel = new RoundedComponent(AppTheme.CARD_WIDTH, DETAIL_CARD_HEIGHT, 20, "panel", " ",
                 AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, " ", 0, 0);
-        mainPanel.setBounds(AppTheme.HORIZONTAL_MARGIN, 20, AppTheme.CARD_WIDTH, 620);
+        mainPanel.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, DETAIL_CARD_Y,
+                AppTheme.CARD_WIDTH, DETAIL_CARD_HEIGHT);
         mainPanel.setLayout(null);
         add(mainPanel);
 
         // 뒤로가기 버튼
         backButton = new RoundedComponent(100, 40, 10, "button", "목록으로",
                 AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 13);
-        backButton.setBounds(20, 16, 100, 40);
+        backButton.setBounds(20, 22, 100, 40);
         backButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         backButton.getButton().addActionListener(e ->{
         	 resetFoodInfo(); // 🔹 뒤로가기 시 음식 정보 초기화
@@ -44,29 +48,29 @@ public class FoodInfoPanel extends JPanel {
         mealTypeLabel = new JLabel("선택한 식사: -", SwingConstants.RIGHT);
         mealTypeLabel.setForeground(AppTheme.PRIMARY_DARK);
         mealTypeLabel.setFont(AppTheme.BODY_BOLD_FONT);
-        mealTypeLabel.setBounds(126, 22, 230, 28);
+        mealTypeLabel.setBounds(126, 28, 230, 28);
         mainPanel.add(mealTypeLabel);
 
         // 음식명 라벨
         foodNameLabel = new JLabel("음식 이름", SwingConstants.CENTER);
         foodNameLabel.setForeground(AppTheme.TEXT);
         foodNameLabel.setFont(AppTheme.TITLE_FONT);
-        foodNameLabel.setBounds(20, 72, 340, 62);
+        foodNameLabel.setBounds(20, 78, 340, 56);
         foodNameLabel.setVerticalAlignment(SwingConstants.CENTER);
         mainPanel.add(foodNameLabel);
 
         // 🔹 탄수화물 패널
-		carbPanel = createNutritionPanel(16, 155, "탄수화물", "",
+		carbPanel = createNutritionPanel(16, 150, "탄수화물", "",
 				AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_DARK);
         mainPanel.add(carbPanel);
         
         // 🔹 단백질 패널
-		proteinPanel = createNutritionPanel(138, 155, "단백질", "",
+		proteinPanel = createNutritionPanel(138, 150, "단백질", "",
 				AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_DARK);
         mainPanel.add(proteinPanel);
 
         // 🔹 지방 패널
-		fatPanel = createNutritionPanel(260, 155, "지방", "",
+		fatPanel = createNutritionPanel(260, 150, "지방", "",
 				AppTheme.PRIMARY_LIGHT, AppTheme.PRIMARY_DARK);
         mainPanel.add(fatPanel);
 
@@ -109,14 +113,14 @@ public class FoodInfoPanel extends JPanel {
         JLabel calorieLabel = new JLabel("총 열량");
         calorieLabel.setFont(AppTheme.SECTION_TITLE_FONT);
 		calorieLabel.setForeground(AppTheme.TEXT);
-		calorieLabel.setBounds(20, 405, 360, 30);
+		calorieLabel.setBounds(20, 395, 360, 30);
 		calorieLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(calorieLabel);
 
         kcalLabel = new JLabel();
         kcalLabel.setFont(AppTheme.TITLE_FONT);
 		kcalLabel.setForeground(AppTheme.PRIMARY_DARK);
-		kcalLabel.setBounds(20, 440, 360, 62);
+		kcalLabel.setBounds(20, 425, 360, 48);
 		kcalLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(kcalLabel);
 
@@ -124,7 +128,7 @@ public class FoodInfoPanel extends JPanel {
         finishButton = new RoundedComponent(240, 48, 12, "button", "담은 목록에 반영",
                 AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF,
                 Font.BOLD, 14);
-        finishButton.setBounds(25, 520, 330, 48);
+        finishButton.setBounds(25, 499, 330, 48);
         finishButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mainPanel.add(finishButton);
         finishButton.getButton().addActionListener(e -> {
