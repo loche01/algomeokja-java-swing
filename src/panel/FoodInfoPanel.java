@@ -10,6 +10,7 @@ import ui_n_utils.RoundedComponent;
 public class FoodInfoPanel extends JPanel {
     private static final int DETAIL_CARD_Y = 67;
     private static final int DETAIL_CARD_HEIGHT = 569;
+    private static final int FINISH_BUTTON_WIDTH = 330;
     private MainUserPanel mainUserPanel;
     private JLabel foodNameLabel, kcalLabel, mealTypeLabel;
     private RoundedComponent proteinPanel, carbPanel, fatPanel, gPanel, searchField;
@@ -55,7 +56,8 @@ public class FoodInfoPanel extends JPanel {
         foodNameLabel = new JLabel("음식 이름", SwingConstants.CENTER);
         foodNameLabel.setForeground(AppTheme.TEXT);
         foodNameLabel.setFont(AppTheme.TITLE_FONT);
-        foodNameLabel.setBounds(20, 78, 340, 56);
+        foodNameLabel.setBounds(0, 78, AppTheme.CARD_WIDTH, 56);
+        foodNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         foodNameLabel.setVerticalAlignment(SwingConstants.CENTER);
         mainPanel.add(foodNameLabel);
 
@@ -125,10 +127,13 @@ public class FoodInfoPanel extends JPanel {
         mainPanel.add(kcalLabel);
 
         // 🔹 담기 버튼
-        finishButton = new RoundedComponent(240, 48, 12, "button", "담은 목록에 반영",
+        finishButton = new RoundedComponent(FINISH_BUTTON_WIDTH, 48, 12, "button", "담은 목록에 반영",
                 AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF,
                 Font.BOLD, 14);
-        finishButton.setBounds(25, 499, 330, 48);
+        finishButton.setBounds(
+                (AppTheme.CARD_WIDTH - FINISH_BUTTON_WIDTH) / 2,
+                499, FINISH_BUTTON_WIDTH, 48);
+        finishButton.getButton().setHorizontalAlignment(SwingConstants.CENTER);
         finishButton.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         mainPanel.add(finishButton);
         finishButton.getButton().addActionListener(e -> {
