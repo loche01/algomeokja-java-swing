@@ -18,6 +18,23 @@ import ui_n_utils.RoundedComponent;
 // 체크 포인트
 public class FoodListPanel extends JPanel {
     private static final String SEARCH_PLACEHOLDER = "음식 이름을 입력하세요";
+    private static final int DEFAULT_MEAL_LABEL_Y = 47;
+    private static final int DEFAULT_FAVORITE_SCROLL_Y = 80;
+    private static final int DEFAULT_FAVORITE_SCROLL_HEIGHT = 524;
+    private static final int DEFAULT_ACTION_BUTTON_Y = 620;
+    private static final int FAVORITE_CONTENT_TOP = 40;
+    private static final int MEAL_LABEL_HEIGHT = 28;
+    private static final int EMPTY_LABEL_TO_CARD_GAP = 5;
+    private static final int EMPTY_SCROLL_HEIGHT = 162;
+    private static final int EMPTY_CARD_TO_BUTTON_GAP = 18;
+    private static final int ACTION_BUTTON_HEIGHT = 42;
+    private static final int EMPTY_BLOCK_HEIGHT = MEAL_LABEL_HEIGHT
+            + EMPTY_LABEL_TO_CARD_GAP
+            + EMPTY_SCROLL_HEIGHT
+            + EMPTY_CARD_TO_BUTTON_GAP
+            + ACTION_BUTTON_HEIGHT;
+    private static final float EMPTY_BLOCK_TOP_SHARE = 0.40f;
+    private static final int EMPTY_MIN_EXTERNAL_MARGIN = 24;
     private MainUserPanel mainUserPanel;
     private JScrollPane searchScrollPane, favoriteScrollPane;
     private JTextField searchField; // 🔹 검색 입력 필드 추가
@@ -98,7 +115,9 @@ public class FoodListPanel extends JPanel {
         mealTypeLabel = new JLabel("선택한 식사: 식사 유형을 선택해주세요");
         mealTypeLabel.setFont(AppTheme.BODY_BOLD_FONT);
         mealTypeLabel.setForeground(AppTheme.PRIMARY_DARK);
-        mealTypeLabel.setBounds(AppTheme.HORIZONTAL_MARGIN, 47, AppTheme.CARD_WIDTH, 28);
+        mealTypeLabel.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, DEFAULT_MEAL_LABEL_Y,
+                AppTheme.CARD_WIDTH, MEAL_LABEL_HEIGHT);
         add(mealTypeLabel);
 
         // 검색바 패널
@@ -177,7 +196,9 @@ public class FoodListPanel extends JPanel {
 
         // ✅ 담은 목록용 스크롤 패널
         favoriteScrollPane = new JScrollPane(favoriteContentPanel);
-        favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 524);
+        favoriteScrollPane.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, DEFAULT_FAVORITE_SCROLL_Y,
+                AppTheme.CARD_WIDTH, DEFAULT_FAVORITE_SCROLL_HEIGHT);
         favoriteScrollPane.setBorder(null);
         favoriteScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         favoriteScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -188,14 +209,15 @@ public class FoodListPanel extends JPanel {
         
         backButtonComponent = new RoundedComponent(130, 42, 10, "button", "식단 화면",
                 AppTheme.PRIMARY, AppTheme.CARD, AppTheme.PRIMARY_DARK, Font.SANS_SERIF, Font.BOLD, 14);
-        backButtonComponent.setBounds(AppTheme.HORIZONTAL_MARGIN, 620, 130, 42);
+        backButtonComponent.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, DEFAULT_ACTION_BUTTON_Y, 130, ACTION_BUTTON_HEIGHT);
         backButtonComponent.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         backButtonComponent.getButton().addActionListener(e -> mainUserPanel.showPanel("HomeMeal"));
         add(backButtonComponent);
 
         saveButtonComponent = new RoundedComponent(180, 42, 10, "button", "식단 저장",
                 AppTheme.PRIMARY_DARK, AppTheme.PRIMARY_DARK, Color.WHITE, Font.SANS_SERIF, Font.BOLD, 14);
-        saveButtonComponent.setBounds(230, 620, 180, 42);
+        saveButtonComponent.setBounds(230, DEFAULT_ACTION_BUTTON_Y, 180, ACTION_BUTTON_HEIGHT);
         saveButtonComponent.getButton().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         saveButtonComponent.getButton().addActionListener(e -> {
             if (favoriteItems.isEmpty()) {
@@ -209,6 +231,7 @@ public class FoodListPanel extends JPanel {
         });
         add(saveButtonComponent);
         saveButtonComponent.setVisible(false);
+        applySearchLayout();
         
         populateItems("");
     }
@@ -570,24 +593,67 @@ public class FoodListPanel extends JPanel {
         favoriteScrollPane.setVisible(false);
         saveButtonComponent.setVisible(false);
         isFavoriteList = false;
-        favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 524);
-        setActionButtonY(620);
+        applySearchLayout();
     }
 
     private void updateFavoriteLayout() {
         if (favoriteItems.isEmpty()) {
-            favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 162);
-            setActionButtonY(258);
+            applyEmptyFavoriteLayout();
             return;
         }
 
-        favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 524);
-        setActionButtonY(620);
+        applyFavoriteListLayout();
+    }
+
+    private void applySearchLayout() {
+        applyDefaultMealAndListBounds();
+        saveButtonComponent.getButton().setEnabled(!favoriteItems.isEmpty());
+    }
+
+    private void applyFavoriteListLayout() {
+        applyDefaultMealAndListBounds();
+        saveButtonComponent.getButton().setEnabled(true);
+    }
+
+    private void applyDefaultMealAndListBounds() {
+        mealTypeLabel.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, DEFAULT_MEAL_LABEL_Y,
+                AppTheme.CARD_WIDTH, MEAL_LABEL_HEIGHT);
+        favoriteScrollPane.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, DEFAULT_FAVORITE_SCROLL_Y,
+                AppTheme.CARD_WIDTH, DEFAULT_FAVORITE_SCROLL_HEIGHT);
+        setActionButtonY(DEFAULT_ACTION_BUTTON_Y);
+    }
+
+    private void applyEmptyFavoriteLayout() {
+        int blockY = calculateEmptyStateBlockY();
+        int emptyScrollY = blockY + MEAL_LABEL_HEIGHT + EMPTY_LABEL_TO_CARD_GAP;
+        int actionButtonY = emptyScrollY + EMPTY_SCROLL_HEIGHT + EMPTY_CARD_TO_BUTTON_GAP;
+
+        mealTypeLabel.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, blockY,
+                AppTheme.CARD_WIDTH, MEAL_LABEL_HEIGHT);
+        favoriteScrollPane.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, emptyScrollY,
+                AppTheme.CARD_WIDTH, EMPTY_SCROLL_HEIGHT);
+        setActionButtonY(actionButtonY);
+        saveButtonComponent.getButton().setEnabled(false);
+    }
+
+    private int calculateEmptyStateBlockY() {
+        int availableHeight = AppTheme.Layout.USER_CONTENT_HEIGHT_WITH_TAB - FAVORITE_CONTENT_TOP;
+        int remainingHeight = Math.max(0, availableHeight - EMPTY_BLOCK_HEIGHT);
+        int opticalY = FAVORITE_CONTENT_TOP + Math.round(remainingHeight * EMPTY_BLOCK_TOP_SHARE);
+        int minimumY = FAVORITE_CONTENT_TOP + EMPTY_MIN_EXTERNAL_MARGIN;
+        int maximumY = AppTheme.Layout.USER_CONTENT_HEIGHT_WITH_TAB
+                - EMPTY_MIN_EXTERNAL_MARGIN - EMPTY_BLOCK_HEIGHT;
+        return Math.max(minimumY, Math.min(opticalY, maximumY));
     }
 
     private void setActionButtonY(int y) {
-        backButtonComponent.setBounds(AppTheme.HORIZONTAL_MARGIN, y, 130, 42);
-        saveButtonComponent.setBounds(230, y, 180, 42);
+        backButtonComponent.setBounds(
+                AppTheme.HORIZONTAL_MARGIN, y, 130, ACTION_BUTTON_HEIGHT);
+        saveButtonComponent.setBounds(230, y, 180, ACTION_BUTTON_HEIGHT);
     }
 
     private static class VerticalListPanel extends JPanel implements Scrollable {
