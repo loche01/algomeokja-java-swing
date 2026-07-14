@@ -299,6 +299,8 @@ public class FoodListPanel extends JPanel {
                 favoriteContentPanel.add(Box.createVerticalStrut(8));
             }
         }
+
+        updateFavoriteLayout();
         
         favoriteContentPanel.revalidate();
         favoriteContentPanel.repaint();
@@ -314,8 +316,6 @@ public class FoodListPanel extends JPanel {
         saveButtonComponent.setVisible(true);
         isFavoriteList = true;
         showFavoriteItems();
-        
-        saveButtonComponent.setBounds(230, 620, 180, 42);
     }
     
     // 담은 목록을 DB에 저장하는 메서드
@@ -570,6 +570,24 @@ public class FoodListPanel extends JPanel {
         favoriteScrollPane.setVisible(false);
         saveButtonComponent.setVisible(false);
         isFavoriteList = false;
+        favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 524);
+        setActionButtonY(620);
+    }
+
+    private void updateFavoriteLayout() {
+        if (favoriteItems.isEmpty()) {
+            favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 162);
+            setActionButtonY(258);
+            return;
+        }
+
+        favoriteScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 80, AppTheme.CARD_WIDTH, 524);
+        setActionButtonY(620);
+    }
+
+    private void setActionButtonY(int y) {
+        backButtonComponent.setBounds(AppTheme.HORIZONTAL_MARGIN, y, 130, 42);
+        saveButtonComponent.setBounds(230, y, 180, 42);
     }
 
     private static class VerticalListPanel extends JPanel implements Scrollable {

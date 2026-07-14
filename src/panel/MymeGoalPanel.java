@@ -40,7 +40,7 @@ public class MymeGoalPanel extends JPanel implements ActionListener {
 
         JPanel formCard = new JPanel(null);
         AppTheme.styleCard(formCard);
-        formCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, 380, 500);
+        formCard.setBounds(AppTheme.HORIZONTAL_MARGIN, 15, 380, 460);
         add(formCard);
 
         titleLabel = new JLabel("목표 설정");
