@@ -119,15 +119,15 @@ public class ExerciseListPanel extends JPanel {
         setupComponents();
         
         // 운동 콘텐츠 패널 생성 (BoxLayout으로 변경)
-        exerciseContentPanel = new JPanel();
-        exerciseContentPanel.setLayout(new BoxLayout(exerciseContentPanel, BoxLayout.Y_AXIS));
+        exerciseContentPanel = new VerticalListPanel();
         exerciseContentPanel.setBackground(AppTheme.BACKGROUND);
         
         // 스크롤 패널에 콘텐츠 패널 추가
         exerciseScrollPane = new JScrollPane(exerciseContentPanel);
         exerciseScrollPane.setBounds(AppTheme.HORIZONTAL_MARGIN, 190, AppTheme.CARD_WIDTH, 500);
         exerciseScrollPane.setBorder(null);
-        exerciseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        exerciseScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        exerciseScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         exerciseScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         
         // 스크롤바 숨기기 위한 스타일 설정
@@ -268,8 +268,10 @@ public class ExerciseListPanel extends JPanel {
         if (searchResults.isEmpty()) {
             JLabel noResultsLabel = new JLabel("검색 결과가 없습니다.", SwingConstants.CENTER);
             AppTheme.styleEmptyState(noResultsLabel);
-            noResultsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            noResultsLabel.setMaximumSize(new Dimension(360, 80));
+            noResultsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            noResultsLabel.setMinimumSize(new Dimension(0, 80));
+            noResultsLabel.setPreferredSize(new Dimension(AppTheme.CARD_WIDTH, 80));
+            noResultsLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
             exerciseContentPanel.add(noResultsLabel);
         } else {
             // 검색 결과를 임시로 exerciseList에 저장
@@ -299,8 +301,10 @@ public class ExerciseListPanel extends JPanel {
         if (exerciseList == null || exerciseList.isEmpty()) {
             JLabel noDataLabel = new JLabel(currentCategory + " 운동 데이터가 없습니다.", SwingConstants.CENTER);
             AppTheme.styleEmptyState(noDataLabel);
-            noDataLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-            noDataLabel.setMaximumSize(new Dimension(360, 80));
+            noDataLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            noDataLabel.setMinimumSize(new Dimension(0, 80));
+            noDataLabel.setPreferredSize(new Dimension(AppTheme.CARD_WIDTH, 80));
+            noDataLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
             exerciseContentPanel.add(noDataLabel);
             return;
         }
@@ -318,22 +322,21 @@ public class ExerciseListPanel extends JPanel {
     
  // 1. ExerciseListPanel의 createExerciseItem 메서드 수정 - 클릭 이벤트 업데이트
     private JPanel createExerciseItem(ExerciseBean ex) {
-        // 감싸는 패널 생성
-        JPanel wrapper = new JPanel();
-        wrapper.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 7));
-        wrapper.setMaximumSize(new Dimension(380, 86));
-        wrapper.setPreferredSize(new Dimension(380, 86));
-        wrapper.setBackground(AppTheme.BACKGROUND);
-        
-        // 둥근 네모 박스 패널 (운동 아이템)
-        RoundedComponent itemPanel = new RoundedComponent(360, 72, 16, "panel", "",
-                AppTheme.BORDER, AppTheme.CARD, AppTheme.TEXT, Font.SANS_SERIF, Font.BOLD, 16);
-        itemPanel.setLayout(null);
-        itemPanel.setBounds(0, 0, 360, 72);
+        JPanel itemPanel = new JPanel();
+        itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.Y_AXIS));
+        itemPanel.setOpaque(true);
+        itemPanel.setBackground(AppTheme.CARD);
+        itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(AppTheme.BORDER, 1, true),
+                BorderFactory.createEmptyBorder(9, 18, 8, 18)));
+        itemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        itemPanel.setMinimumSize(new Dimension(0, 86));
+        itemPanel.setPreferredSize(new Dimension(AppTheme.CARD_WIDTH, 86));
+        itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 86));
         itemPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        
+
         // 운동 아이템 클릭 이벤트
-        itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+        java.awt.event.MouseAdapter openExerciseListener = new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
                 // MainUserPanel의 참조가 필요합니다
@@ -342,27 +345,73 @@ public class ExerciseListPanel extends JPanel {
                     mainUserPanel.showExerciseCaloriePanel(ex);
                 }
             }
-        });
-        
+        };
+        itemPanel.addMouseListener(openExerciseListener);
+
         // 운동명 레이블
-        JLabel nameLabel = new JLabel(ex.getExerciseName());
+        JTextArea nameLabel = new JTextArea(ex.getExerciseName() != null ? ex.getExerciseName() : "");
         nameLabel.setFont(AppTheme.BODY_BOLD_FONT);
         nameLabel.setForeground(AppTheme.TEXT);
-        nameLabel.setBounds(18, 10, 324, 25);
-        
+        nameLabel.setLineWrap(true);
+        nameLabel.setWrapStyleWord(true);
+        nameLabel.setRows(2);
+        nameLabel.setEditable(false);
+        nameLabel.setFocusable(false);
+        nameLabel.setOpaque(false);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        nameLabel.setMinimumSize(new Dimension(0, 36));
+        nameLabel.setPreferredSize(new Dimension(0, 36));
+        nameLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        nameLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        nameLabel.setToolTipText(ex.getExerciseName());
+        nameLabel.addMouseListener(openExerciseListener);
+
         // 운동 타입 레이블
-        JLabel typeLabel = new JLabel(ex.getExerciseType());
+        JLabel typeLabel = new JLabel(ex.getExerciseType() != null ? ex.getExerciseType() : "");
         typeLabel.setFont(AppTheme.CAPTION_FONT);
         typeLabel.setForeground(AppTheme.TEXT_SECONDARY);
-        typeLabel.setBounds(18, 40, 324, 25);
-        
+        typeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        typeLabel.setMinimumSize(new Dimension(0, 20));
+        typeLabel.setPreferredSize(new Dimension(0, 20));
+        typeLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
+        typeLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        typeLabel.addMouseListener(openExerciseListener);
+
         // 패널에 레이블 추가
         itemPanel.add(nameLabel);
         itemPanel.add(typeLabel);
-        
-        // 감싸는 패널에 아이템 패널 추가
-        wrapper.add(itemPanel);
-        
-        return wrapper;
+
+        return itemPanel;
+    }
+
+    private static class VerticalListPanel extends JPanel implements Scrollable {
+        VerticalListPanel() {
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return Math.max(visibleRect.height - 32, 16);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 }
