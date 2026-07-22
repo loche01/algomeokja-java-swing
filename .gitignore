@@ -3,6 +3,9 @@
 /out/
 *.class
 
+# Local dependency binaries
+/lib/*.jar
+
 # Eclipse workspace/project metadata
 .metadata/
 
