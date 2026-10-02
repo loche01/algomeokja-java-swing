@@ -22,9 +22,9 @@
 
 ## 🖼️ 화면
 
-| 로그인 | 일일 현황 | 신체정보 | 공지사항 |
+| 일일 현황 | 음식 검색 | 목표 현황 | 운동 목록 |
 |---|---|---|---|
-| <img src="docs/images/login.png" width="190"> | <img src="docs/images/main-user.png" width="190"> | <img src="docs/images/body-info.png" width="190"> | <img src="docs/images/notice.png" width="190"> |
+| <img src="docs/images/algo_home_daily.png" width="190"> | <img src="docs/images/algo_food_search.png" width="190"> | <img src="docs/images/algo_goal_status.png" width="190"> | <img src="docs/images/algo_ex_list.png" width="190"> |
 
 ---
 
